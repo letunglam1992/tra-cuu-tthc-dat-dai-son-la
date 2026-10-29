@@ -102,9 +102,21 @@ const ghi = (ma, nhom, noiDung, mongDoi, thucTe, dat, ghiChu) => { kq.push({ ma,
       const bc = await taiVe("#bc-word"); const bx = zipTep(bc.buf)["word/document.xml"] || "";
       const soBang = (bx.match(/<w:tbl>/g) || []).length;
       ghi("GD-09", "Công cụ", "Báo cáo tổng hợp TTHC xuất Word: phần đầu, bảng, nơi nhận", "Có quốc hiệu, số 123, ≥ 3 bảng, 45 dòng danh mục", `${bc.ten}; bảng: ${soBang}; số: ${bx.includes("Số: 123/")}; III.22: ${bx.includes("III.22")}`, soBang >= 4 && bx.includes("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM") && bx.includes("Số: 123/") && bx.includes("III.22") && bx.includes("Nơi nhận:"));
-      // Hỏi đáp: chưa cấu hình → vẫn hiện đoạn nguyên văn; có Worker (giả lập) → câu trả lời có dẫn nguồn
+      // Hỏi đáp: Worker cấu hình sẵn (giao thức messages, giả lập — không gọi mạng thật) → đoạn nguyên văn + câu trả lời dẫn nguồn;
+      // ghi đè địa chỉ ở chế độ kiểm soát (giao thức tthc của tro-ly-ai/, giả lập) → câu trả lời dẫn nguồn
+      let thanMessages = null;
+      await p.route(/^https:\/\/[^/]+\.workers\.dev\/?$/, r => { thanMessages = r.request().postDataJSON(); return r.fulfill({ status: 200, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ text: "- Thời hạn: 12 ngày làm việc [1]", model: "@cf/kiem-thu/mo-hinh" }) }); });
       await p.goto(GOC + "#/hoi-dap?q=" + encodeURIComponent("Tách thửa đất mất bao nhiêu ngày làm việc?")); await p.waitForSelector(".hd-nguon li", { timeout: 5000 });
       const soNguon = await p.$$eval(".hd-nguon li", a => a.length);
+      const coTraLoi1 = await p.waitForSelector(".hd-noi-dung a.trich-dan", { timeout: 8000 }).then(() => true, () => false);
+      // Bong bóng chat: nút nổi ở mọi màn hình (ẩn ở trang Hỏi đáp), bấm gợi ý → câu trả lời dẫn nguồn trong khung chat
+      await p.goto(GOC + "#/thu-tuc/III.3"); await p.waitForSelector(".bb-nut");
+      await p.click(".bb-nut"); await p.click(".bb-goi-y button >> nth=0");
+      const coBB = await p.waitForSelector(".bb-khung .bb-tro-ly a.trich-dan", { timeout: 8000 }).then(() => true, () => false);
+      await p.keyboard.press("Escape"); const daDong = await p.$eval(".bb-khung", k => k.hidden);
+      await p.goto(GOC + "#/hoi-dap"); const anNut = await p.$eval(".bb-nut", n => n.hidden);
+      ghi("GD-12", "Công cụ", "Bong bóng chat trợ lý: mở từ nút nổi, trả lời dẫn nguồn, Esc đóng, ẩn ở trang Hỏi đáp", "có [n]; Esc đóng; nút ẩn", `trả lời: ${coBB}; Esc đóng: ${daDong}; ẩn ở hỏi đáp: ${anNut}`, coBB && daDong && anNut);
+      ghi("GD-10a", "Công cụ", "Hỏi đáp qua Worker Workers AI dùng chung (giao thức messages): lời nhắc có chỉ dẫn + đoạn trích, trả lời dẫn nguồn", "system + user; có liên kết [1]", `trả lời: ${coTraLoi1}; system: ${!!(thanMessages && thanMessages.messages[0].role === "system")}`, coTraLoi1 && !!thanMessages && thanMessages.messages.length === 2 && /ĐOẠN TRÍCH/.test(thanMessages.messages[1].content));
       await p.route("https://tro-ly.vi-du.workers.dev/hoi", r => r.fulfill({ status: 200, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ traLoi: "- Thời hạn: 12 ngày làm việc [1]\nThông tin tham khảo.", nhaCungCap: "Giả lập", moHinh: "kiem-thu" }) }));
       await p.evaluate(() => localStorage.setItem("tthc-tro-ly-dia-chi", "https://tro-ly.vi-du.workers.dev"));
       await p.goto(GOC + "#/hoi-dap?q=" + encodeURIComponent("Tách thửa đất mất bao nhiêu ngày làm việc?") + "&t=2"); await p.reload();

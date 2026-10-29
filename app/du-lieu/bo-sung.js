@@ -6,8 +6,9 @@
  *   tăng "phienBanDuLieu" và ghi "lichSu".
  */
 window.QD75_BO_SUNG = {
-  phienBanDuLieu: "2.1.2",
+  phienBanDuLieu: "2.1.3",
   lichSu: [
+    { phienBan: "2.1.3", ngay: "2026-10-29", noiDung: "Bật trợ lý hỏi đáp AI qua Worker Cloudflare Workers AI (rasoatvanban.letunglam1992.workers.dev, giao thức messages); lời nhắc dẫn nguồn dựng tại trình duyệt." },
     { phienBan: "2.1.2", ngay: "2026-10-29", noiDung: "Thống kê truy cập (Vercel Web Analytics) bật bằng cờ thongKeTruyCap sau khi đã bật Analytics cho dự án — tránh lỗi 404 trên console." },
     { phienBan: "2.1.0", ngay: "2026-10-29", noiDung: "Gắn mã TTHC quốc gia theo danh mục công bố (tệp 21/8/2025): 39 thủ tục khớp, 3 gợi ý cần xác minh. Bổ sung phí, lệ phí lĩnh vực đất đai theo Nghị quyết số 155/2025/NQ-HĐND (hiệu lực 08/01/2026). Tình trạng hiệu lực văn bản viện dẫn lấy từ phần căn cứ ban hành. Cấu hình ước tính nghĩa vụ tài chính, trợ lý hỏi đáp." },
     { phienBan: "2.0.0", ngay: "2026-10-29", noiDung: "Đối chiếu bản ký ban hành (ảnh chụp trang 1 và Điều 2 do người dùng cung cấp): số 75/2026/QĐ-UBND, ngày ban hành 22/10/2026, có hiệu lực thi hành kể từ ngày 22/10/2026 (khoản 1 Điều 2). Ghi nhận văn bản hết hiệu lực theo khoản 2 Điều 2. Giải quyết vấn đề VD01, VD02." },
@@ -350,8 +351,10 @@ window.QD75_BO_SUNG = {
     ]
   },
 
-  // Trợ lý hỏi đáp AI: địa chỉ Cloudflare Worker trung gian (tro-ly-ai/). Để trống = chỉ tìm đoạn nguyên văn liên quan.
-  troLyAI: { diaChi: "" },
+  // Trợ lý hỏi đáp AI qua Cloudflare Worker trung gian. Để trống diaChi = chỉ tìm đoạn nguyên văn liên quan.
+  //   giaoThuc "tthc": Worker riêng tro-ly-ai/ (POST /hoi; Gemini → dự phòng Workers AI)
+  //   giaoThuc "messages": Worker Workers AI dùng chung (POST {model, messages} → {text}); moHinh trống = mô hình mặc định của Worker
+  troLyAI: { diaChi: "https://rasoatvanban.letunglam1992.workers.dev", giaoThuc: "messages", moHinh: "" },
 
   // Thống kê truy cập ẩn danh (Vercel Web Analytics). Bật Analytics trong bảng điều khiển dự án Vercel trước, rồi đặt true.
   thongKeTruyCap: false,

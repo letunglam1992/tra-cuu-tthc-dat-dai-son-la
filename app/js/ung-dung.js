@@ -212,6 +212,7 @@ TT.THONG_TIN_PM = {
   }
   window.addEventListener("hashchange", veMan);
   veMan();
+  if (TT.bongBong) TT.bongBong.gan(mh); // bong bóng chat trợ lý AI
 
   // Thống kê truy cập ẩn danh (Vercel Web Analytics — không dùng cookie): chỉ nạp khi chạy trên Vercel, đã bật Analytics cho dự án
   if (mh.B.thongKeTruyCap && /\.vercel\.app$/.test(location.hostname)) {

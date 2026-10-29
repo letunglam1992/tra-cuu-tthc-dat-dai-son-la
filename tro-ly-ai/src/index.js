@@ -4,7 +4,7 @@
  * - Khóa API nằm trong biến bí mật của Worker (wrangler secret), không bao giờ đưa xuống trình duyệt.
  * Nhà cung cấp: Gemini (GEMINI_API_KEY) → dự phòng Cloudflare Workers AI (binding AI, hoặc CF_ACCOUNT_ID + CF_API_TOKEN).
  */
-const CHI_DAN = `Bạn là trợ lý tra cứu thủ tục hành chính về đất đai tỉnh Sơn La, trả lời bằng tiếng Việt.
+export const CHI_DAN = `Bạn là trợ lý tra cứu thủ tục hành chính về đất đai tỉnh Sơn La, trả lời bằng tiếng Việt.
 Quy tắc bắt buộc:
 1. Chỉ dùng thông tin trong các ĐOẠN TRÍCH được cung cấp (đánh số [1], [2]…). Không dùng hiểu biết bên ngoài, không suy đoán.
 2. Mỗi ý trả lời phải ghi nguồn dạng [n] ngay sau ý đó.

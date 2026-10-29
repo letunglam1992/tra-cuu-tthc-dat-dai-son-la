@@ -2,14 +2,14 @@
  * - Tệp ứng dụng (TEP): nạp sẵn khi cài; phục vụ từ bộ đệm, đồng thời cập nhật ngầm từ máy chủ (stale-while-revalidate).
  * - Tệp khác cùng nguồn (PDF nguồn, ảnh bản ký): lưu khi được mở lần đầu.
  * Khi đổi danh sách tệp hoặc phát hành bản mới: tăng PHIEN_BAN (kiểm thử tự động đối chiếu danh sách với thư mục app/). */
-const PHIEN_BAN = "tthc-2.1.2";
+const PHIEN_BAN = "tthc-2.1.3";
 const TEP = [
   "./", "index.html", "manifest.webmanifest",
   "css/giao-dien.css",
   "du-lieu/nguon.js", "du-lieu/bo-sung.js", "du-lieu/phi-le-phi.js",
   "js/tien-ich.js", "js/mo-hinh.js", "js/tim-kiem.js", "js/thoi-han.js", "js/nghia-vu.js", "js/thu-vien/qrcode.min.js",
   "js/thanh-phan.js", "js/so-do.js", "js/xuat-word.js", "js/xuat-excel.js",
-  "js/man-tong-quan.js", "js/man-thu-tuc.js", "js/man-quy-trinh.js", "js/man-tra-cuu.js", "js/man-cong-cu.js", "js/man-nghia-vu.js", "js/man-dien-mau.js", "js/man-bao-cao.js", "js/man-so-theo-doi.js", "js/man-hoi-dap.js", "js/ung-dung.js",
+  "js/man-tong-quan.js", "js/man-thu-tuc.js", "js/man-quy-trinh.js", "js/man-tra-cuu.js", "js/man-cong-cu.js", "js/man-nghia-vu.js", "js/man-dien-mau.js", "js/man-bao-cao.js", "js/man-so-theo-doi.js", "js/tro-ly.js", "js/man-hoi-dap.js", "js/bong-bong-tro-ly.js", "js/ung-dung.js",
   "tai-nguyen/nen-nui.svg", "tai-nguyen/bieu-tuong-192.png", "tai-nguyen/bieu-tuong-512.png", "tai-nguyen/bieu-tuong-512-maskable.png",
   "tai-nguyen/fonts/be-vietnam-pro-vi-400.woff2", "tai-nguyen/fonts/be-vietnam-pro-vi-500.woff2", "tai-nguyen/fonts/be-vietnam-pro-vi-600.woff2", "tai-nguyen/fonts/be-vietnam-pro-vi-700.woff2",
   "tai-nguyen/fonts/be-vietnam-pro-latin-400.woff2", "tai-nguyen/fonts/be-vietnam-pro-latin-500.woff2", "tai-nguyen/fonts/be-vietnam-pro-latin-600.woff2", "tai-nguyen/fonts/be-vietnam-pro-latin-700.woff2"

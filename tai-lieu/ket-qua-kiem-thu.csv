@@ -56,7 +56,7 @@ TH-07,Thời hạn,Nhận diện số ngày tăng thêm cho xã khu vực III �
 WD-01,Xuất Word,Tạo tệp .docx cho toàn bộ mẫu biểu Phụ lục V,"45/45 tệp: ZIP đúng chữ ký, CRC khớp, document.xml hợp lệ",45/45 hợp lệ,Đạt,Mở thử bằng Microsoft Word: kiểm thử WD-03 (chỉ có khi chạy cong-cu/chay-kiem-thu.ps1 trên máy có Word)
 WD-02,Xuất Word,"Nội dung tệp Word giữ nguyên văn mẫu, ghép dòng thành đoạn và ghi nguồn",Tiêu đề Mẫu số 19; ≥ 99% từ của mẫu có trong tệp; số đoạn < số dòng PDF; có dòng nguồn,92 đoạn / 162 dòng PDF; giữ 228/228 từ,Đạt,
 WD-04,Xuất Word,"Mẫu 01: ghép dòng bị ngắt, khôi phục m², tách quốc hiệu và chú thích",“1. Người đề nghị” liền một đoạn; có “(m²)”; quốc hiệu riêng; ≥ 4 chú thích,quốc hiệu: true; chú thích: 4; m²: true; đoạn 1: true,Đạt,
-PW-01,Ngoại tuyến,"Danh sách tệp lưu ngoại tuyến (sw.js) đầy đủ, tồn tại",Mọi tệp trong danh sách tải được; mọi script của index.html có trong danh sách,40 tệp; thiếu: 0; script ngoài danh sách: 0,Đạt,Script của trang kiểm thử: 8
+PW-01,Ngoại tuyến,"Danh sách tệp lưu ngoại tuyến (sw.js) đầy đủ, tồn tại",Mọi tệp trong danh sách tải được; mọi script của index.html có trong danh sách,42 tệp; thiếu: 0; script ngoài danh sách: 0,Đạt,Script của trang kiểm thử: 8
 PW-02,Ngoại tuyến,Tệp manifest cài đặt ứng dụng,"Có tên, biểu tượng 192/512, start_url","TTHC đất đai; 192x192, 512x512, 512x512",Đạt,
 UI-01,Giao diện,"Mở các màn hình chính, mọi tab","42/42 màn hình hiển thị đúng tiêu đề, không lỗi",42/42,Đạt,
 UI-02,Giao diện,"Trạng thái không tìm thấy (đường dẫn, mã thủ tục, mẫu sai)","Hiển thị thông báo rõ ràng, không lỗi",Không có trang “khong-ton-tai”. | Không có thủ tục mã “IX.99”. | Không có Mẫu số “99” trong Phụ lục V. | Không có quy trình mã “QT99”.,Đạt,
@@ -79,5 +79,7 @@ GD-06,In ấn,"Phiếu hướng dẫn hồ sơ III.3 in gọn, có mã QR","≤ 
 GD-07,Công cụ,"Sổ theo dõi: thêm hồ sơ III.3, tính hạn trả, xuất Excel",Hạn 16/11/2026; tệp .xlsx có số hồ sơ,hạn đúng; So-theo-doi-ho-so-2026-10-29.xlsx; có HS-KT-01: true,Đạt,
 GD-08,Công cụ,Điền Mẫu số 22 rồi tải Word: giá trị nằm trong tệp,Tệp .docx chứa giá trị đã nhập,Mau-so-22-da-dien.docx; có giá trị,Đạt,
 GD-09,Công cụ,"Báo cáo tổng hợp TTHC xuất Word: phần đầu, bảng, nơi nhận","Có quốc hiệu, số 123, ≥ 3 bảng, 45 dòng danh mục",Bao-cao-TTHC-dat-dai-2026.docx; bảng: 4; số: true; III.22: true,Đạt,
+GD-12,Công cụ,"Bong bóng chat trợ lý: mở từ nút nổi, trả lời dẫn nguồn, Esc đóng, ẩn ở trang Hỏi đáp",có [n]; Esc đóng; nút ẩn,trả lời: true; Esc đóng: true; ẩn ở hỏi đáp: true,Đạt,
+GD-10a,Công cụ,"Hỏi đáp qua Worker Workers AI dùng chung (giao thức messages): lời nhắc có chỉ dẫn + đoạn trích, trả lời dẫn nguồn",system + user; có liên kết [1],trả lời: true; system: true,Đạt,
 GD-10,Công cụ,Hỏi đáp: không có Worker vẫn hiện đoạn nguyên văn; có Worker hiện câu trả lời dẫn nguồn [n],≥ 3 đoạn; có liên kết [1],7 đoạn; trả lời có dẫn nguồn: true,Đạt,
 GD-11,Công cụ,Không lỗi JavaScript khi dùng các công cụ mới,0 lỗi,0,Đạt,

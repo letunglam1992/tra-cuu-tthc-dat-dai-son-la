@@ -92,9 +92,9 @@ TT.man = TT.man || {};
     function oTruong(k, khoan) {
       const [nhan, kieu] = TRUONG[k], gt = khoan.gt[k] ?? (k === "tyLe" && ch.khoan[khoan.loai].mucMacDinh != null ? String(ch.khoan[khoan.loai].mucMacDinh).replace(".", ",") : k === "tyLeThu" ? "100" : "");
       const traGia = kieu === "gia" && /^gia/.test(k) && bangGia.length && k !== "giaTriChuyenNhuong" ? `<button type="button" class="nut nut-nho" data-tra-gia="${k}">${bt("tim", 13)} Tra bảng giá</button>` : "";
-      const goiY = k === "tyLeThu" ? `<select data-goi-y aria-label="Gợi ý tỷ lệ thu" class="o-so" style="width:auto">${ch.tyLeChuyenMucDich.map(x => `<option value="${x.giaTri == null ? "" : x.giaTri}">${e(x.nhan)}</option>`).join("")}</select>` : "";
+      const goiY = k === "tyLeThu" ? `<select data-goi-y aria-label="Gợi ý tỷ lệ thu" class="goi-y-ty-le" title="Chọn để điền tỷ lệ theo căn cứ">${ch.tyLeChuyenMucDich.map(x => `<option value="${x.giaTri == null ? "" : x.giaTri}">${e(x.nhan)}</option>`).join("")}</select>` : "";
       return `<label class="truong"><span>${e(nhan)}${k === "tyLe" && ch.khoan[khoan.loai].mucMacDinh != null ? ` <span class="nhan nhan-vang">mặc định ${String(ch.khoan[khoan.loai].mucMacDinh).replace(".", ",")}% — cần đối chiếu</span>` : ""}</span>
-        <span class="tang"><input name="${k}" inputmode="decimal" value="${e(gt)}" autocomplete="off" style="flex:1;min-width:140px">${traGia}${goiY}</span>
+        <span class="tang"><input name="${k}" inputmode="decimal" value="${e(gt)}" autocomplete="off" style="flex:1;min-width:140px">${traGia}</span>${goiY}
         ${kieu === "gia" ? `<span class="mo chu-nho" data-chu="${k}"></span>` : ""}</label>`;
     }
     function ve() {

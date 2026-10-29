@@ -1,5 +1,11 @@
 # Nhật ký thay đổi
 
+## 2.1.3 — 29/10/2026
+
+- **Bong bóng chat trợ lý AI** ở góc phải dưới mọi màn hình (ẩn ở trang Hỏi đáp đầy đủ): hội thoại dạng bong bóng, câu hỏi gợi ý, trả lời dẫn nguồn [n] bấm mở đúng vị trí, danh sách nguồn nguyên văn dưới mỗi câu trả lời; phím Esc để đóng; trên điện thoại mở dạng tấm trượt toàn chiều rộng. Hội thoại chỉ lưu trong thẻ trình duyệt đang mở.
+- **Trợ lý AI đã hoạt động** qua Worker Cloudflare Workers AI `rasoatvanban.letunglam1992.workers.dev` (giao thức `messages`, mô hình mặc định SEA-LION v4 27B). Lời nhắc (chỉ dẫn chỉ trả lời theo đoạn trích, dẫn nguồn) dựng tại trình duyệt, kiểm thử đối chiếu khớp với Worker riêng `tro-ly-ai/`. Mô-đun mới `app/js/tro-ly.js` hỗ trợ cả hai giao thức; chế độ kiểm soát chọn được giao thức khi ghi đè địa chỉ.
+- Sửa lỗi bố cục công cụ Ước tính nghĩa vụ tài chính: ô gợi ý “Tỷ lệ thu trên chênh lệch” (khoản chuyển mục đích) tràn đè lên ô bên cạnh.
+
 ## 2.1.0 — 29/10/2026
 
 ### Dữ liệu pháp lý
