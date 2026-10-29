@@ -18,6 +18,12 @@ Phần mềm tra cứu trình tự, thủ tục hành chính về đất đai v�
 | Mẫu biểu | 45 mẫu | Phụ lục V |
 | Vấn đề phát hiện trong văn bản nguồn | 14 vấn đề biên soạn + các vấn đề tự phát hiện | Màn hình *Đối soát dữ liệu* |
 
+## Địa chỉ sử dụng
+
+- Phần mềm: **https://tra-cuu-tthc-dat-dai-son-la.vercel.app**
+- Mã nguồn: https://github.com/letunglam1992/tra-cuu-tthc-dat-dai-son-la
+- Triển khai: Vercel (dự án `tra-cuu-tthc-dat-dai-son-la`, thư mục gốc `app/`, không có bước build). Mỗi lần đẩy mã lên nhánh `main`, Vercel tự triển khai bản mới.
+
 ## Tính năng bổ sung (phiên bản 1.1)
 
 - Tải mẫu biểu Phụ lục V dạng **Word (.docx)** — khổ A4, Times New Roman 13, ghi rõ nguồn trang PDF (tạo ngay trong trình duyệt, không cần máy chủ).
