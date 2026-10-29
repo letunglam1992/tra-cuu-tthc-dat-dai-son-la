@@ -214,10 +214,9 @@ TT.THONG_TIN_PM = {
   veMan();
 
   // Thống kê truy cập ẩn danh (Vercel Web Analytics — không dùng cookie): chỉ nạp khi chạy trên Vercel, đã bật Analytics cho dự án
-  if (/\.vercel\.app$/.test(location.hostname)) {
+  if (mh.B.thongKeTruyCap && /\.vercel\.app$/.test(location.hostname)) {
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    // Chỉ nạp khi Analytics đã bật cho dự án (chưa bật thì tệp trả 404 — tránh lỗi trên console)
-    fetch("/_vercel/insights/script.js", { method: "HEAD" }).then(r => { if (r.ok && /javascript/.test(r.headers.get("content-type") || "")) { const s = document.createElement("script"); s.defer = true; s.src = "/_vercel/insights/script.js"; document.head.appendChild(s); } }, () => { });
+    const s = document.createElement("script"); s.defer = true; s.src = "/_vercel/insights/script.js"; document.head.appendChild(s);
     // Ghi nhận từ khóa tìm kiếm (ẩn danh) để bổ sung từ đồng nghĩa, tình huống
     window.addEventListener("hashchange", () => { const m = location.hash.match(/^#\/tra-cuu\?q=([^&]+)/); if (m) window.va("event", { name: "Tim kiem", data: { q: decodeURIComponent(m[1]).slice(0, 80) } }); });
   }

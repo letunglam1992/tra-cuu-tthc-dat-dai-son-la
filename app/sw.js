@@ -2,7 +2,7 @@
  * - Tệp ứng dụng (TEP): nạp sẵn khi cài; phục vụ từ bộ đệm, đồng thời cập nhật ngầm từ máy chủ (stale-while-revalidate).
  * - Tệp khác cùng nguồn (PDF nguồn, ảnh bản ký): lưu khi được mở lần đầu.
  * Khi đổi danh sách tệp hoặc phát hành bản mới: tăng PHIEN_BAN (kiểm thử tự động đối chiếu danh sách với thư mục app/). */
-const PHIEN_BAN = "tthc-2.1.1";
+const PHIEN_BAN = "tthc-2.1.2";
 const TEP = [
   "./", "index.html", "manifest.webmanifest",
   "css/giao-dien.css",
