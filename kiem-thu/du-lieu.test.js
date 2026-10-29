@@ -131,6 +131,8 @@ test("Triển khai: vercel.json, manifest hợp lệ; bộ kiểm thử không �
   const v = JSON.parse(fs.readFileSync(path.join(APP, "vercel.json"), "utf8"));
   const h = v.headers.find(x => x.source === "/(.*)").headers.map(x => x.key);
   for (const k of ["Content-Security-Policy", "X-Content-Type-Options", "Referrer-Policy"]) assert.ok(h.includes(k), k);
+  // Vercel (path-to-regexp) không chấp nhận nhóm ngoặc lồng nhau trong "source" — lỗi này làm hỏng mọi lần triển khai
+  for (const x of v.headers) assert.ok(!/\([^)]*\(/.test(x.source), "Mẫu source không hợp lệ: " + x.source);
   const mf = JSON.parse(fs.readFileSync(path.join(APP, "manifest.webmanifest"), "utf8"));
   for (const i of mf.icons) assert.ok(fs.existsSync(path.join(APP, i.src)), i.src);
   assert.match(fs.readFileSync(path.join(APP, ".vercelignore"), "utf8"), /kiem-thu\.html/);
