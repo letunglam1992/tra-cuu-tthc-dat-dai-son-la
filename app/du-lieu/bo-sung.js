@@ -6,8 +6,9 @@
  *   tăng "phienBanDuLieu" và ghi "lichSu".
  */
 window.QD75_BO_SUNG = {
-  phienBanDuLieu: "2.1.0",
+  phienBanDuLieu: "2.1.1",
   lichSu: [
+    { phienBan: "2.1.1", ngay: "2026-10-29", noiDung: "Chỉ nạp mã thống kê truy cập khi Vercel Web Analytics đã bật (tránh lỗi trên console)." },
     { phienBan: "2.1.0", ngay: "2026-10-29", noiDung: "Gắn mã TTHC quốc gia theo danh mục công bố (tệp 21/8/2025): 39 thủ tục khớp, 3 gợi ý cần xác minh. Bổ sung phí, lệ phí lĩnh vực đất đai theo Nghị quyết số 155/2025/NQ-HĐND (hiệu lực 08/01/2026). Tình trạng hiệu lực văn bản viện dẫn lấy từ phần căn cứ ban hành. Cấu hình ước tính nghĩa vụ tài chính, trợ lý hỏi đáp." },
     { phienBan: "2.0.0", ngay: "2026-10-29", noiDung: "Đối chiếu bản ký ban hành (ảnh chụp trang 1 và Điều 2 do người dùng cung cấp): số 75/2026/QĐ-UBND, ngày ban hành 22/10/2026, có hiệu lực thi hành kể từ ngày 22/10/2026 (khoản 1 Điều 2). Ghi nhận văn bản hết hiệu lực theo khoản 2 Điều 2. Giải quyết vấn đề VD01, VD02." },
     { phienBan: "1.1.0", ngay: "2026-10-29", noiDung: "Cập nhật tình trạng hiệu lực: người dùng xác nhận Quyết định số 75/2026/QĐ-UBND ngày 22/10/2026 đã có hiệu lực. Ngày có hiệu lực cụ thể chưa được cung cấp; tệp PDF vẫn để trống số, ngày." },
