@@ -9,7 +9,7 @@ Dữ liệu tách hoàn toàn khỏi giao diện, gồm hai tệp:
 
 ## A. Khi có văn bản sửa đổi, bổ sung, thay thế (PDF mới)
 
-Yêu cầu: Windows, PowerShell, **.NET SDK 8** (lần đầu cần Internet để tải gói PdfPig từ nuget.org).
+Yêu cầu: **.NET SDK 8** và Node.js ≥ 18 (lần đầu cần Internet để tải gói PdfPig từ nuget.org). Chạy được trên Windows, Linux, macOS bằng `npm run cap-nhat-du-lieu` (hoặc trên Windows: `cong-cu/cap-nhat-du-lieu.ps1`).
 
 1. Sao lưu thư mục `app/du-lieu/`.
 2. Chép PDF mới thành `app/tai-nguyen/qd75.pdf` (hoặc chỉ định đường dẫn ở bước 3).
@@ -52,7 +52,12 @@ Bộ kiểm tra tự động bảo đảm: làn có trong danh mục, cạnh tr�
 | `tinhHuong` | Trang chủ “Bạn cần làm thủ tục gì?” | Mỗi mục: `ten`, `moTa`, `thuTuc: ["III.3", …]` hoặc `lienKet`. Kiểm thử báo lỗi nếu mã thủ tục không tồn tại. |
 | `dongNghia` | Tìm kiếm hiểu cách gọi thông dụng | `{ tu: ["so do", "gcn"], thanh: "giấy chứng nhận" }`; `thanh` có thể là mảng cụm (tài liệu phải chứa đủ). Viết `tu` không dấu. |
 | `lichNghi.theoNam` | Tính thời hạn | Mỗi năm, khi có thông báo nghỉ lễ, Tết của Thủ tướng/Bộ Nội vụ: `{ nam: 2027, ngayNghi: ["2027-02-05", …], ngayLamBu: ["2027-…"], nguon: "Thông báo số …" }`. Năm chưa nhập: phần mềm tạm tính Tết, ngày liền kề Quốc khánh theo thông lệ và cảnh báo người dùng. Ngày lễ dương lịch cố định và Giỗ Tổ (âm lịch) luôn tự tính, kể cả nghỉ bù. |
-| `dichVuCong` | Nút “Nộp trực tuyến” ở trang thủ tục, chân phiếu hướng dẫn | `maQuocGia: { "III.3": "1.0xxxxx" }` — nhập mã thủ tục trên Cơ sở dữ liệu quốc gia về TTHC khi có. |
+| `dichVuCong.maQuocGia` | Mã TTHC quốc gia ở trang thủ tục, tìm kiếm, báo cáo | `{ "III.3": { ma: "1.012784", mucDo: "khop" \| "goi-y", tenDanhMuc, phiDanhMuc, ghiChu } }`. Khi UBND tỉnh công bố danh mục mới: cập nhật mã, `nguonMa`; mã “goi-y” chỉ hiển thị kèm nhãn cần xác minh. |
+| `hieuLucVanBan` | Tình trạng hiệu lực văn bản viện dẫn ngoài phần căn cứ | `{ ten, ma: "co-hieu-luc" \| "het-hieu-luc" \| "het-mot-phan", nhan, nguon }` — ghi rõ nguồn tra cứu (Cơ sở dữ liệu quốc gia về VBPL, ngày tra). |
+| `nghiaVuTaiChinh` | Công cụ ước tính nghĩa vụ tài chính | Căn cứ, mức mặc định (lệ phí trước bạ, thuế TNCN), gợi ý tỷ lệ thu khi chuyển mục đích — các mục `canXacMinh` phải được đối chiếu văn bản hiện hành. |
+| `troLyAI.diaChi` | Trợ lý hỏi đáp | Địa chỉ Worker sau khi triển khai `tro-ly-ai/` (xem README trong thư mục đó). Để trống: chỉ hiện đoạn nguyên văn liên quan. |
+
+**Phí, lệ phí** (`app/du-lieu/phi-le-phi.js`): mức thu trích nguyên văn từ Nghị quyết HĐND tỉnh hiện hành. Khi HĐND ban hành nghị quyết mới: cập nhật `vanBan` (số, ngày, hiệu lực, văn bản hết hiệu lực), các bảng mức thu; `theoThuTuc` là phân loại khoản thu theo thủ tục (lan-dau, bien-dong, ca-hai, trich-luc, khong).
 
 Sau khi sửa, tăng `phienBanDuLieu` **và** `PHIEN_BAN` trong `app/sw.js` (kiểm thử bắt buộc hai số trùng nhau) để trình duyệt người dùng nhận bản mới thay vì bản lưu ngoại tuyến.
 

@@ -11,7 +11,7 @@ TT.man = TT.man || {};
     const nhom = {};
     if (kq) for (const r of kq.ketQua) (nhom[r.nhom] = nhom[r.nhom] || []).push(r);
     const loaiChon = q.loai || "";
-    const LOAI = [["", "Tất cả"], ["thu-tuc", "Thủ tục"], ["buoc-qt", "Bước luân chuyển NVTC"], ["mau", "Mẫu biểu"], ["dieu", "Điều khoản"], ["pl4", "Thu hồi, BT-HT-TĐC"], ["co-quan", "Cơ quan"], ["van-ban", "Văn bản viện dẫn"]];
+    const LOAI = [["", "Tất cả"], ["thu-tuc", "Thủ tục"], ["buoc-qt", "Bước luân chuyển NVTC"], ["mau", "Mẫu biểu"], ["dieu", "Điều khoản"], ["pl4", "Thu hồi, BT-HT-TĐC"], ["co-quan", "Cơ quan"], ["phi", "Phí, lệ phí"], ["van-ban", "Văn bản viện dẫn"]];
     const ds = kq ? kq.ketQua.filter(r => !loaiChon || r.loai === loaiChon) : [];
     const html = `<div class="trang">
       <div class="dong-tieu-de"><div><div class="nhan-trang">Tra cứu nhanh</div><h1>Tìm trong toàn bộ dữ liệu</h1>
@@ -60,7 +60,7 @@ TT.man = TT.man || {};
           <td data-nhan="Thủ tục" class="chu-nho">${m.thuTuc.length ? m.thuTuc.slice(0, 6).map(x => `<a href="#/thu-tuc/${x}">${x}</a>`).join(", ") + (m.thuTuc.length > 6 ? ` và ${m.thuTuc.length - 6} thủ tục khác` : "") : (m.quyTrinh.length || m.phuLucIV.length ? '<span class="mo">Dùng trong quy trình/PL IV</span>' : '<span class="mo">Không có thủ tục viện dẫn</span>')}</td>
           <td data-nhan="Danh mục">${m.coTrongDanhMuc ? '<span class="nhan nhan-xanh">Có</span>' : '<span class="nhan nhan-vang" title="Xem VD04">Không có</span>'}</td>
           <td class="so" data-nhan="Trang">${tp.lkPdf(m.trangDau, m.trangDau + (m.trangCuoi !== m.trangDau ? "–" + m.trangCuoi : ""))}</td>
-          <td class="so" data-nhan="Tải về"><button type="button" class="nut nut-nho" data-word-mau="${e(m.khoa)}" title="Tải Mẫu số ${e(m.kyHieu)} dạng Word (.docx)">${bt("taiXuong", 13)} Word</button></td></tr>`).join("") || `<tr><td colspan="6" class="trong">Không có mẫu phù hợp.</td></tr>`}
+          <td class="so" data-nhan="Tải về"><button type="button" class="nut nut-nho" data-word-mau="${e(m.khoa)}" title="Tải Mẫu số ${e(m.kyHieu)} dạng Word (.docx)">${bt("taiXuong", 13)} Word</button> <a class="nut nut-nho" href="#/dien-mau/${e(m.khoa)}" title="Điền Mẫu số ${e(m.kyHieu)} rồi tải Word">Điền</a></td></tr>`).join("") || `<tr><td colspan="6" class="trong">Không có mẫu phù hợp.</td></tr>`}
         </tbody></table></div></div>
         <div class="nhan-muc">Mẫu của văn bản khác được viện dẫn (không có trong tài liệu nguồn)</div>
         <div class="the"><div class="bang-cuon"><table class="bang dap-ung"><thead><tr><th>Mẫu</th><th>Văn bản ban hành</th><th>Thủ tục viện dẫn</th></tr></thead><tbody>
@@ -111,7 +111,7 @@ TT.man = TT.man || {};
       <div class="dong-tieu-de"><div><div class="nhan-trang">Phụ lục V · Mẫu số ${e(m.kyHieu)}</div><h1 style="max-width:100ch">${e(m.ten)}</h1>
         <div class="mo-ta tang">${m.coTrongDanhMuc ? `<span class="nhan nhan-xanh">Có trong danh mục Phụ lục V</span>` : `<span class="nhan nhan-vang">Không có trong danh mục Phụ lục V (VD04)</span>`} <span>Trang ${m.trangDau}${m.trangCuoi !== m.trangDau ? "–" + m.trangCuoi : ""} tệp PDF nguồn</span></div></div>
         <div class="phai khong-in">${truoc ? `<a class="nut nut-nho" href="#/mau-bieu/${truoc.khoa}">← Mẫu ${e(truoc.kyHieu)}</a>` : ""}${sau ? `<a class="nut nut-nho" href="#/mau-bieu/${sau.khoa}">Mẫu ${e(sau.kyHieu)} →</a>` : ""}</div></div>
-      <div class="luoi luoi-chinh"><div class="the"><div class="the-dau"><h3>Nội dung mẫu</h3><div class="phai">${tp.dauNguon.nv()}<button type="button" class="nut nut-nho" data-word-mau="${e(m.khoa)}">${bt("taiXuong", 14)} Tải Word (.docx)</button><a class="nut nut-chinh nut-nho" href="${mh.lienKetPdf(m.trangDau)}" target="_blank" rel="noopener">${bt("pdf", 14)} Mở mẫu chính thức (PDF tr. ${m.trangDau})</a></div></div>
+      <div class="luoi luoi-chinh"><div class="the"><div class="the-dau"><h3>Nội dung mẫu</h3><div class="phai">${tp.dauNguon.nv()}<a class="nut nut-nho" href="#/dien-mau/${e(m.khoa)}">${bt("kiem", 14)} Điền mẫu</a><button type="button" class="nut nut-nho" data-word-mau="${e(m.khoa)}">${bt("taiXuong", 14)} Tải Word (.docx)</button><a class="nut nut-chinh nut-nho" href="${mh.lienKetPdf(m.trangDau)}" target="_blank" rel="noopener">${bt("pdf", 14)} Mở mẫu chính thức (PDF tr. ${m.trangDau})</a></div></div>
         <div class="the-than"><div class="thong-bao thong-bao-vang">${bt("canhBao")}<div>Văn bản dưới đây được <b>trích tự động</b> từ PDF để tra cứu, tìm kiếm. Tệp Word tải về chứa đúng nội dung này (khổ A4, Times New Roman) để tiện điền; bảng, dòng chấm, ô đánh dấu có thể không giữ đúng định dạng — <b>đối chiếu với trang PDF gốc</b> trước khi sử dụng.</div></div>
         <div class="van-ban-mau">${e(m.noiDung)}</div></div></div>
         <aside class="muc-luc"><div class="the"><div class="the-dau"><h3>Được sử dụng tại</h3><div class="phai">${tp.dauNguon.pm()}</div></div><div class="the-than chu-nho" style="display:grid;gap:6px">
@@ -170,7 +170,7 @@ TT.man = TT.man || {};
     const html = `<div class="trang">${tp.dauIn("Căn cứ pháp lý")}
       <div class="dong-tieu-de"><div><div class="nhan-trang">Căn cứ pháp lý</div><h1>Văn bản nguồn và điều khoản</h1>
         <div class="mo-ta">Toàn văn Quyết định, Quy định (5 chương, ${mh.dieu.length} điều) và các phụ lục, trích từ tệp PDF nguồn. Mỗi điều có liên kết tới trang PDF gốc.</div></div></div>
-      ${vdChon ? `<div class="the" style="margin-bottom:16px"><div class="the-dau"><h3>${e(vdChon.ten)}</h3><div class="phai">${tp.dauNguon.pm()}<span class="nhan nhan-vang">Hiệu lực: chưa xác minh</span><a class="nut nut-nho" href="#/can-cu">Đóng</a></div></div><div class="the-than">
+      ${vdChon ? `<div class="the" style="margin-bottom:16px"><div class="the-dau"><h3>${e(vdChon.ten)}</h3><div class="phai">${tp.dauNguon.pm()}${nhanHL(vdChon.hieuLuc)}<a class="nut nut-nho" href="#/can-cu">Đóng</a></div></div><div class="the-than">${moTaHL(vdChon.hieuLuc)}
         <p class="chu-nho mo" style="margin-top:0">Văn bản này được nêu tên tại các vị trí sau trong tài liệu nguồn. Tài liệu nguồn không kèm toàn văn văn bản được viện dẫn.</p>
         <ul style="margin:0;padding-left:18px">${vdChon.viTri.map(v => `<li><a href="${v.lienKet}">${e(v.nhan)}</a></li>`).join("")}</ul></div></div>` : ""}
       <div class="luoi luoi-chinh"><div style="display:grid;gap:16px">
@@ -194,12 +194,19 @@ TT.man = TT.man || {};
         <div class="the"><div class="the-dau"><h3>Phụ lục</h3></div><div class="the-than" style="display:grid;gap:8px">
           ${mh.PL.map(p => `<a href="#/thu-tuc?pl=${p.so}">Phụ lục ${p.so}: ${e(mh.N[p.khoa].tieuDe)}</a>`).join("")}
           <a href="#/thu-hoi">Phụ lục IV: ${e(mh.N.phuLucIV.tieuDe)}</a><a href="#/mau-bieu">Phụ lục V: Mẫu biểu</a></div></div>
-        <div class="the"><div class="the-dau"><h3>Văn bản được viện dẫn</h3><div class="phai">${tp.dauNguon.pm()}</div></div><div class="the-than khit"><table class="bang"><thead><tr><th>Văn bản</th><th class="so">Vị trí</th></tr></thead><tbody>
-          ${Object.values(mh.vanBanDanChieu).sort((a, b) => b.viTri.length - a.viTri.length).map(v => `<tr><td><a href="#/can-cu?vb=${encodeURIComponent(v.ten)}">${e(v.ten)}</a></td><td class="so">${v.viTri.length}</td></tr>`).join("")}
-        </tbody></table><div class="ket-loc">Nhận diện tự động theo tên, số ký hiệu. Hiệu lực các văn bản này chưa được xác minh.</div></div></div>
+        <div class="the"><div class="the-dau"><h3>Văn bản được viện dẫn</h3><div class="phai">${tp.dauNguon.pm()}</div></div><div class="the-than khit"><table class="bang"><thead><tr><th>Văn bản</th><th>Hiệu lực</th><th class="so">Vị trí</th></tr></thead><tbody>
+          ${Object.values(mh.vanBanDanChieu).sort((a, b) => b.viTri.length - a.viTri.length).map(v => `<tr><td><a href="#/can-cu?vb=${encodeURIComponent(v.ten)}">${e(v.ten)}</a></td><td>${nhanHL(v.hieuLuc)}</td><td class="so">${v.viTri.length}</td></tr>`).join("")}
+        </tbody></table><div class="ket-loc">Nhận diện tự động theo tên, số ký hiệu. Hiệu lực lấy từ phần căn cứ ban hành và khoản 2 Điều 2 Quyết định (thời điểm ${e(vb.ngayBanHanh.giaTri)}); văn bản “chưa xác minh” cần tra Cơ sở dữ liệu quốc gia về văn bản pháp luật.</div></div></div>
       </aside></div></div>`;
     return { tieuDe: "Căn cứ pháp lý", html };
   };
+
+  function nhanHL(h) { const lop = { "co-hieu-luc": "xanh", "het-hieu-luc": "do", "het-mot-phan": "vang" }[h && h.ma] || "xam"; return `<span class="nhan nhan-${lop}" title="${e(h && h.nguon || "")}">${e(h ? h.nhan : "Chưa xác minh")}</span>`; }
+  function moTaHL(h) {
+    if (!h) return "";
+    return `<p class="chu-nho" style="margin-top:0"><b>${e(h.nhan)}${h.phamVi && h.phamVi !== "Toàn bộ" ? ": " + e(h.phamVi) : ""}${h.tuNgay ? " kể từ ngày " + e(h.tuNgay) : ""}.</b> Nguồn: ${e(h.nguon)}.${h.suaDoiBoi && h.suaDoiBoi.length ? ` Được sửa đổi, bổ sung bởi: ${h.suaDoiBoi.map(x => `<a href="#/can-cu?vb=${encodeURIComponent(x)}">${e(x)}</a>`).join(", ")}.` : ""}${h.suaDoi && h.suaDoi.length ? ` Sửa đổi, bổ sung: ${h.suaDoi.map(x => `<a href="#/can-cu?vb=${encodeURIComponent(x)}">${e(x)}</a>`).join(", ")}.` : ""}${h.ma === "co-hieu-luc" ? " Phần mềm không theo dõi văn bản sửa đổi ban hành sau thời điểm này." : ""}</p>`;
+  }
+  TT.nhanHieuLucVB = nhanHL;
 
   function chiTietDieu(mh, ma) {
     const [loai, so] = ma.split("-");

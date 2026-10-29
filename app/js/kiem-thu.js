@@ -16,7 +16,7 @@
   };
 
   let mh, tk;
-  try { mh = TT.taoMoHinh(window.QD75_NGUON, window.QD75_BO_SUNG); tk = TT.taoTimKiem(mh); }
+  try { mh = TT.taoMoHinh(window.QD75_NGUON, window.QD75_BO_SUNG, window.QD75_PHI); tk = TT.taoTimKiem(mh); }
   catch (err) { ghi("KT-00", "Khởi tạo", "Dựng mô hình dữ liệu", "Không lỗi", err.message, false); return; }
   const loi = mh.kiemTra();
   const T = m => mh.thuTucTheoMa[m];
@@ -165,7 +165,7 @@
       return { h1: (d.querySelector("#noi-dung h1") || {}).textContent || "", loi: loiHien ? loiHien.textContent.trim() : null, khongCo: khongCo ? khongCo.textContent : null, d };
     }
     const tuyen = [
-      ["#/tong-quan", "Tra cứu thủ tục hành chính về đất đai"], ["#/tinh-han?ma=III.3", "Tính thời hạn"], ["#/phieu", "Phiếu hướng dẫn"], ["#/phieu/III.3", "PHIẾU HƯỚNG DẪN"], ["#/thu-tuc", "Thủ tục hành chính về đất đai"], ["#/thu-tuc/I.1", "Giao đất, cho thuê đất"],
+      ["#/tong-quan", "Tra cứu thủ tục hành chính về đất đai"], ["#/tinh-han?ma=III.3", "Tính thời hạn"], ["#/phieu", "Phiếu hướng dẫn"], ["#/phieu/III.3", "PHIẾU HƯỚNG DẪN"], ["#/nghia-vu", "Ước tính nghĩa vụ tài chính"], ["#/nghia-vu?phi=III.3", "Ước tính nghĩa vụ tài chính"], ["#/phi-le-phi", "Phí, lệ phí"], ["#/dien-mau", "Điền mẫu"], ["#/dien-mau/22", "tách thửa"], ["#/bao-cao", "Báo cáo tổng hợp"], ["#/so-theo-doi", "Sổ theo dõi"], ["#/hoi-dap", "Hỏi đáp"], ["#/doi-soat?tab=ma-tthc", "Đối soát"], ["#/thu-tuc", "Thủ tục hành chính về đất đai"], ["#/thu-tuc/I.1", "Giao đất, cho thuê đất"],
       ["#/thu-tuc/II.6/trinh-tu", "Đăng ký đất đai"], ["#/thu-tuc/III.2/ho-so", "Đăng ký biến động"], ["#/thu-tuc/I.5/thoi-han", "Thẩm định, phê duyệt phương án sử dụng đất"], ["#/thu-tuc/III.1/co-quan", "Đăng ký biến động"],
       ["#/thu-tuc/I.1/mau", "Giao đất"], ["#/thu-tuc/I.1/can-cu", "Giao đất"], ["#/quy-trinh/QT15", "tính theo bảng giá đất"], ["#/quy-trinh/QT15-6", "Tính hoặc tính lại"], ["#/quy-trinh/QT16/b1", "giá đất cụ thể"],
       ["#/quy-trinh/QT17", "Khấu trừ kinh phí"], ["#/quy-trinh/QT18", "đăng ký biến động"], ["#/thu-hoi", "Thu hồi đất"], ["#/thu-hoi/IV", "Trình tự, thủ tục bồi thường"], ["#/mau-bieu", "Hồ sơ và mẫu biểu"],

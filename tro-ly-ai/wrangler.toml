@@ -1,0 +1,17 @@
+# Cloudflare Worker trung gian cho trợ lý hỏi đáp: giữ khóa API ở máy chủ, gọi Gemini, dự phòng Workers AI.
+# Triển khai: xem tro-ly-ai/README.md
+name = "tro-ly-tthc-dat-dai-son-la"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# Workers AI (dự phòng khi Gemini lỗi/hết hạn mức) — dùng tài khoản Cloudflare đang triển khai, không cần khóa riêng
+[ai]
+binding = "AI"
+
+[vars]
+GEMINI_MODEL = "gemini-3.5-flash"
+CF_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+# Các nguồn (origin) được phép gọi, cách nhau dấu phẩy
+ALLOWED_ORIGINS = "https://tra-cuu-tthc-dat-dai-son-la.vercel.app,http://localhost:8686,http://127.0.0.1:8686"
+# Số câu hỏi tối đa mỗi địa chỉ IP trong 1 phút (giới hạn mềm, theo từng phiên bản Worker)
+GIOI_HAN_PHUT = "12"

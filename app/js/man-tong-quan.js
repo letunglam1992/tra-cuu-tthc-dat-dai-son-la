@@ -51,6 +51,7 @@ TT.man = TT.man || {};
       <div class="luoi luoi-3">
         <a class="the the-cong-cu" href="#/tinh-han"><span class="th-bt">${bt("dongHo", 20)}</span><div><div class="th-ten">Tính thời hạn giải quyết</div><div class="th-mo-ta">Nhập ngày nhận hồ sơ hợp lệ → ngày hẹn trả kết quả, trừ ngày nghỉ, cộng thời gian xã khu vực III.</div></div></a>
         <a class="the the-cong-cu" href="#/phieu"><span class="th-bt">${bt("kiem", 20)}</span><div><div class="th-ten">Phiếu hướng dẫn hồ sơ</div><div class="th-mo-ta">Danh mục giấy tờ có ô đánh dấu, in 1 trang A4 kèm mã QR — đưa cho người dân chuẩn bị hồ sơ.</div></div></a>
+        <a class="the the-cong-cu" href="#/nghia-vu"><span class="th-bt">${bt("canCan", 20)}</span><div><div class="th-ten">Ước tính nghĩa vụ tài chính, phí, lệ phí</div><div class="th-mo-ta">Tiền sử dụng đất, tiền thuê đất, lệ phí trước bạ; phí thẩm định, lệ phí cấp GCN theo Nghị quyết 155/2025/NQ-HĐND.</div></div></a>
         <a class="the the-cong-cu" href="#/quy-trinh"><span class="th-bt">${bt("luong", 20)}</span><div><div class="th-ten">Sơ đồ luân chuyển hồ sơ NVTC</div><div class="th-mo-ta">Ai làm gì, trong bao lâu, giữa cơ quan đất đai, thuế, kho bạc (Điều 15–18).</div></div></a>
       </div>
 
@@ -123,6 +124,15 @@ TT.man = TT.man || {};
         <div class="bang-cuon"><table class="bang dap-ung"><thead><tr><th>Mã</th><th>Mức độ</th><th>Vị trí</th><th>Mô tả</th></tr></thead><tbody>
         ${mh.vanDeNguon.map(v => `<tr><td class="ma" data-nhan="Mã">${e(v.ma)}</td><td data-nhan="Mức độ">${tp.nhanMucDo(v.mucDo)}</td><td data-nhan="Vị trí" class="chu-nho">${e(v.viTri)}${v.trang ? "<br>" + tp.lkPdf(v.trang) : ""}${v.thuTuc ? `<br><a href="#/thu-tuc/${v.thuTuc}">Mở thủ tục</a>` : ""}</td><td data-nhan="Mô tả">${e(v.moTa)}</td></tr>`).join("")}
         </tbody></table></div></div>`;
+    } else if (tab === "ma-tthc") {
+      const dvc = mh.B.dichVuCong || {};
+      const nhan = m => !m ? '<span class="nhan nhan-do">Chưa có mã</span>' : m.mucDo === "khop" ? '<span class="nhan nhan-xanh">Khớp</span>' : '<span class="nhan nhan-vang">Gợi ý — cần xác minh</span>';
+      than = `<div class="the"><div class="the-dau"><h3>Mã TTHC quốc gia — đối chiếu với danh mục công bố</h3><div class="phai chu-nho mo">${e(dvc.nguonMa || "")}</div></div>
+        <div class="the-than chu-nho">${mh.thuTuc.filter(t => t.maQuocGia && t.maQuocGia.mucDo === "khop").length} khớp · ${mh.thuTuc.filter(t => t.maQuocGia && t.maQuocGia.mucDo === "goi-y").length} gợi ý · ${mh.thuTuc.filter(t => !t.maQuocGia).length} chưa có mã. Đối chiếu theo tên thủ tục và cấp giải quyết; sửa tại <code>bo-sung.js › dichVuCong.maQuocGia</code>.</div>
+        <div class="bang-cuon"><table class="bang dap-ung"><thead><tr><th>Thủ tục</th><th>Tên theo Quyết định 75</th><th>Mã TTHC</th><th>Tên trong danh mục công bố</th><th>Kết quả</th></tr></thead><tbody>
+        ${mh.thuTuc.map(t => `<tr><td class="ma" data-nhan="Thủ tục"><a href="#/thu-tuc/${t.ma}">${t.ma}</a></td><td data-nhan="Tên QĐ 75" class="chu-nho">${e(t.ten)}</td><td data-nhan="Mã">${t.maQuocGia ? `<b>${e(t.maQuocGia.ma)}</b>` : "—"}</td><td data-nhan="Danh mục" class="chu-nho">${t.maQuocGia ? e(t.maQuocGia.tenDanhMuc) : ""}${t.maQuocGia && t.maQuocGia.ghiChu ? `<div class="mo">${e(t.maQuocGia.ghiChu)}</div>` : ""}</td><td data-nhan="Kết quả">${nhan(t.maQuocGia)}</td></tr>`).join("")}
+        </tbody></table></div>
+        ${(dvc.ngoaiPhamVi || []).length ? `<div class="the-than chu-nho"><b>Thủ tục trong danh mục công bố nhưng không có trong Quyết định 75/2026/QĐ-UBND:</b><ul class="ds-gon">${dvc.ngoaiPhamVi.map(x => `<li>${e(x.ma)} · ${e(x.cap)} · ${e(x.ten)}</li>`).join("")}</ul></div>` : ""}</div>`;
     } else if (tab === "phien-ban") {
       const tt = mh.N.thongTinTrichXuat;
       than = `<div class="luoi luoi-2" style="align-items:start"><div class="the"><div class="the-dau"><h3>Phiên bản bộ dữ liệu</h3></div><div class="the-than"><dl class="dl-gon">
@@ -142,7 +152,7 @@ TT.man = TT.man || {};
       <div class="dong-tieu-de"><div><div class="nhan-trang">Kiểm soát dữ liệu</div><h1>Đối soát dữ liệu với văn bản nguồn</h1>
         <div class="mo-ta">Kiểm tra tính đầy đủ, nhất quán của dữ liệu đã cấu trúc so với Quyết định và các phụ lục; ghi nhận các nội dung cần xác minh.</div></div>
         <div class="phai khong-in"><button class="nut" id="xuat-ds">${bt("taiXuong", 15)} Xuất bảng đối soát (CSV)</button><button class="nut" id="xuat-json">${bt("taiXuong", 15)} Xuất dữ liệu (JSON)</button><button class="nut" onclick="window.print()">${bt("in", 15)} In</button></div></div>
-      <nav class="tab khong-in">${[["", "Kiểm tra tự động"], ["bang", "Bảng đối soát"], ["van-de", "Vấn đề văn bản nguồn"], ["phien-ban", "Phiên bản & cập nhật"]].map(([id, ten]) => `<a href="#/doi-soat${id ? "?tab=" + id : ""}" class="${tab === id ? "chon" : ""}">${ten}</a>`).join("")}</nav>
+      <nav class="tab khong-in">${[["", "Kiểm tra tự động"], ["bang", "Bảng đối soát"], ["van-de", "Vấn đề văn bản nguồn"], ["ma-tthc", "Mã TTHC"], ["phien-ban", "Phiên bản & cập nhật"]].map(([id, ten]) => `<a href="#/doi-soat${id ? "?tab=" + id : ""}" class="${tab === id ? "chon" : ""}">${ten}</a>`).join("")}</nav>
       ${than}</div>`;
     return { tieuDe: "Đối soát dữ liệu", html, giuCuon: true,
       sau(root) {

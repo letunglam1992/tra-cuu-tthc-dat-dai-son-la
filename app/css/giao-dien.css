@@ -615,3 +615,36 @@ a.the-th:hover, .the-cong-cu:hover { border-color: var(--chinh); box-shadow: var
   .muc-tt .the-dau { break-after: avoid; }
   .tom-tat { break-inside: avoid; }
 }
+
+.ma-qg { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 3px 4px 3px 10px; border-radius: 99px; border: 1px solid var(--vien); background: var(--be-mat-2); }
+.ma-qg.goi-y { border-style: dashed; }
+.nut-xoa.da-chep { color: var(--xanh); }
+.phieu-ma { font-size: 12.5px; margin-top: 4px; }
+
+.hop-phi { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--vien); border-left: 3px solid var(--chinh); border-radius: var(--r-md); background: var(--be-mat-2); font-size: 13px; }
+.hop-phi summary { cursor: pointer; }
+.bang-gon td { padding: 5px 8px; font-size: 12.5px; }
+.form-nv { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px 14px; }
+.kq-nv { margin-top: 12px; padding: 10px 12px; border-radius: var(--r-md); background: var(--chinh-nhat); }
+.kq-nv .k, .tong-du-tru .k { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--chu-mo); font-weight: 600; }
+.kq-nv .v { font-size: 20px; font-weight: 600; color: var(--chinh); }
+:root[data-theme="dark"] .kq-nv .v { color: var(--tieu-diem); }
+.tong-du-tru { margin-top: 14px; border-color: var(--chinh); }
+.tra-gia { margin: 6px 0 4px; }
+
+.mau-dien { max-width: 860px; font-family: "Times New Roman", Times, serif; font-size: 15px; line-height: 1.9; }
+.mau-dien p { margin: 0 0 4px; text-align: justify; }
+.mau-dien p.hoa { text-align: center; font-weight: 700; }
+.o-dien { font: inherit; border: 0; border-bottom: 1px dashed var(--chinh); background: var(--chinh-nhat); padding: 0 4px; margin: 0 2px; max-width: 100%; color: var(--chu); border-radius: 3px; }
+.o-dien:focus { outline: 2px solid var(--tieu-diem); background: var(--be-mat); }
+
+.hoi-dap-o { padding: 14px 16px; display: grid; gap: 10px; }
+.hoi-dap-o textarea { width: 100%; border: 1px solid var(--vien-dam); border-radius: var(--r-md); padding: 10px 12px; font-size: 15px; background: var(--o-nhap); resize: vertical; }
+.hd-goi-y { display: flex; flex-wrap: wrap; gap: 6px; }
+.hd-goi-y .nut { white-space: normal; text-align: left; }
+.hd-tra-loi { margin-top: 14px; border-color: var(--tim); }
+.hd-noi-dung p { margin: 0 0 8px; } .hd-noi-dung ul { margin: 0 0 8px; padding-left: 20px; }
+.trich-dan { font-weight: 600; text-decoration: none; padding: 0 2px; }
+.hd-nguon { margin: 0; padding: 10px 16px 14px 34px; display: grid; gap: 10px; }
+.nhan-tim { background: var(--tim-nen); color: var(--tim); }
+.mau-dien p.ngay { text-align: right; font-style: italic; }

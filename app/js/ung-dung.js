@@ -4,7 +4,7 @@ window.TT = window.TT || {};
 TT.THONG_TIN_PM = {
   ten: "Phần mềm tra cứu thủ tục hành chính đất đai tỉnh Sơn La",
   moTa: "Tra cứu trình tự, thủ tục, hồ sơ, thời hạn và luân chuyển hồ sơ xác định nghĩa vụ tài chính về đất đai.",
-  phienBan: "2.0", ngayCapNhat: "29/10/2026",
+  phienBan: "2.1", ngayCapNhat: "29/10/2026",
   tacGia: "Lê Tùng Lâm", donVi: "Sở Nông nghiệp và Môi trường tỉnh Sơn La", dienThoai: "0987559092",
   mucDich: "Tra cứu, hướng dẫn và hỗ trợ giải quyết thủ tục hành chính về đất đai, luân chuyển hồ sơ xác định nghĩa vụ tài chính về đất đai trên địa bàn tỉnh Sơn La.",
   namBanQuyen: "2026",
@@ -16,7 +16,7 @@ TT.THONG_TIN_PM = {
 
   let mh, tk;
   try {
-    mh = TT.taoMoHinh(window.QD75_NGUON, window.QD75_BO_SUNG);
+    mh = TT.taoMoHinh(window.QD75_NGUON, window.QD75_BO_SUNG, window.QD75_PHI);
     tk = TT.taoTimKiem(mh);
   } catch (err) {
     goc.innerHTML = `<div class="trang" style="grid-column:1/-1"><div class="thong-bao thong-bao-do">${bt("canhBao")}<div><b>Không tải được dữ liệu nghiệp vụ.</b><br>${e(err.message)}<br>
@@ -48,12 +48,18 @@ TT.THONG_TIN_PM = {
       { id: "thu-hoi", ten: "Thu hồi, bồi thường, TĐC", bt: "thuHoi", dem: mh.thongKe.phuLucIV },
       { id: "mau-bieu", ten: "Hồ sơ và mẫu biểu", bt: "tep", dem: mh.thongKe.mauBieu },
       { id: "co-quan", ten: "Cơ quan và trách nhiệm", bt: "coQuan" },
+      { id: "phi-le-phi", ten: "Phí, lệ phí", bt: "taiXuong" },
       { id: "can-cu", ten: "Căn cứ pháp lý", bt: "canCan" },
       { id: "tra-cuu", ten: "Tra cứu nhanh", bt: "tim" }
     ] },
     { nhom: "Công cụ", muc: [
       { id: "tinh-han", ten: "Tính thời hạn giải quyết", bt: "dongHo" },
       { id: "phieu", ten: "Phiếu hướng dẫn hồ sơ", bt: "kiem" },
+      { id: "nghia-vu", ten: "Ước tính nghĩa vụ tài chính", bt: "canCan" },
+      { id: "dien-mau", ten: "Điền mẫu đơn", bt: "tep" },
+      { id: "so-theo-doi", ten: "Sổ theo dõi hạn hồ sơ", bt: "dongHo" },
+      { id: "bao-cao", ten: "Báo cáo tổng hợp TTHC", bt: "danhSach" },
+      { id: "hoi-dap", ten: "Hỏi đáp (trợ lý AI)", bt: "thongTin" },
       { id: "gioi-thieu", ten: "Giới thiệu, hướng dẫn", bt: "thongTin" }
     ] },
     ...(quanTri ? [{ nhom: "Kiểm soát dữ liệu", muc: [
@@ -206,6 +212,14 @@ TT.THONG_TIN_PM = {
   }
   window.addEventListener("hashchange", veMan);
   veMan();
+
+  // Thống kê truy cập ẩn danh (Vercel Web Analytics — không dùng cookie): chỉ nạp khi chạy trên Vercel, đã bật Analytics cho dự án
+  if (/\.vercel\.app$/.test(location.hostname)) {
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    const s = document.createElement("script"); s.defer = true; s.src = "/_vercel/insights/script.js"; s.onerror = () => { }; document.head.appendChild(s);
+    // Ghi nhận từ khóa tìm kiếm (ẩn danh) để bổ sung từ đồng nghĩa, tình huống
+    window.addEventListener("hashchange", () => { const m = location.hash.match(/^#\/tra-cuu\?q=([^&]+)/); if (m) window.va("event", { name: "Tim kiem", data: { q: decodeURIComponent(m[1]).slice(0, 80) } }); });
+  }
 
   // Chạy được khi mất mạng (sau lần mở đầu tiên): bộ nhớ đệm Service Worker — chỉ khi mở qua http(s)
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !/kiem-thu/.test(location.pathname)) {

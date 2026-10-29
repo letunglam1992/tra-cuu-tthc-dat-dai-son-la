@@ -3,7 +3,7 @@
  * phân biệt với nội dung pháp lý nguyên văn. Không phụ thuộc DOM — dùng chung cho ứng dụng và bộ kiểm thử.
  */
 window.TT = window.TT || {};
-TT.taoMoHinh = function (N, B) {
+TT.taoMoHinh = function (N, B, P) {
   const ti = TT.ti;
   if (!N || !B) throw new Error("Thiếu dữ liệu nguồn (du-lieu/nguon.js) hoặc dữ liệu bổ sung (du-lieu/bo-sung.js).");
   const PDF = "tai-nguyen/qd75.pdf";
@@ -184,6 +184,8 @@ TT.taoMoHinh = function (N, B) {
     }
   }
   const thuTucTheoMa = Object.fromEntries(thuTuc.map(t => [t.ma, t]));
+  // Mã TTHC quốc gia (B.dichVuCong.maQuocGia): "khop" dùng được; "goi-y" chỉ để tham khảo, cần xác minh
+  for (const t of thuTuc) { const m = B.dichVuCong && B.dichVuCong.maQuocGia && B.dichVuCong.maQuocGia[t.ma]; t.maQuocGia = m ? { ...m } : null; }
 
   // ---------- Phụ lục IV ----------
   // Chỉ nhận cụm thời hạn có từ "thời hạn"/"thời gian" đứng trước (tránh nhầm số ngày đăng báo, niêm yết… là nội dung công việc)
@@ -212,6 +214,8 @@ TT.taoMoHinh = function (N, B) {
   // ---------- Văn bản được viện dẫn ----------
   const MAU_VB = [
     [/Luật Đất đai(?: số 31\/2024\/QH15)?/g, () => "Luật Đất đai số 31/2024/QH15"],
+    [/Luật (Tổ chức chính quyền địa phương|Ban hành văn bản quy phạm pháp luật) số (\d+\/\d{4}\/QH\d+)/g, m => `Luật ${m[1]} số ${m[2]}`],
+    [/Luật số (\d+\/\d{4}\/QH\d+)/g, m => "Luật số " + m[1]],
     [/Nghị định(?: số)? (\d+\/\d{4}\/NĐ-\s?CP)/g, m => "Nghị định số " + m[1].replace(/\s/g, "")],
     [/Thông tư(?: số)? (\d+\/\d{4}\/TT-[A-ZĐ]+)/g, m => "Thông tư số " + m[1]],
     [/Nghị quyết(?: số)? (\d+\/\d{4}\/[A-ZĐ0-9\-]+)/g, m => "Nghị quyết số " + m[1]],
@@ -235,6 +239,33 @@ TT.taoMoHinh = function (N, B) {
   dieu.forEach(d => ghiVienDan(d.tieuDe + "\n" + d.noiDung, { khoa: "d" + d.so, nhan: `Điều ${d.so} Quy định`, lienKet: "#/can-cu/dieu-" + d.so }));
   thuTuc.forEach(t => ghiVienDan(Object.values(t.muc).map(m => m.noiDung).join("\n"), { khoa: "tt" + t.ma, nhan: `Thủ tục ${t.ma}`, lienKet: "#/thu-tuc/" + t.ma }));
   phuLucIV.forEach(m => ghiVienDan(m.tieuDe + "\n" + m.khoan.map(k => k.noiDung).join("\n"), { khoa: "pl4" + m.so, nhan: `Phụ lục IV mục ${m.so}`, lienKet: "#/thu-hoi/" + m.so }));
+
+  // ---------- Tình trạng hiệu lực văn bản được viện dẫn ----------
+  // Nguồn 1 (chính thức): phần căn cứ ban hành Quyết định — văn bản được viện dẫn làm căn cứ có hiệu lực tại ngày ban hành,
+  //   kèm văn bản sửa đổi, bổ sung nêu tại căn cứ. Nguồn 2: khoản 2 Điều 2 (văn bản hết hiệu lực). Nguồn 3: B.hieuLucVanBan (biên soạn, ghi nguồn).
+  const tachTenVB = text => { const ds = []; for (const [re, ten] of MAU_VB) { re.lastIndex = 0; let m; while ((m = re.exec(text))) ds.push({ i: m.index, ten: ten(m) }); } return ds.sort((a, b) => a.i - b.i); };
+  const ngayBH = B.vanBan.ngayBanHanh.giaTri;
+  const hieuLucVB = {};
+  for (const c of N.moDau.canCu) {
+    const vt = c.search(/được sửa đổi, bổ sung bởi/);
+    const ds = tachTenVB(c); if (!ds.length) continue;
+    const goc = ds.find(x => vt < 0 || x.i < vt), sua = vt < 0 ? [] : ds.filter(x => x.i > vt).map(x => x.ten);
+    if (goc) hieuLucVB[goc.ten] = { ma: "co-hieu-luc", nhan: "Có hiệu lực", nguon: `Căn cứ ban hành ${B.vanBan.loai} số ${B.vanBan.soKyHieu.giaTri} (ngày ${ngayBH})`, suaDoiBoi: sua };
+    for (const x of sua) { const h = hieuLucVB[x] || (hieuLucVB[x] = { ma: "co-hieu-luc", nhan: "Có hiệu lực", nguon: `Căn cứ ban hành ${B.vanBan.loai} số ${B.vanBan.soKyHieu.giaTri} (ngày ${ngayBH})`, suaDoi: [] }); if (goc && h.suaDoi && !h.suaDoi.includes(goc.ten)) h.suaDoi.push(goc.ten); }
+  }
+  for (const x of B.vanBan.vanBanHetHieuLuc || []) {
+    const t = tachTenVB(x.ten)[0]; if (!t) continue;
+    hieuLucVB[t.ten] = { ma: x.phamVi === "Toàn bộ" ? "het-hieu-luc" : "het-mot-phan", nhan: x.phamVi === "Toàn bộ" ? "Hết hiệu lực" : "Hết hiệu lực một phần", phamVi: x.phamVi,
+      nguon: `${x.canCu} ${B.vanBan.loai} số ${B.vanBan.soKyHieu.giaTri}`, tuNgay: B.vanBan.ngayHieuLuc.giaTri };
+  }
+  // Luật Phí và lệ phí: hiệu lực theo phần căn cứ của Nghị quyết HĐND tỉnh về phí, lệ phí (P), nếu có
+  if (P && P.vanBan && P.vanBan.luatPhi) { const sua = tachTenVB(P.vanBan.luatPhi.nguyenVan).map(x => x.ten).filter(x => !/^Luật Phí/.test(x));
+    hieuLucVB["Luật Phí và lệ phí"] = { ma: "co-hieu-luc", nhan: "Có hiệu lực", nguon: `Căn cứ ban hành ${P.vanBan.ten} ngày ${P.vanBan.ngay}: ${P.vanBan.luatPhi.nguyenVan}`, suaDoiBoi: [] }; }
+  for (const x of B.hieuLucVanBan || []) hieuLucVB[x.ten] = { ...x };
+  for (const v of Object.values(vanBanDanChieu)) v.hieuLuc = hieuLucVB[v.ten] || { ma: "chua-xac-minh", nhan: "Chưa xác minh", nguon: "Không có trong phần căn cứ ban hành; tài liệu nguồn không kèm toàn văn" };
+  // Ký hiệu Nghị quyết của Quốc hội ghi lệch (…/NQ-QH thay vì …/QH15) → ghi nhận vấn đề nguồn
+  for (const v of Object.values(vanBanDanChieu)) if (/Nghị quyết số \d+\/\d{4}\/NQ-QH$/.test(v.ten))
+    vanDeTuDong.push({ ma: "KYHIEU-" + v.ten.replace(/\D+/g, "-"), mucDo: "thap", viTri: v.viTri.map(x => x.nhan).join("; "), trang: null, moTa: `Văn bản ghi “${v.ten}”; phần căn cứ ghi Nghị quyết số ${v.ten.match(/\d+\/\d{4}/)[0]}/QH15. Ký hiệu không thống nhất — phần mềm giữ nguyên văn.` });
 
   // ---------- Chỉ mục cơ quan ----------
   const chiMucCoQuan = {};
@@ -389,6 +420,7 @@ TT.taoMoHinh = function (N, B) {
     return rows;
   }
 
+  if (P && P.vanDeDanhMuc) P.vanDeDanhMuc.forEach((m, i) => vanDeTuDong.push({ ma: "PHI-" + (i + 1), mucDo: "trung-binh", viTri: "Danh mục TTHC công bố (21/8/2025) — cột Phí, lệ phí", trang: null, moTa: m }));
   const vanDeNguon = [...B.vanDeNguon, ...vanDeTuDong];
 
   // Tình trạng hiệu lực văn bản nguồn — một chỗ duy nhất để giao diện hiển thị
@@ -426,7 +458,7 @@ TT.taoMoHinh = function (N, B) {
   };
 
   return {
-    N, B, PDF, lienKetPdf, TEN_MUC, PL, dieu, dieuQD, dieuTheoSo, chuong, thuTuc, thuTucTheoMa, phuLucIV, mauBieu, mauTheoKhoa, mauNgoai,
+    N, B, P: P || null, PDF, lienKetPdf, TEN_MUC, PL, dieu, dieuQD, dieuTheoSo, chuong, thuTuc, thuTucTheoMa, phuLucIV, mauBieu, mauTheoKhoa, mauNgoai,
     quyTrinh, quyTrinhTheoId, coQuan, coQuanTheoId, chiMucCoQuan, vanBanDanChieu, vanDeNguon, thongKe, hieuLuc, tinhHieuLuc, daDoiChieuBanKy, tenVanBan, dienBanKy,
     giaiCanCu, kiemTra, bangDoiSoat, timCoQuan, timMau, thoiHanRutGon, hienThiHan, tachBuoc
   };

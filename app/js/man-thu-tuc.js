@@ -69,7 +69,7 @@ TT.man = TT.man || {};
           ${ds.map(t => `<tr class="co-the-chon" data-href="#/thu-tuc/${t.ma}">
             <td class="ma" data-nhan="Mã">${t.ma}</td>
             <td data-nhan="Thủ tục"><a class="ten-tt" href="#/thu-tuc/${t.ma}">${tu.length ? ti.toSang(t.ten, tu) : e(t.ten)}</a>
-              <div class="phu">Phụ lục ${t.phuLuc} · ${e(t.cap)}${t.suyRa.coNghiaVuTaiChinh ? ` · <span class="nhan nhan-lam" style="padding:0 7px">Có NVTC</span>` : ""}${!t.khopTen ? ` · <span class="nhan nhan-vang" style="padding:0 7px" title="Tên ở danh mục khác tên ở nội dung chi tiết">Tên A/B khác nhau</span>` : ""}</div>
+              <div class="phu">Phụ lục ${t.phuLuc} · ${e(t.cap)}${t.maQuocGia && t.maQuocGia.mucDo === "khop" ? ` · Mã TTHC ${e(t.maQuocGia.ma)}` : ""}${t.suyRa.coNghiaVuTaiChinh ? ` · <span class="nhan nhan-lam" style="padding:0 7px">Có NVTC</span>` : ""}${!t.khopTen ? ` · <span class="nhan nhan-vang" style="padding:0 7px" title="Tên ở danh mục khác tên ở nội dung chi tiết">Tên A/B khác nhau</span>` : ""}</div>
               ${t._kq && t._kq.trich ? `<div class="phu" style="margin-top:4px">${e(t._kq.truongTrich)}: ${ti.toSang(t._kq.trich, tu)}</div>` : ""}</td>
             <td data-nhan="Thời hạn">${hanNgan(t)}</td>
             <td data-nhan="Có thẩm quyền" class="chu-nho">${coQuanVaiTro(t, "tham-quyen").map(id => e(tp.tenCoQuan(id))).join("<br>") || '<span class="mo">Xem mục (5)</span>'}</td>
@@ -95,8 +95,8 @@ TT.man = TT.man || {};
         let hen; f.q.addEventListener("input", () => { clearTimeout(hen); hen = setTimeout(() => { apDung(); setTimeout(() => { const o = document.querySelector("#loc input[name=q]"); if (o) { o.focus(); o.setSelectionRange(o.value.length, o.value.length); } }, 0); }, 450); });
         root.querySelectorAll("tr[data-href]").forEach(tr => tr.addEventListener("click", ev => { if (!ev.target.closest("a")) location.hash = tr.getAttribute("data-href"); }));
         root.querySelector("#xuat-csv").addEventListener("click", () => tp.xuatCsv("danh-muc-thu-tuc.csv",
-          ["Mã", "Phụ lục", "Cấp giải quyết", "Tên thủ tục (danh mục)", "Tên tại nội dung chi tiết", "Thời hạn - số (nêu đầu tiên, chỉ mục)", "Thời hạn - đơn vị", "Cơ quan có thẩm quyền (chỉ mục)", "Mẫu Phụ lục V", "Số lượng hồ sơ", "Trang PDF", "Thời hạn giải quyết (nguyên văn)"],
-          ds.map(t => [t.ma, t.phuLuc, t.cap, t.ten, t.tenNoiDung, t.suyRa.thoiHan ? t.suyRa.thoiHan.ngay : "", t.suyRa.thoiHan ? t.suyRa.thoiHan.donVi : "", coQuanVaiTro(t, "tham-quyen").map(tp.tenCoQuan).join("; "), t.suyRa.mau.map(k => mh.mauTheoKhoa[k].kyHieu).join(", "), t.suyRa.soLuongHoSo || "", `${t.trangDau}-${t.trangCuoi}`, t.muc[3] ? t.muc[3].noiDung : ""])));
+          ["Mã", "Mã TTHC quốc gia", "Phụ lục", "Cấp giải quyết", "Tên thủ tục (danh mục)", "Tên tại nội dung chi tiết", "Thời hạn - số (nêu đầu tiên, chỉ mục)", "Thời hạn - đơn vị", "Cơ quan có thẩm quyền (chỉ mục)", "Mẫu Phụ lục V", "Số lượng hồ sơ", "Trang PDF", "Thời hạn giải quyết (nguyên văn)"],
+          ds.map(t => [t.ma, t.maQuocGia ? t.maQuocGia.ma + (t.maQuocGia.mucDo === "goi-y" ? " (gợi ý, cần xác minh)" : "") : "", t.phuLuc, t.cap, t.ten, t.tenNoiDung, t.suyRa.thoiHan ? t.suyRa.thoiHan.ngay : "", t.suyRa.thoiHan ? t.suyRa.thoiHan.donVi : "", coQuanVaiTro(t, "tham-quyen").map(tp.tenCoQuan).join("; "), t.suyRa.mau.map(k => mh.mauTheoKhoa[k].kyHieu).join(", "), t.suyRa.soLuongHoSo || "", `${t.trangDau}-${t.trangCuoi}`, t.muc[3] ? t.muc[3].noiDung : ""])));
       }
     };
   };
@@ -141,7 +141,7 @@ TT.man = TT.man || {};
 
     let than = "";
     if (tab === "") {
-      than = `<div class="luoi luoi-chinh"><div>${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(so => theMuc(mh, t, so, { toSang: tu, sau: so === 3 ? hopQuyTacThoiHan(mh) : "" })).join("")}</div>
+      than = `<div class="luoi luoi-chinh"><div>${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(so => theMuc(mh, t, so, { toSang: tu, sau: so === 3 ? hopQuyTacThoiHan(mh) : so === 7 ? hopPhi(mh, t) : "" })).join("")}</div>
         <aside class="muc-luc khong-in"><div class="the"><div class="the-dau"><h3>Mục lục thủ tục</h3></div><nav class="the-than" style="padding:8px">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(so => `<a href="#/thu-tuc/${t.ma}/${so}"><b>(${so})</b>${e(mh.TEN_MUC[so])}</a>`).join("")}</nav></div>
           ${hopNVTC(mh, t)}</aside></div>`;
     } else if (tab === "trinh-tu") {
@@ -211,13 +211,14 @@ TT.man = TT.man || {};
           <a class="nut nut-chinh" href="#/phieu/${t.ma}">${bt("kiem", 15)} Phiếu hướng dẫn hồ sơ</a>
           <a class="nut" href="#/tinh-han?ma=${t.ma}">${bt("dongHo", 15)} Tính ngày hẹn trả</a>
           ${dvc.congQuocGia ? `<a class="nut" href="${e(dvc.congQuocGia)}" target="_blank" rel="noopener" title="${e(dvc.ghiChu || "")}">${bt("ngoai", 15)} Nộp trực tuyến (Cổng DVC)</a>` : ""}
-          ${dvc.maQuocGia && dvc.maQuocGia[t.ma] ? `<span class="nhan nhan-xam">Mã TTHC quốc gia: ${e(dvc.maQuocGia[t.ma])}</span>` : ""}
+          ${t.maQuocGia ? `<span class="ma-qg ${t.maQuocGia.mucDo}" title="${e(t.maQuocGia.ghiChu || dvc.nguonMa || "")}">Mã TTHC: <b>${e(t.maQuocGia.ma)}</b>${t.maQuocGia.mucDo === "goi-y" ? ` <span class="nhan nhan-vang">gợi ý — cần xác minh</span>` : ""}<button type="button" class="nut-xoa" data-chep="${e(t.maQuocGia.ma)}" aria-label="Sao chép mã ${e(t.maQuocGia.ma)}" title="Sao chép mã">${bt("tep", 13)}</button></span>` : `<span class="nhan nhan-xam" title="${e(dvc.nguonMa || "")}">Chưa có mã TTHC trong danh mục công bố</span>`}
         </div>
         <div class="chu-nho mo">${tp.dauNguon.pm()} Ô tóm tắt rút từ nguyên văn để đọc nhanh; nội dung pháp lý là phần nguyên văn bên dưới.</div>
       </div>
       <nav class="tab khong-in" aria-label="Nhóm thông tin">${TAB.map(x => `<a href="#/thu-tuc/${t.ma}${x.id ? "/" + x.id : ""}" class="${x.id === tab ? "chon" : ""}" ${x.id === tab ? 'aria-current="page"' : ""}>${e(x.ten)}</a>`).join("")}</nav>
       ${than}</div>`;
-    return { tieuDe: `${t.ma} ${t.ten}`, html, cuonDen: soMuc ? "#muc-" + soMuc : null, giuCuon: true };
+    return { tieuDe: `${t.ma} ${t.ten}`, html, cuonDen: soMuc ? "#muc-" + soMuc : null, giuCuon: true,
+      sau(root) { const c = root.querySelector("[data-chep]"); if (c) c.addEventListener("click", () => { const v = c.getAttribute("data-chep"); (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => { c.title = "Đã sao chép"; c.classList.add("da-chep"); }, () => { }); }); } };
   }
 
   function noiDungQuyTac(mh) {
@@ -227,6 +228,31 @@ TT.man = TT.man || {};
   function hopQuyTacThoiHan(mh) {
     return `<details class="khong-in" style="margin-top:10px"><summary class="chu-nho" style="cursor:pointer;font-weight:600">Cách tính thời hạn chung (Điều 8, Điều 6, Điều 7 Quy định)</summary><div style="margin-top:10px">${noiDungQuyTac(mh)}</div></details>`;
   }
+  // Mức phí, lệ phí tại tỉnh (Nghị quyết HĐND) gắn với thủ tục — mục (7) của Quyết định chỉ dẫn chiếu Luật Phí và lệ phí
+  function hopPhi(mh, t) {
+    const P = mh.P; if (!P) return "";
+    const loai = P.theoThuTuc[t.ma], td = P.thamDinh, lp = P.lePhi;
+    const vnd = v => v.toLocaleString("vi-VN");
+    const phiDM = t.maQuocGia && t.maQuocGia.phiDanhMuc;
+    if (loai === "khong") return `<div class="hop-phi">${tp.dauNguon.pm()} <b>Mức thu tại tỉnh Sơn La:</b> danh mục TTHC công bố ghi “${e(phiDM || "Không quy định")}”. Đối chiếu ${e(P.vanBan.ten)} nếu hồ sơ phát sinh cấp, chỉnh lý Giấy chứng nhận. <a href="#/phi-le-phi">Xem phí, lệ phí đất đai</a></div>`;
+    const bd = loai === "bien-dong", ld = loai === "lan-dau" || loai === "ca-hai";
+    const dongLP = (bang, ids) => bang.filter(x => ids.includes(x.id)).map(x => `<tr><td>${e(x.noiDung)}</td><td class="so">${vnd(x.mucThu)}</td><td class="chu-nho">${e(x.donVi)}</td></tr>`).join("");
+    const idsLP = loai === "trich-luc" ? ["trich-luc"] : [...(ld ? ["lan-dau", "qsdd-lan-dau"] : []), ...(bd || loai === "ca-hai" ? ["cap-moi-bien-dong", "qsdd-cap-moi-bien-dong", "chung-nhan-bien-dong"] : []), "trich-luc"];
+    return `<details class="hop-phi" open><summary><b>Mức thu tại tỉnh Sơn La</b> — ${e(P.vanBan.ten)} ngày ${e(P.vanBan.ngay)} (hiệu lực ${e(P.vanBan.hieuLuc)}) ${tp.dauNguon.nv()}</summary>
+      ${loai !== "trich-luc" ? `<div class="chu-nho" style="margin:8px 0 4px"><b>${e(td.ten)}</b> (${e(td.viTri)})${bd ? ` — hồ sơ cấp lại, cấp đổi, đăng ký biến động: <b>bằng ${td.tyLeBienDong}%</b> mức cấp lần đầu dưới đây` : ""}</div>
+      <table class="bang bang-gon"><tbody>
+        <tr><td>Cá nhân — sử dụng đất làm nhà ở</td><td class="so">${vnd(td.caNhanLanDau["nha-o"]["do-thi"])} (đô thị) · ${vnd(td.caNhanLanDau["nha-o"]["nong-thon"])} (nông thôn)</td><td class="chu-nho">Bộ hồ sơ</td></tr>
+        <tr><td>Cá nhân — sử dụng đất kinh doanh</td><td class="so">${vnd(td.caNhanLanDau["kinh-doanh"]["do-thi"])} (đô thị) · ${vnd(td.caNhanLanDau["kinh-doanh"]["nong-thon"])} (nông thôn)</td><td class="chu-nho">Bộ hồ sơ</td></tr>
+        <tr><td>Tổ chức — theo quy mô diện tích dự án</td><td class="so">${vnd(td.toChucLanDau[0][2])} – ${vnd(td.toChucLanDau[td.toChucLanDau.length - 1][2])}</td><td class="chu-nho">Bộ hồ sơ</td></tr></tbody></table>` : ""}
+      <div class="chu-nho" style="margin:10px 0 4px"><b>${e(lp.ten)}</b> (${e(lp.viTri)}) — cá nhân tại phường; <b>cá nhân tại xã bằng ${lp.tyLeCaNhanXa}%</b></div>
+      <table class="bang bang-gon"><tbody>${dongLP(lp.caNhanPhuong, idsLP)}</tbody></table>
+      <div class="chu-nho" style="margin:10px 0 4px"><b>Tổ chức</b></div><table class="bang bang-gon"><tbody>${dongLP(lp.toChuc, idsLP)}</tbody></table>
+      <div class="chu-nho mo" style="margin-top:8px">${tp.dauNguon.pm()} Khoản thu gợi ý theo loại hồ sơ (${e({ "lan-dau": "cấp lần đầu", "bien-dong": "cấp lại, cấp đổi, đăng ký biến động", "ca-hai": "cấp lần đầu hoặc biến động tùy trường hợp", "trich-luc": "chỉ phát sinh lệ phí trích lục" }[loai] || "chưa phân loại")}). Có các trường hợp miễn nộp — <a href="#/phi-le-phi">xem đầy đủ</a>.
+        <a class="nut nut-nho khong-in" href="#/nghia-vu?phi=${t.ma}">${bt("dongHo", 13)} Tính phí, lệ phí cho hồ sơ</a></div>
+      ${phiDM ? `<details class="chu-nho" style="margin-top:8px"><summary>Mức thu ghi tại danh mục TTHC công bố 21/8/2025 <span class="nhan nhan-do">theo Nghị quyết 135/2020 — đã hết hiệu lực</span></summary><div class="mo" style="white-space:pre-line;margin-top:6px">${e(phiDM)}</div></details>` : ""}
+    </details>`;
+  }
+
   function hopNVTC(mh, t) {
     if (!t.suyRa.coNghiaVuTaiChinh) return "";
     return `<div class="the"><div class="the-dau"><h3>Luân chuyển hồ sơ NVTC</h3><div class="phai">${tp.dauNguon.pm()}</div></div><div class="the-than chu-nho">
@@ -246,7 +272,7 @@ TT.man = TT.man || {};
       </tbody></table><p class="chu-nho mo">Tình trạng hiệu lực: <b>${e(mh.hieuLuc.nhan.toLowerCase())}</b>. ${e(mh.hieuLuc.ghiChu)}${mh.daDoiChieuBanKy ? "" : " Tệp PDF nguồn chưa ghi số, ngày ban hành (VD01)."}</p></div></div>
       <div class="the"><div class="the-dau"><h3>Quy định chung áp dụng cho mọi thủ tục</h3></div><div class="the-than" style="display:grid;gap:6px">${chung.map(([d, ten]) => `<div class="tang">${tp.chipCanCu({ dieu: d }, "Điều " + d)} <span>${e(ten)}</span></div>`).join("")}</div></div></div>
       <div class="the"><div class="the-dau"><h3>Văn bản được viện dẫn trong nội dung thủ tục</h3><div class="phai">${tp.dauNguon.pm()}</div></div><div class="the-than">
-        <p class="chu-nho mo" style="margin-top:0">Liệt kê tự động các văn bản có tên trong 9 mục của thủ tục. Hiệu lực của các văn bản này <b>chưa được phần mềm xác minh</b>; tài liệu nguồn không kèm toàn văn.</p>
-        ${vd.length ? `<ul style="margin:0;padding-left:18px">${vd.map(v => `<li><a href="#/can-cu?vb=${encodeURIComponent(v.ten)}">${e(v.ten)}</a></li>`).join("")}</ul>` : `<p class="mo">Không có văn bản khác được nêu tên.</p>`}</div></div></div>`;
+        <p class="chu-nho mo" style="margin-top:0">Liệt kê tự động các văn bản có tên trong 9 mục của thủ tục. Hiệu lực lấy từ phần căn cứ ban hành và Điều 2 Quyết định; tài liệu nguồn không kèm toàn văn các văn bản này.</p>
+        ${vd.length ? `<ul style="margin:0;padding-left:18px;display:grid;gap:4px">${vd.map(v => `<li><a href="#/can-cu?vb=${encodeURIComponent(v.ten)}">${e(v.ten)}</a> ${TT.nhanHieuLucVB ? TT.nhanHieuLucVB(v.hieuLuc) : ""}</li>`).join("")}</ul>` : `<p class="mo">Không có văn bản khác được nêu tên.</p>`}</div></div></div>`;
   }
 })();

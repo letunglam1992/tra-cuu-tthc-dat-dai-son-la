@@ -19,7 +19,7 @@ TT.taoTimKiem = function (mh) {
   };
 
   for (const t of mh.thuTuc) {
-    const f = [truong("Tên thủ tục", t.ten, 10), truong("Mã", "Thủ tục " + t.ma, 8)];
+    const f = [truong("Tên thủ tục", t.ten, 10), truong("Mã", "Thủ tục " + t.ma + (t.maQuocGia && t.maQuocGia.mucDo === "khop" ? " Mã TTHC " + t.maQuocGia.ma : ""), 8)];
     if (!t.khopTen) f.push(truong("Tên tại nội dung", t.tenNoiDung, 6));
     for (const k of [1, 2, 3, 4, 5, 6, 7, 8, 9]) if (t.muc[k]) f.push(truong(mh.TEN_MUC[k], t.muc[k].noiDung, k === 4 || k === 5 || k === 8 ? 2 : 1, `#/thu-tuc/${t.ma}/${k}`));
     tl.push({ loai: "thu-tuc", nhom: "Thủ tục hành chính", id: t.ma, ma: t.ma, tieuDe: t.ten, phu: `Thủ tục ${t.ma} · Phụ lục ${t.phuLuc} · ${t.cap}`, lienKet: "#/thu-tuc/" + t.ma, truong: f });
@@ -37,6 +37,11 @@ TT.taoTimKiem = function (mh) {
   for (const d of mh.dieuQD) tl.push({ loai: "dieu", nhom: "Căn cứ pháp lý", id: "qd-" + d.so, tieuDe: `Điều ${d.so} Quyết định. ${d.tieuDe}`, phu: `Quyết định · trang ${d.trangDau}`, lienKet: "#/can-cu/qd-" + d.so, truong: [truong("Tiêu đề", `Điều ${d.so} ${d.tieuDe}`, 8), truong("Nội dung", d.noiDung, 1)] });
   for (const d of mh.dieu) tl.push({ loai: "dieu", nhom: "Căn cứ pháp lý", id: "dieu-" + d.so, ma: "dieu " + d.so, tieuDe: `Điều ${d.so}. ${d.tieuDe}`, phu: `${d.chuong} · trang ${d.trangDau}`, lienKet: "#/can-cu/dieu-" + d.so, truong: [truong("Tiêu đề", `Điều ${d.so} ${d.tieuDe}`, 8), truong("Nội dung", d.noiDung, 1)] });
   for (const m of mh.phuLucIV) tl.push({ loai: "pl4", nhom: "Thu hồi đất, bồi thường, hỗ trợ, tái định cư (Phụ lục IV)", id: m.so, tieuDe: `${m.so}. ${m.tieuDe}`, phu: `Phụ lục IV · trang ${m.trangDau}–${m.trangCuoi}`, lienKet: "#/thu-hoi/" + m.so, truong: [truong("Tiêu đề", m.tieuDe, 8), ...m.khoan.map(k => truong("Khoản " + k.so, k.noiDung, 1, `#/thu-hoi/${m.so}/${k.so}`))] });
+  // Phí, lệ phí (Nghị quyết HĐND tỉnh)
+  if (mh.P) for (const k of [mh.P.thamDinh, mh.P.lePhi, ...mh.P.khac]) {
+    const noi = [k.mienNop].concat(k.toChucLanDau ? k.toChucLanDau.map(x => x[3] + " " + x[2]) : [], k.caNhanPhuong ? k.caNhanPhuong.map(x => x.noiDung + " " + x.mucThu) : [], k.bang ? k.bang.map(x => x.join(" ")) : []).flat().join("\n");
+    tl.push({ loai: "phi", nhom: "Phí, lệ phí", id: k.id || k.viTri, tieuDe: k.ten, phu: `${mh.P.vanBan.ten} · ${k.viTri}`, lienKet: "#/phi-le-phi", truong: [truong("Tên khoản thu", k.ten + " phí lệ phí", 10), truong("Nội dung", noi, 1)] });
+  }
   for (const c of mh.coQuan) if (mh.chiMucCoQuan[c.id]) tl.push({ loai: "co-quan", nhom: "Cơ quan, chủ thể", id: c.id, tieuDe: c.ten, phu: c.nhom, lienKet: "#/co-quan/" + c.id, truong: [truong("Tên", c.ten, 10)] });
   for (const v of Object.values(mh.vanBanDanChieu)) tl.push({ loai: "van-ban", nhom: "Văn bản được viện dẫn", id: v.ten, tieuDe: v.ten, phu: `Được viện dẫn tại ${v.viTri.length} vị trí`, lienKet: "#/can-cu?vb=" + encodeURIComponent(v.ten), truong: [truong("Tên văn bản", v.ten, 10)] });
 
@@ -121,6 +126,8 @@ TT.taoTimKiem = function (mh) {
     // Mã thủ tục (I.1, II.13, III.3) và mẫu ("mẫu 19", "mẫu số 04a")
     const ma = [];
     du = du.replace(/(^|\s)(i{1,3})\.(\d{1,2})(?=\s|$)/g, (_, s, pl, so) => { ma.push(pl.toUpperCase() + "." + so); return " "; });
+    // Mã TTHC quốc gia dạng 1.012784
+    du = du.replace(/(^|\s)([12]\.0\d{5})(?=\s|$)/g, (_, s, m) => { for (const t of mh.thuTuc) if (t.maQuocGia && t.maQuocGia.mucDo === "khop" && t.maQuocGia.ma === m) ma.push(t.ma); if (!ma.length) ma.push("khong-co"); return " "; });
     du = du.replace(/(^|\s)mẫu(?:\s+số)?\s+(\d{1,2}[a-zđ]?)(?=\s|$)/gi, (_, s, k) => { ma.push("mau " + ti.chuanKyHieu(k)); return " "; });
     du = du.replace(/(^|\s)mau(?:\s+so)?\s+(\d{1,2}[a-z]?)(?=\s|$)/gi, (_, s, k) => { ma.push("mau " + ti.chuanKyHieu(k)); return " "; });
     du = du.replace(/[,;:!?()[\]]/g, " ").replace(/\s+/g, " ").trim();
@@ -246,5 +253,32 @@ TT.taoTimKiem = function (mh) {
     return { tu: [ti.coDau(q) ? null : p.chuan, ...tu].filter(Boolean), ketQua, giaiThich: { ...p.giaiThich, noiDau }, goiY: goiY.slice(0, 3) };
   }
 
-  return { tim, tachTuKhoa, soTaiLieu: tl.length };
+  // Tìm ngữ cảnh cho hỏi đáp: câu hỏi tự nhiên, bỏ hư từ, không bắt buộc đủ mọi từ (≥ 50% nhóm từ khóa).
+  // Trả về đoạn trích theo trường khớp tốt nhất của mỗi tài liệu — để gửi kèm câu hỏi cho mô hình ngôn ngữ.
+  const HU_TU = new Set("thi la va cua cho voi cac nhung mot nay do khi nao gi bao nhieu co khong duoc phai can lam the nhu ra sao o tai tu den hay hoac neu ve trong theo de ma toi minh em anh chi ong ba ban xin hoi a a cung da se dang bi boi".split(" "));
+  function timNguCanh(q, soLuong) {
+    const p = tachTuKhoa(q);
+    const nhom = p.nhom.filter(g => g.cum || g.pa.some(t => t.re) || !g.pa.every(t => !t.dau && HU_TU.has(t.c)) && !(g.pa.length === 1 && HU_TU.has(ti.chuanHoa(g.pa[0].c))));
+    if (!nhom.length && !p.ma.length) return [];
+    const N = tl.length, cache = new Map();
+    const idf = term => { const k = (term.dau ? "1" : "0") + term.c; if (!cache.has(k)) { let df = 0; for (const d of tl) if (d.truong.some(f => demKhop(f, term))) df++; cache.set(k, Math.log(1 + (N - df + 0.5) / (df + 0.5))); } return cache.get(k); };
+    const can = Math.max(1, Math.ceil(nhom.length * 0.5)), kq = [];
+    for (const d of tl) {
+      let diem = 0, khop = 0; const diemTruong = new Map();
+      for (const g of nhom) {
+        let tot = 0;
+        for (const term of g.pa) for (const f of d.truong) { const tf = demKhop(f, term); if (!tf) continue; const v = f.trongSo * idf(term) * tf / (tf + 1); tot = Math.max(tot, v); diemTruong.set(f, (diemTruong.get(f) || 0) + v); }
+        if (tot) { khop++; diem += tot; }
+      }
+      if (p.ma.length && d.ma && p.ma.includes(d.ma)) { diem += 100; khop = nhom.length; }
+      if (khop < can || !diem) continue;
+      const fTot = [...diemTruong].filter(([f]) => f.trongSo < 8).sort((a, b) => b[1] - a[1])[0];
+      const tu = nhom.flatMap(g => g.pa.map(t => t.re ? t.c.split(" ")[0] : t.dau ? t : t.c));
+      kq.push({ id: d.id, loai: d.loai, nhom: d.nhom, tieuDe: d.tieuDe, phu: d.phu, lienKet: (fTot && fTot[0].lienKet) || d.lienKet, truong: fTot ? fTot[0].ten : null,
+        noiDung: fTot ? ti.trichDoan(fTot[0].goc, tu, 700) : d.truong.map(f => f.goc).join(" ").slice(0, 1400), diem: diem * (khop / nhom.length) });
+    }
+    return kq.sort((a, b) => b.diem - a.diem).slice(0, soLuong || 8);
+  }
+
+  return { tim, tachTuKhoa, timNguCanh, soTaiLieu: tl.length };
 };

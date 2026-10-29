@@ -1,5 +1,25 @@
 # Nhật ký thay đổi
 
+## 2.1.0 — 29/10/2026
+
+### Dữ liệu pháp lý
+- **Mã TTHC quốc gia** theo danh mục TTHC lĩnh vực đất đai công bố (tệp ngày 21/8/2025): 39 thủ tục khớp (2 cặp dùng chung mã: I.9/III.17, I.10/III.21), 3 mã gợi ý cần xác minh (I.6, III.5, II.8), 4 thủ tục chưa có mã. Hiển thị tại trang thủ tục (nút sao chép), danh mục, phiếu hướng dẫn; tìm được theo mã (vd. 1.012784); tab đối soát “Mã TTHC”.
+- **Tình trạng hiệu lực văn bản viện dẫn** lấy từ phần căn cứ ban hành Quyết định (33 văn bản có hiệu lực tại 22/10/2026, kèm văn bản sửa đổi, bổ sung), khoản 2 Điều 2 (Quyết định 45/2021 hết hiệu lực; Quyết định 106/2025 hết hiệu lực một phần) và căn cứ Nghị quyết 155/2025 (Luật Phí và lệ phí). Văn bản không có nguồn xác minh giữ “chưa xác minh”. Phát hiện ký hiệu “Nghị quyết số 254/2025/NQ-QH” không thống nhất.
+- **Phí, lệ phí đất đai** theo Nghị quyết số 155/2025/NQ-HĐND ngày 29/12/2025 (hiệu lực 08/01/2026): phí thẩm định hồ sơ cấp GCN, lệ phí cấp GCN, phí khai thác tài liệu đất đai, phí giao dịch bảo đảm — hiển thị tại mục (7) từng thủ tục và trang “Phí, lệ phí”. Ghi nhận cột phí của danh mục công bố tính theo Nghị quyết 135/2020 (đã hết hiệu lực) và lỗi “28.000.000 đồng” ở mã 1.013947.
+
+### Công cụ mới
+- **Ước tính nghĩa vụ tài chính** (tham khảo): tiền sử dụng đất (giao đất, chuyển mục đích), tiền thuê đất (hằng năm, một lần), lệ phí trước bạ, thuế TNCN; phí thẩm định và lệ phí cấp GCN theo Nghị quyết 155/2025; công thức, căn cứ, số tiền bằng chữ; nhập bảng giá đất từ Excel/CSV và tra giá.
+- **Điền mẫu đơn → Word**: 45 mẫu Phụ lục V, ô điền nhận diện từ dòng chấm, bản nháp lưu trên máy, tệp Word đã điền.
+- **Báo cáo tổng hợp TTHC**: theo cấp, theo cơ quan có thẩm quyền, danh mục chi tiết (thời hạn, mã TTHC, NVTC); xuất Word đúng thể thức (phần đầu hai cột, nơi nhận, chữ ký) và CSV.
+- **Sổ theo dõi hạn hồ sơ** (dùng cá nhân): tính hạn trả, cảnh báo sắp đến hạn/quá hạn, xuất Excel (.xlsx), sao lưu/khôi phục JSON; dữ liệu chỉ lưu trên máy.
+- **Hỏi đáp (trợ lý AI)**: tìm đoạn nguyên văn liên quan ngay trên máy; Cloudflare Worker trung gian (`tro-ly-ai/`) gọi Google Gemini, dự phòng Cloudflare Workers AI; câu trả lời chỉ dựa trên đoạn trích, dẫn nguồn [n]. Khóa API nằm ở máy chủ.
+
+### Vận hành
+- Xác minh GitHub Actions chạy đạt; xóa nhánh `nang-cap-v2`.
+- Gắn Vercel Web Analytics (ẩn danh, chỉ nạp trên Vercel; bật tại bảng điều khiển dự án).
+- `cong-cu/cap-nhat-du-lieu.js`: cập nhật dữ liệu từ PDF trên mọi hệ điều hành (`npm run cap-nhat-du-lieu`).
+- Kiểm thử: 54 kiểm thử dòng lệnh (gồm Worker giả lập), 82 kiểm thử giao diện.
+
 ## 2.0.0 — 29/10/2026
 
 ### Văn bản nguồn, hiệu lực

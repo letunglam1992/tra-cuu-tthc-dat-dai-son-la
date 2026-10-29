@@ -109,7 +109,7 @@ TT.man = TT.man || {};
       <article class="phieu">
         <header class="phieu-dau"><div><div class="phieu-to-chuc">Tỉnh Sơn La · Thủ tục hành chính về đất đai</div>
           <h1>PHIẾU HƯỚNG DẪN CHUẨN BỊ HỒ SƠ</h1>
-          <div class="phieu-ten"><b>${t.ma}</b> — ${e(t.ten)}</div></div>
+          <div class="phieu-ten"><b>${t.ma}</b> — ${e(t.ten)}${t.maQuocGia && t.maQuocGia.mucDo === "khop" ? `<div class="phieu-ma">Mã TTHC trên Cổng Dịch vụ công: <b>${e(t.maQuocGia.ma)}</b></div>` : ""}</div></div>
           <div class="phieu-qr" aria-label="Mã QR tới trang thủ tục">${maQR(lk, 3)}<div>Quét để xem toàn văn</div></div></header>
         <table class="phieu-bang"><tbody>
           <tr><th>Thời hạn giải quyết</th><td>${h ? `<b>${e(mh.hienThiHan(h))}</b> kể từ ngày nhận đủ hồ sơ hợp lệ${h.nhieuTruongHop ? " (có nhiều trường hợp — xem mục 3)" : ""}${kv3 ? `; xã khu vực III cộng thêm ${kv3.ngay} ${e(kv3.donVi)}` : ""}` : "Xem mục (3) của thủ tục"}</td></tr>

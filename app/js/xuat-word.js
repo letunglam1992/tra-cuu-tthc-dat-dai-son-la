@@ -36,10 +36,30 @@ TT.word = (function () {
     return `<w:p><w:pPr>${pPr.join("")}</w:pPr>${chay}</w:p>`;
   }
 
+  // Bảng: { bang: { cot: [độ rộng twips…], dong: [[ô…]…], dau: số dòng tiêu đề, vien: true|false } }; ô là chuỗi hoặc { text, dam, can, co, nghieng, gop (số cột gộp) } hoặc mảng đoạn
+  function bangXml(b) {
+    const vien = b.vien === false ? "none" : "single";
+    const bd = `<w:tblBorders>${["top", "left", "bottom", "right", "insideH", "insideV"].map(k => `<w:${k} w:val="${vien}" w:sz="4" w:space="0" w:color="000000"/>`).join("")}</w:tblBorders>`;
+    const tong = b.cot.reduce((x, y) => x + y, 0);
+    const dong = b.dong.map((r, i) => {
+      const laDau = i < (b.dau || 0);
+      let cot = 0; // vị trí cột thực (tính cả ô gộp)
+      return `<w:tr>${laDau ? "<w:trPr><w:tblHeader/></w:trPr>" : ""}${r.map(o => {
+        const ds = Array.isArray(o) ? o : [o];
+        const gop = (ds[0] && ds[0].gop) || 1, rong = b.cot.slice(cot, cot + gop).reduce((x, y) => x + y, 0) || 1000; cot += gop;
+        const ps = ds.map(x => doan(typeof x === "string" ? { text: x, co: b.co || 12, sau: 0, dam: laDau, can: laDau ? "giua" : undefined } : { co: b.co || 12, sau: 0, ...x, dam: x.dam != null ? x.dam : laDau })).join("");
+        return `<w:tc><w:tcPr><w:tcW w:w="${rong}" w:type="dxa"/>${gop > 1 ? `<w:gridSpan w:val="${gop}"/>` : ""}<w:tcMar><w:top w:w="40" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/></w:tcMar></w:tcPr>${ps}</w:tc>`;
+      }).join("")}</w:tr>`;
+    }).join("");
+    return `<w:tbl><w:tblPr><w:tblW w:w="${tong}" w:type="dxa"/><w:jc w:val="center"/>${bd}<w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${b.cot.map(w => `<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>${dong}</w:tbl><w:p><w:pPr><w:spacing w:after="0"/></w:pPr></w:p>`;
+  }
+
   function taoDocx(khoi, thuocTinh) {
-    const than = khoi.map(doan).join("");
+    thuocTinh = thuocTinh || {};
+    const than = khoi.map(k => k.bang ? bangXml(k.bang) : doan(k)).join("");
+    const ngang = !!thuocTinh.ngang;
     const document = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${than}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1701" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${than}<w:sectPr>${ngang ? '<w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>' : '<w:pgSz w:w="11906" w:h="16838"/>'}<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1701" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr></w:body></w:document>`;
     const tep = [
       { ten: "[Content_Types].xml", noiDung: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>` },
       { ten: "_rels/.rels", noiDung: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>` },
@@ -92,8 +112,28 @@ TT.word = (function () {
     return { quocHieu, doan, chuThich };
   }
 
-  // Dựng nội dung Word cho một mẫu biểu Phụ lục V
-  function khoiMau(m, vb) {
+  // ---------- Ô điền trong mẫu: các dòng chấm (……, ....., ____) ----------
+  // Chấm ngắn (2–3 dấu) chỉ là ô khi đứng tách riêng (vd. "ngày ... tháng"), không phải "email..."
+  const reO = /(?:[.…_]{4,}|…+[.…_]*|(?:^|(?<=[\s,(/]))\.{2,3}(?=[\s,)/]|$))/g;
+  const laDongNgay = t => /ngày\s*[.…]+\s*tháng/.test(t) && t.length < 80;
+  // Chuẩn hóa đoạn trước khi tách ô — dùng chung cho màn hình điền và xuất Word
+  const chuanDoanMau = t => laDongNgay(t) && /^[.…]/.test(t) ? t.replace(/^[.…\s]*,?\s*/, "……, ") : t;
+  function tachO(text) {
+    const phan = []; let p = 0, m; reO.lastIndex = 0;
+    while ((m = reO.exec(text))) { if (m.index > p) phan.push({ t: text.slice(p, m.index) }); phan.push({ o: true, goc: m[0] }); p = m.index + m[0].length; }
+    if (p < text.length) phan.push({ t: text.slice(p) });
+    return phan;
+  }
+  // Danh sách đoạn kèm ô điền, theo đúng thứ tự dùng khi xuất Word (để giá trị điền khớp vị trí)
+  function oDienMau(m) {
+    const { doan } = dungDoan(m.noiDung); let i = 0;
+    return doan.map(d => ({ phan: tachO(chuanDoanMau(d.text)).map(x => x.o ? { ...x, i: i++ } : x), laHoa: laHoa(d.text), ngay: laDongNgay(d.text) }));
+  }
+  const dienO = (text, bd) => !bd ? text : text.replace(reO, g => { const v = bd.gt[bd.i++]; return v != null && String(v).trim() ? String(v).trim() : g; });
+
+  // Dựng nội dung Word cho một mẫu biểu Phụ lục V; giaTri (tùy chọn): mảng giá trị điền vào các ô theo thứ tự oDienMau
+  function khoiMau(m, vb, giaTri) {
+    const bd = giaTri ? { gt: giaTri, i: 0 } : null;
     const khoi = [{ text: `Mẫu số ${m.kyHieu}. ${m.ten}`, can: "phai", nghieng: true, co: 11, sau: 6 }];
     const { quocHieu, doan, chuThich } = dungDoan(m.noiDung);
     if (quocHieu) {
@@ -102,8 +142,8 @@ TT.word = (function () {
       khoi.push({ text: "_______________________", can: "giua", sau: 8 });
     }
     for (const d of doan) {
-      const t = d.text, hoa = laHoa(t);
-      if (/ngày\s*[.…]+\s*tháng/.test(t) && t.length < 80) { khoi.push({ text: /^[.…]/.test(t) ? t.replace(/^[.…\s]*,?\s*/, "……, ") : t, can: "phai", nghieng: true, sau: 6 }); continue; }
+      const t = dienO(chuanDoanMau(d.text), bd), hoa = laHoa(d.text);
+      if (laDongNgay(d.text)) { khoi.push({ text: t, can: "phai", nghieng: true, sau: 6 }); continue; }
       const giua = hoa && t.length < 120 || /^\(Ban hành|^\(Kèm theo|^\(Ký/.test(t);
       khoi.push({ text: t, can: giua ? "giua" : "deu", dam: hoa && t.length < 120, nghieng: /^\(Ký/.test(t), thutLe: !giua && !/^(\d+(\.\d+)*\.|[-+•]|\(\d+\)|[a-zđ]\))/.test(t) && t.length > 90, truoc: hoa ? 6 : 0 });
     }
@@ -114,9 +154,9 @@ TT.word = (function () {
     khoi.push({ text: `Nguồn: Mẫu số ${m.kyHieu}, Phụ lục V ban hành kèm theo ${vb.loai} số ${vb.soKyHieu.giaTri} ngày ${vb.ngayBanHanh.giaTri} của ${vb.coQuanBanHanh} (trang ${m.trangDau}${m.trangCuoi !== m.trangDau ? "–" + m.trangCuoi : ""} tệp PDF). Nội dung được dựng lại tự động từ PDF (ghép dòng thành đoạn); bảng biểu, ô đánh dấu có thể khác bố cục gốc — đối chiếu mẫu gốc trước khi sử dụng.`, nghieng: true, co: 10, truoc: 12 });
     return khoi;
   }
-  function xuatMau(m, vb, tacGia) {
-    taiVe(taoDocx(khoiMau(m, vb), { tieuDe: `Mẫu số ${m.kyHieu}. ${m.ten}`, tacGia }), `Mau-so-${m.kyHieu}.docx`);
+  function xuatMau(m, vb, tacGia, giaTri) {
+    taiVe(taoDocx(khoiMau(m, vb, giaTri), { tieuDe: `Mẫu số ${m.kyHieu}. ${m.ten}`, tacGia }), `Mau-so-${m.kyHieu}${giaTri ? "-da-dien" : ""}.docx`);
   }
 
-  return { taoDocx, xuatMau, khoiMau, dungDoan, zip, crc32, taiVe };
+  return { taoDocx, xuatMau, khoiMau, dungDoan, oDienMau, tachO, zip, crc32, taiVe };
 })();

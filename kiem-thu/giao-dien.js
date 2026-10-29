@@ -29,7 +29,7 @@ const ghi = (ma, nhom, noiDung, mongDoi, thucTe, dat, ghiChu) => { kq.push({ ma,
     {
       const ctx = await b.newContext({ viewport: { width: 375, height: 812 }, serviceWorkers: "block", hasTouch: true, isMobile: true });
       const p = await ctx.newPage(); const loi = []; p.on("pageerror", e => loi.push(e.message));
-      const tuyen = ["#/tong-quan", "#/thu-tuc", "#/thu-tuc/III.3", "#/thu-tuc/I.1/ho-so", "#/quy-trinh/QT15", "#/thu-hoi", "#/mau-bieu", "#/mau-bieu/19", "#/co-quan", "#/can-cu", "#/tra-cuu?q=s%E1%BB%95%20%C4%91%E1%BB%8F", "#/tinh-han?ma=III.3", "#/phieu/III.3", "#/gioi-thieu", "#/doi-soat"];
+      const tuyen = ["#/tong-quan", "#/thu-tuc", "#/thu-tuc/III.3", "#/thu-tuc/I.1/ho-so", "#/quy-trinh/QT15", "#/thu-hoi", "#/mau-bieu", "#/mau-bieu/19", "#/co-quan", "#/can-cu", "#/tra-cuu?q=s%E1%BB%95%20%C4%91%E1%BB%8F", "#/tinh-han?ma=III.3", "#/phieu/III.3", "#/gioi-thieu", "#/doi-soat", "#/nghia-vu?phi=III.3", "#/phi-le-phi", "#/dien-mau", "#/dien-mau/22", "#/bao-cao", "#/so-theo-doi", "#/hoi-dap", "#/doi-soat?tab=ma-tthc"];
       const tran = [];
       await p.goto(GOC + "#/tong-quan"); await p.waitForSelector(".ben-muc");
       for (const h of tuyen) {
@@ -77,6 +77,41 @@ const ghi = (ma, nhom, noiDung, mongDoi, thucTe, dat, ghiChu) => { kq.push({ ma,
       const soTrang = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;
       ghi("GD-06", "In ấn", "Phiếu hướng dẫn hồ sơ III.3 in gọn, có mã QR", "≤ 2 trang A4, có QR", `${soTrang} trang; QR: ${qr}`, qr && soTrang >= 1 && soTrang <= 2);
       await p.close();
+    }
+    // 5. Công cụ v2.1: sổ theo dõi + Excel, điền mẫu + Word, báo cáo Word, hỏi đáp (Worker giả lập)
+    {
+      const ctx = await b.newContext({ acceptDownloads: true, serviceWorkers: "block" });
+      const p = await ctx.newPage(); const loi = []; p.on("pageerror", e => loi.push(e.message));
+      const zipTep = buf => { const ra = {}; let o = 0; while (buf.readUInt32LE(o) === 0x04034b50) { const co = buf.readUInt32LE(o + 18), dt = buf.readUInt16LE(o + 26); ra[buf.subarray(o + 30, o + 30 + dt).toString()] = buf.subarray(o + 30 + dt, o + 30 + dt + co).toString(); o += 30 + dt + co; } return ra; };
+      const taiVe = async (nut) => { const [d] = await Promise.all([p.waitForEvent("download"), p.click(nut)]); return { ten: d.suggestedFilename(), buf: fs.readFileSync(await d.path()) }; };
+      // Sổ theo dõi
+      await p.goto(GOC + "#/so-theo-doi"); await p.waitForSelector("#so-form");
+      await p.fill('#so-form [name="soHoSo"]', "HS-KT-01"); await p.selectOption('#so-form [name="ma"]', "III.3");
+      await p.fill('#so-form [name="ngayNhan"]', "2026-10-29"); await p.click('#so-form button.nut-chinh'); await p.waitForTimeout(300);
+      const dong = await p.textContent("tbody tr");
+      const x = await taiVe("#so-xlsx"); const zx = zipTep(x.buf);
+      ghi("GD-07", "Công cụ", "Sổ theo dõi: thêm hồ sơ III.3, tính hạn trả, xuất Excel", "Hạn 16/11/2026; tệp .xlsx có số hồ sơ", `${/16\/11\/2026/.test(dong) ? "hạn đúng" : "hạn sai: " + dong.replace(/\s+/g, " ").slice(0, 80)}; ${x.ten}; có HS-KT-01: ${(zx["xl/worksheets/sheet1.xml"] || "").includes("HS-KT-01")}`, /16\/11\/2026/.test(dong) && /\.xlsx$/.test(x.ten) && (zx["xl/worksheets/sheet1.xml"] || "").includes("HS-KT-01"));
+      // Điền mẫu
+      await p.goto(GOC + "#/dien-mau/22"); await p.waitForSelector(".o-dien");
+      await p.fill(".o-dien >> nth=0", "Văn phòng Đăng ký đất đai tỉnh Sơn La"); await p.fill(".o-dien >> nth=1", "Nguyễn Văn A");
+      const w = await taiVe("#tai-dien"); const dx = zipTep(w.buf)["word/document.xml"] || "";
+      ghi("GD-08", "Công cụ", "Điền Mẫu số 22 rồi tải Word: giá trị nằm trong tệp", "Tệp .docx chứa giá trị đã nhập", `${w.ten}; ${dx.includes("Nguyễn Văn A") ? "có giá trị" : "thiếu giá trị"}`, /da-dien\.docx$/.test(w.ten) && dx.includes("Nguyễn Văn A") && dx.includes("Văn phòng Đăng ký đất đai tỉnh Sơn La"));
+      // Báo cáo
+      await p.goto(GOC + "#/bao-cao"); await p.waitForSelector("#bc-word");
+      await p.fill('#bc-tt [name="so"]', "123");
+      const bc = await taiVe("#bc-word"); const bx = zipTep(bc.buf)["word/document.xml"] || "";
+      const soBang = (bx.match(/<w:tbl>/g) || []).length;
+      ghi("GD-09", "Công cụ", "Báo cáo tổng hợp TTHC xuất Word: phần đầu, bảng, nơi nhận", "Có quốc hiệu, số 123, ≥ 3 bảng, 45 dòng danh mục", `${bc.ten}; bảng: ${soBang}; số: ${bx.includes("Số: 123/")}; III.22: ${bx.includes("III.22")}`, soBang >= 4 && bx.includes("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM") && bx.includes("Số: 123/") && bx.includes("III.22") && bx.includes("Nơi nhận:"));
+      // Hỏi đáp: chưa cấu hình → vẫn hiện đoạn nguyên văn; có Worker (giả lập) → câu trả lời có dẫn nguồn
+      await p.goto(GOC + "#/hoi-dap?q=" + encodeURIComponent("Tách thửa đất mất bao nhiêu ngày làm việc?")); await p.waitForSelector(".hd-nguon li", { timeout: 5000 });
+      const soNguon = await p.$$eval(".hd-nguon li", a => a.length);
+      await p.route("https://tro-ly.vi-du.workers.dev/hoi", r => r.fulfill({ status: 200, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ traLoi: "- Thời hạn: 12 ngày làm việc [1]\nThông tin tham khảo.", nhaCungCap: "Giả lập", moHinh: "kiem-thu" }) }));
+      await p.evaluate(() => localStorage.setItem("tthc-tro-ly-dia-chi", "https://tro-ly.vi-du.workers.dev"));
+      await p.goto(GOC + "#/hoi-dap?q=" + encodeURIComponent("Tách thửa đất mất bao nhiêu ngày làm việc?") + "&t=2"); await p.reload();
+      const coTraLoi = await p.waitForSelector(".hd-noi-dung a.trich-dan", { timeout: 8000 }).then(() => true, () => false);
+      ghi("GD-10", "Công cụ", "Hỏi đáp: không có Worker vẫn hiện đoạn nguyên văn; có Worker hiện câu trả lời dẫn nguồn [n]", "≥ 3 đoạn; có liên kết [1]", `${soNguon} đoạn; trả lời có dẫn nguồn: ${coTraLoi}`, soNguon >= 3 && coTraLoi);
+      ghi("GD-11", "Công cụ", "Không lỗi JavaScript khi dùng các công cụ mới", "0 lỗi", loi.length ? loi.join(" | ") : "0", !loi.length);
+      await ctx.close();
     }
   } finally {
     await b.close(); sv.close();
