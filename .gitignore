@@ -1,0 +1,5 @@
+﻿# Tệp trung gian, có thể tái tạo
+cong-cu/tam/
+cong-cu/trich-pdf/bin/
+cong-cu/trich-pdf/obj/
+.claude/

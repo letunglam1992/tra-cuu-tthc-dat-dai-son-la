@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kiểm thử tự động – TTHC đất đai</title>
+  <link rel="stylesheet" href="css/giao-dien.css">
+  <style>
+    body { overflow: auto; }
+    .trang { max-width: 1400px; }
+    td.dat { color: var(--xanh); font-weight: 700; }
+    td.truot { color: var(--do); font-weight: 700; }
+    #khung-ui { position: absolute; left: -10000px; top: 0; width: 1280px; height: 900px; border: 0; }
+  </style>
+</head>
+<body>
+  <div class="trang">
+    <div class="dong-tieu-de"><div><div class="nhan-trang">Kiểm thử tự động</div><h1>Bộ kiểm thử dữ liệu, chức năng và giao diện</h1>
+      <div class="mo-ta">Chạy trên chính dữ liệu và mã nguồn của phần mềm. Kiểm thử giao diện mở từng màn hình trong khung ẩn và duyệt mọi đường dẫn nội bộ. Cần mở qua máy chủ (cong-cu/chay-may-chu.ps1) để kiểm thử giao diện chạy được.</div></div>
+      <div class="phai"><button class="nut" id="xuat" disabled>Xuất kết quả CSV</button></div></div>
+    <div id="tom-tat" class="thong-bao thong-bao-xanh">Đang chạy kiểm thử…</div>
+    <div class="the"><div class="bang-cuon"><table class="bang"><thead><tr><th>Mã</th><th>Nhóm</th><th>Nội dung kiểm thử</th><th>Kết quả mong đợi</th><th>Kết quả thực tế</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody id="kq"></tbody></table></div></div>
+  </div>
+  <iframe id="khung-ui" title="Khung kiểm thử giao diện"></iframe>
+  <script src="du-lieu/nguon.js"></script>
+  <script src="du-lieu/bo-sung.js"></script>
+  <script src="js/tien-ich.js"></script>
+  <script src="js/mo-hinh.js"></script>
+  <script src="js/tim-kiem.js"></script>
+  <script src="js/xuat-word.js"></script>
+  <script src="js/kiem-thu.js"></script>
+</body>
+</html>
