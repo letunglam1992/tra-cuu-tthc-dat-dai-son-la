@@ -1,53 +1,78 @@
-﻿"Mã kiểm thử","Nhóm","Nội dung","Kết quả mong đợi","Kết quả thực tế","Trạng thái","Ghi chú"
-"DL-01","Dữ liệu","Số thủ tục theo phụ lục","PL I: 10, PL II: 13, PL III: 22 (tổng 45)","I: 10, II: 13, III: 22 (45)","Đạt","Đối chiếu danh mục mục A các phụ lục, tr.15, 42–43, 74–76"
-"DL-02","Dữ liệu","Danh mục (mục A) khớp số lượng nội dung (mục B) từng phụ lục","Khớp cả 3 phụ lục","10/10; 13/13; 22/22","Đạt",""
-"DL-03","Dữ liệu","Mỗi thủ tục trích đủ 9 mục (theo nhãn bảng)","45/45","45/45","Đạt",""
-"DL-04","Dữ liệu","Mục để trống trong văn bản được ghi nhận, không tự điền","Chỉ III.13 mục (9) trống; có trong vấn đề nguồn","III.13(9) — đã ghi nhận","Đạt","Đã đối chiếu cấu trúc bảng trang 117 PDF"
-"DL-05","Dữ liệu","Mã thủ tục không trùng","45 mã duy nhất","45 mã","Đạt",""
-"DL-06","Dữ liệu","Quy định: số điều và tên điều trọng tâm","24 điều; Điều 15–18 thuộc Chương III","24 điều","Đạt",""
-"DL-07","Dữ liệu","Số khoản Điều 15, 16, 17, 18","6, 5, 4, 4","6, 5, 4, 4","Đạt",""
-"DL-08","Dữ liệu","Phụ lục IV: số mục và số khoản mỗi mục","6 mục: 7, 5, 4, 16, 9, 2 khoản","6 mục: 7, 5, 4, 16, 9, 2","Đạt",""
-"DL-09","Dữ liệu","Phụ lục V: số mẫu có nội dung; Mẫu 19 được ghi nhận thiếu trong danh mục","45 mẫu; Mẫu 19 có cảnh báo","45 mẫu; Mẫu 19 trong danh mục: false","Đạt",""
-"DL-10","Dữ liệu","Mọi “Mẫu số …” viện dẫn trong thủ tục đều có trong Phụ lục V","0 viện dẫn không tìm thấy","0","Đạt",""
-"DL-11","Dữ liệu","Thời hạn giữ đúng đơn vị văn bản","I.1 = 15 ngày làm việc; I.5 = 30 ngày; II.11 = 35 ngày","15 ngày làm việc; 30 ngày; 35 ngày","Đạt","Đối chiếu nguyên văn mục (3) tr.18, 29, 68"
-"DL-12","Dữ liệu","Thủ tục ghi thời hạn bằng “ngày” được nêu là vấn đề cần xác minh","I.5, II.2, II.4, II.11","I.5, II.2, II.4, II.11","Đạt",""
-"DL-13","Dữ liệu","Đánh số bước giữ nguyên theo văn bản (III.14 không có Bước 3)","III.14: 1, 2, 4, 5 và được ghi nhận","1, 2, 4, 5","Đạt",""
-"DL-14","Dữ liệu","Đối chiếu nội dung mẫu: I.1 mục (5) nêu Chủ tịch UBND tỉnh có thẩm quyền","Chứa “Cơ quan có thẩm quyền quyết định: Chủ tịch Ủy ban nhân dân tỉnh”","- Cơ quan có thẩm quyền quyết định: Chủ tịch Ủy ban nhân dân tỉnh.","Đạt","tr.18"
-"DL-15","Dữ liệu","Đối chiếu nội dung: Điều 5 khoản 3 (VBDLIS), Điều 8 khoản 3 (lấy ý kiến 03 ngày làm việc)","Có cả hai nội dung","VBDLIS: true; 03 ngày: true","Đạt",""
-"DL-16","Dữ liệu","Phân biệt nội dung pháp lý và chỉ mục suy ra","Chỉ mục nằm trong trường suyRa, không ghi đè nguyên văn","thoiHan, mau, mauKhongTimThay, mauNgoai, coQuan, giayTo, soLuongHoSo, coNghiaVuTaiChinh","Đạt",""
-"QT-01","Quy trình NVTC","Số quy trình được mô hình hóa","5 (Điều 15, Điều 15 khoản 6, Điều 16, 17, 18)","QT15, QT15-6, QT16, QT17, QT18","Đạt",""
-"QT-02","Quy trình NVTC","Mọi đoạn nguyên văn của các bước khớp đúng khoản, điều được dẫn","100% khớp","35/35 đoạn nguyên văn trong quy trình Chương III khớp với văn bản trích xuất.","Đạt",""
-"QT-03","Quy trình NVTC","Toàn vẹn sơ đồ: cạnh trỏ tới bước có thật, mọi bước có luồng vào/ra, làn khai báo","0 lỗi","0 lỗi","Đạt",""
-"QT-04","Quy trình NVTC","Thời hạn từng bước theo văn bản (Điều 15)","Chuyển Phiếu 2; thuế 3; từ chối 2; thu NSNN 1 ngày làm việc","2, 3, 2, 1","Đạt",""
-"QT-05","Quy trình NVTC","Bước văn bản không nêu thời hạn không bị gán số ngày","QT15/b8, QT16/b6 (thuế chuyển thông tin thu nộp) không có số ngày","null, null","Đạt",""
-"QT-06","Quy trình NVTC","Nhánh ngoại lệ (từ chối/trả lại) được thể hiện","Mỗi quy trình Điều 15, 16, 17, 18 có cạnh trả lại","true, true, true, true","Đạt",""
-"QT-07","Quy trình NVTC","Mọi căn cứ trích dẫn trong dữ liệu biên soạn giải được","0 căn cứ hỏng","0","Đạt",""
-"TI-01","Tiện ích","Chuẩn hóa tiếng Việt bỏ dấu, chữ thường, gộp khoảng trắng","“  Đăng   KÝ Đất ” → “dang ky dat”","dang ky dat","Đạt",""
-"TI-02","Tiện ích","Chuẩn hóa ký hiệu mẫu","04a → 4a; 4b → 4b; 19 → 19","4a,4b,19","Đạt",""
-"TI-03","Tiện ích","Thoát ký tự HTML trong nội dung","<b>&"" → &lt;b&gt;&amp;&quot;","&lt;b&gt;&amp;&quot;","Đạt",""
-"TI-04","Tiện ích","Tô sáng giữ nguyên văn gốc","“Tách thửa” tô sáng khi tìm “tach thua”","<mark>Tách thửa</mark> đất","Đạt",""
-"TI-05","Tiện ích","Khớp đầu từ, không khớp giữa từ","“an” không khớp “toàn”; khớp “an ninh”","false / true","Đạt",""
-"TI-06","Tiện ích","Nhận diện thời hạn phân số","“không quá 1/2 ngày làm việc” → 0,5 ngày làm việc","0,5 ngày làm việc","Đạt",""
-"TK-01","Tìm kiếm","Tìm không dấu","“tach thua” → III.3 đứng đầu","III.3, III.10, III.11","Đạt",""
-"TK-02","Tìm kiếm","Có dấu và không dấu cho cùng kết quả","“tách thửa” = “tach thua”","Giống nhau","Đạt",""
-"TK-03","Tìm kiếm","Khoảng trắng thừa và chữ hoa không ảnh hưởng","“  TÁCH   thửa ” = “tách thửa”","Giống nhau","Đạt",""
-"TK-04","Tìm kiếm","Không có kết quả giả","“xyzkhongco” → 0 kết quả","0","Đạt",""
-"TK-05","Tìm kiếm","Tìm cụm chính xác trong ngoặc kép","“""phiếu chuyển thông tin""” có Mẫu số 19","19, 25","Đạt",""
-"TK-06","Tìm kiếm","Tìm theo tên cơ quan","“Kho bạc” → cơ quan KBNN","kbnn","Đạt",""
-"TK-07","Tìm kiếm","Mọi kết quả chứa đủ các từ khóa","100% kết quả “giấy chứng nhận đính chính” chứa đủ 2 cụm từ","70 kết quả","Đạt",""
-"TK-08","Tìm kiếm","Tìm theo thời hạn","“15 ngày làm việc” có I.1","17 thủ tục","Đạt",""
-"WD-01","Xuất Word","Tạo tệp .docx cho toàn bộ mẫu biểu Phụ lục V","45/45 tệp: ZIP đúng chữ ký, CRC khớp, document.xml hợp lệ","45/45 hợp lệ","Đạt","Mở thử bằng Microsoft Word: kiểm thử WD-03 (chỉ có khi chạy cong-cu/chay-kiem-thu.ps1 trên máy có Word)"
-"WD-02","Xuất Word","Nội dung tệp Word giữ nguyên văn mẫu và ghi nguồn","Có tiêu đề Mẫu số 19, đủ số dòng nội dung, dòng ghi nguồn","164 đoạn; tiêu đề: Mẫu số 19. Phiếu chuyển thông tin để xác…","Đạt",""
-"UI-01","Giao diện","Mở các màn hình chính, mọi tab","30/30 màn hình hiển thị đúng tiêu đề, không lỗi","30/30","Đạt",""
-"UI-02","Giao diện","Trạng thái không tìm thấy (đường dẫn, mã thủ tục, mẫu sai)","Hiển thị thông báo rõ ràng, không lỗi","Không có trang “khong-ton-tai”. | Không có thủ tục mã “IX.99”. | Không có Mẫu số “99” trong Phụ lục V.","Đạt",""
-"UI-03","Giao diện","Tra cứu không có kết quả","Thông báo không tìm thấy, không có kết quả giả","Không tìm thấy kết quả cho “xyzkhongco”.","Đạt",""
-"UI-04","Giao diện","Lọc thủ tục theo phụ lục và thời hạn","3 dòng (PL III, ≤ 5 ngày)","3 dòng","Đạt",""
-"UI-05","Giao diện","Duyệt toàn bộ liên kết nội bộ (thủ tục, mẫu, điều, cơ quan, quy trình…)","0 liên kết dẫn tới trang lỗi/không tìm thấy; duyệt hết hàng đợi","927 trang đã mở, 23465 lượt liên kết, 0 hỏng, còn 0 chưa mở","Đạt",""
-"UI-06","Giao diện","Chip căn cứ pháp lý mở được nguyên văn","100% giải được","1892/1892","Đạt",""
-"UI-07","Giao diện","Liên kết trang PDF gốc nằm trong phạm vi tệp","Trang 1–225","1151/1151 hợp lệ","Đạt",""
-"UI-08","Giao diện","Mở căn cứ tại chỗ (ngăn bên) và đóng bằng Esc","Mở có tiêu đề căn cứ; Esc đóng","Phụ lục I, mục B, thủ tục 1, mục (1) / đóng: true","Đạt",""
-"UI-09","Giao diện","Sơ đồ Điều 17: đủ nút, cạnh; bấm nút hiển thị chi tiết bước","6 nút, 6 cạnh; chi tiết bước n3","6 nút, 6 cạnh; Rà soát, xác nhận số tiền được trừ; gửi cơ quan thuế Diễn gi","Đạt",""
-"UI-11","Giao diện","Nút “Quay lại” trên mọi màn hình (trừ trang chính) đưa về màn hình trước","Có nút; từ II.4 quay về #/thu-tuc; trang chính không có nút","nút: true; về: #/thu-tuc; trang chính có nút: false","Đạt",""
-"UI-12","Giao diện","Hộp “Giới thiệu, bản quyền”: tác giả, đơn vị, liên hệ, phiên bản, lời bản quyền; đóng bằng Esc","Đủ thông tin; Esc đóng","5/5 thông tin; đóng: true","Đạt",""
-"UI-10","Giao diện","Không phát sinh lỗi JavaScript khi duyệt","0 lỗi","0 lỗi","Đạt",""
-"WD-03","Xuất Word","Mở tệp Mau-so-19.docx bằng Microsoft Word trên máy","Word mở được, không báo lỗi tệp hỏng","Mở được: 164 đoạn; đoạn đầu: Mẫu số 19. Phiếu chuyển thông tin để xác định nghĩa vụ tài chính về đất đai","Đạt",""
+﻿Mã,Nhóm,Nội dung kiểm thử,Kết quả mong đợi,Kết quả thực tế,Trạng thái,Ghi chú
+DL-01,Dữ liệu,Số thủ tục theo phụ lục,"PL I: 10, PL II: 13, PL III: 22 (tổng 45)","I: 10, II: 13, III: 22 (45)",Đạt,"Đối chiếu danh mục mục A các phụ lục, tr.15, 42–43, 74–76"
+DL-02,Dữ liệu,Danh mục (mục A) khớp số lượng nội dung (mục B) từng phụ lục,Khớp cả 3 phụ lục,10/10; 13/13; 22/22,Đạt,
+DL-03,Dữ liệu,Mỗi thủ tục trích đủ 9 mục (theo nhãn bảng),45/45,45/45,Đạt,
+DL-04,Dữ liệu,"Mục để trống trong văn bản được ghi nhận, không tự điền",Chỉ III.13 mục (9) trống; có trong vấn đề nguồn,III.13(9) — đã ghi nhận,Đạt,Đã đối chiếu cấu trúc bảng trang 117 PDF
+DL-05,Dữ liệu,Mã thủ tục không trùng,45 mã duy nhất,45 mã,Đạt,
+DL-06,Dữ liệu,Quy định: số điều và tên điều trọng tâm,24 điều; Điều 15–18 thuộc Chương III,24 điều,Đạt,
+DL-07,Dữ liệu,"Số khoản Điều 15, 16, 17, 18","6, 5, 4, 4","6, 5, 4, 4",Đạt,
+DL-08,Dữ liệu,Phụ lục IV: số mục và số khoản mỗi mục,"6 mục: 7, 5, 4, 16, 9, 2 khoản","6 mục: 7, 5, 4, 16, 9, 2",Đạt,
+DL-09,Dữ liệu,Phụ lục V: số mẫu có nội dung; Mẫu 19 được ghi nhận thiếu trong danh mục,45 mẫu; Mẫu 19 có cảnh báo,45 mẫu; Mẫu 19 trong danh mục: false,Đạt,
+DL-10,Dữ liệu,Mọi “Mẫu số …” viện dẫn trong thủ tục đều có trong Phụ lục V,0 viện dẫn không tìm thấy,0,Đạt,
+DL-11,Dữ liệu,Thời hạn giữ đúng đơn vị văn bản,I.1 = 15 ngày làm việc; I.5 = 30 ngày; II.11 = 35 ngày,15 ngày làm việc; 30 ngày; 35 ngày,Đạt,"Đối chiếu nguyên văn mục (3) tr.18, 29, 68"
+DL-12,Dữ liệu,Thủ tục ghi thời hạn bằng “ngày” được nêu là vấn đề cần xác minh,"I.5, II.2, II.4, II.11","I.5, II.2, II.4, II.11",Đạt,
+DL-13,Dữ liệu,Đánh số bước giữ nguyên theo văn bản (III.14 không có Bước 3),"III.14: 1, 2, 4, 5 và được ghi nhận","1, 2, 4, 5",Đạt,
+DL-14,Dữ liệu,Đối chiếu nội dung mẫu: I.1 mục (5) nêu Chủ tịch UBND tỉnh có thẩm quyền,Chứa “Cơ quan có thẩm quyền quyết định: Chủ tịch Ủy ban nhân dân tỉnh”,- Cơ quan có thẩm quyền quyết định: Chủ tịch Ủy ban nhân dân tỉnh.,Đạt,tr.18
+DL-15,Dữ liệu,"Đối chiếu nội dung: Điều 5 khoản 3 (VBDLIS), Điều 8 khoản 3 (lấy ý kiến 03 ngày làm việc)",Có cả hai nội dung,VBDLIS: true; 03 ngày: true,Đạt,
+DL-16,Dữ liệu,Phân biệt nội dung pháp lý và chỉ mục suy ra,"Chỉ mục nằm trong trường suyRa, không ghi đè nguyên văn","thoiHan, mau, mauKhongTimThay, mauNgoai, coQuan, giayTo, soLuongHoSo, coNghiaVuTaiChinh",Đạt,
+QT-01,Quy trình NVTC,Số quy trình được mô hình hóa,"5 (Điều 15, Điều 15 khoản 6, Điều 16, 17, 18)","QT15, QT15-6, QT16, QT17, QT18",Đạt,
+QT-02,Quy trình NVTC,"Mọi đoạn nguyên văn của các bước khớp đúng khoản, điều được dẫn",100% khớp,35/35 đoạn nguyên văn trong quy trình Chương III khớp với văn bản trích xuất.,Đạt,
+QT-03,Quy trình NVTC,"Toàn vẹn sơ đồ: cạnh trỏ tới bước có thật, mọi bước có luồng vào/ra, làn khai báo",0 lỗi,0 lỗi,Đạt,
+QT-04,Quy trình NVTC,Thời hạn từng bước theo văn bản (Điều 15),Chuyển Phiếu 2; thuế 3; từ chối 2; thu NSNN 1 ngày làm việc,"2, 3, 2, 1",Đạt,
+QT-05,Quy trình NVTC,Bước văn bản không nêu thời hạn không bị gán số ngày,"QT15/b8, QT16/b6 (thuế chuyển thông tin thu nộp) không có số ngày","null, null",Đạt,
+QT-06,Quy trình NVTC,Nhánh ngoại lệ (từ chối/trả lại) được thể hiện,"Mỗi quy trình Điều 15, 16, 17, 18 có cạnh trả lại","true, true, true, true",Đạt,
+QT-07,Quy trình NVTC,Mọi căn cứ trích dẫn trong dữ liệu biên soạn giải được,0 căn cứ hỏng,0,Đạt,
+TI-01,Tiện ích,"Chuẩn hóa tiếng Việt bỏ dấu, chữ thường, gộp khoảng trắng",“  Đăng   KÝ Đất ” → “dang ky dat”,dang ky dat,Đạt,
+TI-02,Tiện ích,Chuẩn hóa ký hiệu mẫu,04a → 4a; 4b → 4b; 19 → 19,"4a,4b,19",Đạt,
+TI-03,Tiện ích,Thoát ký tự HTML trong nội dung,"<b>&"" → &lt;b&gt;&amp;&quot;",&lt;b&gt;&amp;&quot;,Đạt,
+TI-04,Tiện ích,Tô sáng giữ nguyên văn gốc,“Tách thửa” tô sáng khi tìm “tach thua”,<mark>Tách thửa</mark> đất,Đạt,
+TI-05,Tiện ích,"Khớp đầu từ, không khớp giữa từ",“an” không khớp “toàn”; khớp “an ninh”,false / true,Đạt,
+TI-06,Tiện ích,Nhận diện thời hạn phân số,"“không quá 1/2 ngày làm việc” → 0,5 ngày làm việc","0,5 ngày làm việc",Đạt,
+TK-01,Tìm kiếm,Tìm không dấu,“tach thua” → III.3 đứng đầu,"III.3, III.10, III.2",Đạt,
+TK-02,Tìm kiếm,Có dấu và không dấu cho cùng kết quả,“tách thửa” = “tach thua”,Giống nhau,Đạt,
+TK-03,Tìm kiếm,Khoảng trắng thừa và chữ hoa không ảnh hưởng,“  TÁCH   thửa ” = “tách thửa”,Giống nhau,Đạt,
+TK-04,Tìm kiếm,Không có kết quả giả,“xyzkhongco” → 0 kết quả,0,Đạt,
+TK-05,Tìm kiếm,Tìm cụm chính xác trong ngoặc kép,"“""phiếu chuyển thông tin""” có Mẫu số 19","19, 25",Đạt,
+TK-06,Tìm kiếm,Tìm theo tên cơ quan,“Kho bạc” → cơ quan KBNN,kbnn,Đạt,
+TK-07,Tìm kiếm,Mọi kết quả chứa đủ các từ khóa,100% kết quả “giấy chứng nhận đính chính” chứa đủ 2 cụm từ,4 kết quả,Đạt,
+TK-08,Tìm kiếm,Tìm theo thời hạn,“15 ngày làm việc” có I.1,7 thủ tục,Đạt,
+TK-09,Tìm kiếm,Gõ có dấu thì so khớp đúng dấu,“thừa kế” không khớp “thừa” + “kê”; ít kết quả hơn “thua ke”,có dấu 6 / không dấu 85,Đạt,
+TK-10,Tìm kiếm,"Từ đồng nghĩa, cách gọi thông dụng","“sổ đỏ”, “GCN” → Giấy chứng nhận; “QSDĐ”; “chi cục thuế” → Cơ quan thuế; “NVTC”",sổ đỏ 66; QSDĐ 70; chi cục thuế → co-quan-thue; NVTC 68,Đạt,
+TK-11,Tìm kiếm,"Sửa lỗi gõ, từ viết liền",“chuyen nhuog” ≈ “chuyển nhượng”; “tachthua” → III.3,"15 kết quả, sửa: nhuong; tachthua → III.3",Đạt,
+TK-12,Tìm kiếm,"Mã thủ tục, mẫu biểu",“III.3” → III.3; “mẫu 19” → Mẫu số 19,III.3; 19,Đạt,
+TK-13,Tìm kiếm,Số + đơn vị thời gian khớp cách viết văn bản,“15 ngày làm việc” khớp “15 (mười lăm) ngày làm việc” ở I.1,7 thủ tục,Đạt,
+TK-14,Tìm kiếm,Không có kết quả: gợi ý bỏ từ kèm số kết quả thật,"“sổ đỏ xe máy” → 0 kết quả, có gợi ý",0 kết quả; gợi ý: sổ đỏ xe (26),Đạt,
+TK-15,Tìm kiếm,Thứ hạng theo tình huống thường gặp,tách thửa → III.3; cấp lại GCN bị mất → III.7; đính chính → I.9/II.9/III.17; cấp lần đầu → II.6 trong top 3,"III.3; III.7; I.9,II.9,III.17; II.6,II.10,II.9",Đạt,
+HL-01,Hiệu lực,"Số, ngày ban hành, ngày hiệu lực theo bản ký ban hành",75/2026/QĐ-UBND; 22/10/2026; hiệu lực 22/10/2026,75/2026/QĐ-UBND; 22/10/2026; 22/10/2026; đã đối chiếu bản ký,Đạt,
+HL-02,Hiệu lực,Tình trạng tự tính theo ngày hiệu lực,21/10/2026: chưa có hiệu lực; 22/10/2026: có hiệu lực,chua-co-hieu-luc / co-hieu-luc,Đạt,
+HL-03,Hiệu lực,Điều 2 khoản 1 điền ngày theo bản ký; văn bản hết hiệu lực theo khoản 2,“kể từ ngày 22 tháng 10 năm 2026”; QĐ 45/2021 và QĐ 106/2025,1. Quyết định này có hiệu lực thi hành kể từ ngày 22 tháng 10 năm 2026.,Đạt,
+TH-01,Thời hạn,"Âm lịch: Tết Nguyên đán, Giỗ Tổ Hùng Vương",Tết 2025: 29/01; 2026: 17/02; 2027: 06/02 · Giỗ Tổ 2026: 26/04,"2025-01-29, 2026-02-17, 2027-02-06 · 2026-04-26",Đạt,
+TH-02,Thời hạn,"Đếm ngày làm việc từ ngày tiếp theo, bỏ thứ Bảy, Chủ nhật","Nhận 29/10/2026 (thứ Năm), 12 ngày làm việc → 16/11/2026","Thứ Hai, 16/11/2026",Đạt,
+TH-03,Thời hạn,Cộng thời gian xã khu vực III,III.3 nhận 29/10/2026: 12 + 10 ngày làm việc → 30/11/2026,"Thứ Hai, 30/11/2026",Đạt,
+TH-04,Thời hạn,"Trừ ngày lễ, nghỉ bù khi lễ trùng cuối tuần","Nhận 31/12/2026, 1 ngày làm việc → 04/01/2027 (1/1 nghỉ lễ); 1/5/2027 thứ Bảy → nghỉ bù 3/5","Thứ Hai, 04/01/2027; 03/05/2027: Nghỉ bù Ngày Quốc tế lao động",Đạt,
+TH-05,Thời hạn,Thời hạn tính bằng “ngày”: ngày cuối là ngày nghỉ thì lùi sang ngày làm việc tiếp theo,"Nhận 23/10/2026, 30 ngày → 22/11 (Chủ nhật) → 23/11/2026","Thứ Hai, 23/11/2026",Đạt,
+TH-06,Thời hạn,Năm chưa có thông báo lịch nghỉ: tạm tính Tết và cảnh báo,Hồ sơ qua Tết 2027 có cảnh báo “tạm tính”,"Có 7 ngày nghỉ TẠM TÍNH theo thông lệ (Tết Âm lịch, ngày liền kề Quốc khánh) vì ",Đạt,
+TH-07,Thời hạn,Nhận diện số ngày tăng thêm cho xã khu vực III ở mục (3),45/45 thủ tục có nêu khu vực III đều nhận diện được,45/45,Đạt,
+WD-01,Xuất Word,Tạo tệp .docx cho toàn bộ mẫu biểu Phụ lục V,"45/45 tệp: ZIP đúng chữ ký, CRC khớp, document.xml hợp lệ",45/45 hợp lệ,Đạt,Mở thử bằng Microsoft Word: kiểm thử WD-03 (chỉ có khi chạy cong-cu/chay-kiem-thu.ps1 trên máy có Word)
+WD-02,Xuất Word,"Nội dung tệp Word giữ nguyên văn mẫu, ghép dòng thành đoạn và ghi nguồn",Tiêu đề Mẫu số 19; ≥ 99% từ của mẫu có trong tệp; số đoạn < số dòng PDF; có dòng nguồn,92 đoạn / 162 dòng PDF; giữ 228/228 từ,Đạt,
+WD-04,Xuất Word,"Mẫu 01: ghép dòng bị ngắt, khôi phục m², tách quốc hiệu và chú thích",“1. Người đề nghị” liền một đoạn; có “(m²)”; quốc hiệu riêng; ≥ 4 chú thích,quốc hiệu: true; chú thích: 4; m²: true; đoạn 1: true,Đạt,
+PW-01,Ngoại tuyến,"Danh sách tệp lưu ngoại tuyến (sw.js) đầy đủ, tồn tại",Mọi tệp trong danh sách tải được; mọi script của index.html có trong danh sách,32 tệp; thiếu: 0; script ngoài danh sách: 0,Đạt,Script của trang kiểm thử: 7
+PW-02,Ngoại tuyến,Tệp manifest cài đặt ứng dụng,"Có tên, biểu tượng 192/512, start_url","TTHC đất đai; 192x192, 512x512, 512x512",Đạt,
+UI-01,Giao diện,"Mở các màn hình chính, mọi tab","33/33 màn hình hiển thị đúng tiêu đề, không lỗi",33/33,Đạt,
+UI-02,Giao diện,"Trạng thái không tìm thấy (đường dẫn, mã thủ tục, mẫu sai)","Hiển thị thông báo rõ ràng, không lỗi",Không có trang “khong-ton-tai”. | Không có thủ tục mã “IX.99”. | Không có Mẫu số “99” trong Phụ lục V. | Không có quy trình mã “QT99”.,Đạt,
+UI-03,Giao diện,Tra cứu không có kết quả,"Thông báo không tìm thấy, không có kết quả giả",Không tìm thấy kết quả cho “xyzkhongco”.,Đạt,
+UI-04,Giao diện,Lọc thủ tục theo phụ lục và thời hạn,"3 dòng (PL III, ≤ 5 ngày)",3 dòng,Đạt,
+UI-05,Giao diện,"Duyệt toàn bộ liên kết nội bộ (thủ tục, mẫu, điều, cơ quan, quy trình…)",0 liên kết dẫn tới trang lỗi/không tìm thấy; duyệt hết hàng đợi,"1108 trang đã mở, 27133 lượt liên kết, 0 hỏng, còn 0 chưa mở",Đạt,
+UI-06,Giao diện,Chip căn cứ pháp lý mở được nguyên văn,100% giải được,1650/1650,Đạt,
+UI-07,Giao diện,Liên kết trang PDF gốc nằm trong phạm vi tệp,Trang 1–225,1089/1089 hợp lệ,Đạt,
+UI-08,Giao diện,Mở căn cứ tại chỗ (ngăn bên) và đóng bằng Esc,Mở có tiêu đề căn cứ; Esc đóng,"Phụ lục I, mục B, thủ tục 1, mục (1) / đóng: true",Đạt,
+UI-09,Giao diện,"Sơ đồ Điều 17: đủ nút, cạnh; bấm nút hiển thị chi tiết bước","6 nút, 6 cạnh; chi tiết bước n3","6 nút, 6 cạnh; Rà soát, xác nhận số tiền được trừ; gửi cơ quan thuế Diễn gi",Đạt,
+UI-11,Giao diện,Nút “Quay lại” trên mọi màn hình (trừ trang chính) đưa về màn hình trước,Có nút; từ II.4 quay về #/thu-tuc; trang chính không có nút,nút: true; về: #/thu-tuc; trang chính có nút: false,Đạt,
+UI-12,Giao diện,"Hộp “Giới thiệu, bản quyền”: tác giả, đơn vị, liên hệ, phiên bản, lời bản quyền; đóng bằng Esc",Đủ thông tin; Esc đóng,5/5 thông tin; đóng: true,Đạt,
+UI-10,Giao diện,Không phát sinh lỗi JavaScript khi duyệt,0 lỗi,0 lỗi,Đạt,
+GD-01,Điện thoại,Khổ 375 px: không tràn ngang trên các màn hình chính,0/15 màn hình tràn,0/15,Đạt,
+GD-02,Điện thoại,Quy trình NVTC hiện dạng danh sách bước,"data-qt=ds, có các bước, ẩn sơ đồ","{""cheDo"":""ds"",""soBuoc"":11,""soDoAn"":true}",Đạt,
+GD-03,Điện thoại,"Chân trang không cố định; menu trượt có lớp phủ, chạm ra ngoài để đóng",position≠fixed; mở có lớp phủ; đóng được,"chân trang: static; menu: {""mo"":true,""phu"":true}; đóng: true",Đạt,
+GD-04,Điện thoại,Bộ lọc thủ tục thu gọn sau nút “Bộ lọc”,Ẩn bộ lọc; bấm nút thì hiện,"{""an"":true,""nut"":true}; sau khi bấm: true",Đạt,
+GD-05,Ngoại tuyến,"Mất mạng sau lần mở đầu tiên: phần mềm vẫn mở được, tra cứu được",Mở được thủ tục III.3 khi ngoại tuyến,Tách thửa hoặc hợp thửa đất,Đạt,
+GD-06,In ấn,"Phiếu hướng dẫn hồ sơ III.3 in gọn, có mã QR","≤ 2 trang A4, có QR",1 trang; QR: true,Đạt,

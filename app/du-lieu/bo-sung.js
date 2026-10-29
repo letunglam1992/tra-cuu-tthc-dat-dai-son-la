@@ -6,30 +6,49 @@
  *   tăng "phienBanDuLieu" và ghi "lichSu".
  */
 window.QD75_BO_SUNG = {
-  phienBanDuLieu: "1.1.0",
+  phienBanDuLieu: "2.0.0",
   lichSu: [
+    { phienBan: "2.0.0", ngay: "2026-10-29", noiDung: "Đối chiếu bản ký ban hành (ảnh chụp trang 1 và Điều 2 do người dùng cung cấp): số 75/2026/QĐ-UBND, ngày ban hành 22/10/2026, có hiệu lực thi hành kể từ ngày 22/10/2026 (khoản 1 Điều 2). Ghi nhận văn bản hết hiệu lực theo khoản 2 Điều 2. Giải quyết vấn đề VD01, VD02." },
     { phienBan: "1.1.0", ngay: "2026-10-29", noiDung: "Cập nhật tình trạng hiệu lực: người dùng xác nhận Quyết định số 75/2026/QĐ-UBND ngày 22/10/2026 đã có hiệu lực. Ngày có hiệu lực cụ thể chưa được cung cấp; tệp PDF vẫn để trống số, ngày." },
     { phienBan: "1.0.0", ngay: "2026-10-29", noiDung: "Khởi tạo bộ dữ liệu: trích xuất toàn văn Quyết định, Quy định (24 điều) và Phụ lục I–V từ tệp PDF do người dùng cung cấp; mô hình hóa quy trình luân chuyển hồ sơ xác định nghĩa vụ tài chính tại Chương III (Điều 15–18)." }
   ],
+
+  // Bản ký ban hành: tệp PDF nội dung (qd75.pdf) là bản để trống số, ngày; số, ngày, hiệu lực đối chiếu theo ảnh chụp bản ký ban hành.
+  banKy: {
+    moTa: "Ảnh chụp bản ký ban hành do người dùng cung cấp ngày 29/10/2026",
+    anh: [
+      { tep: "tai-nguyen/ban-ky/trang-1-so-ngay.png", noiDung: "Trang 1: Số 75/2026/QĐ-UBND, Sơn La, ngày 22 tháng 10 năm 2026" },
+      { tep: "tai-nguyen/ban-ky/dieu-2-hieu-luc.png", noiDung: "Điều 2: Quyết định này có hiệu lực thi hành kể từ ngày 22 tháng 10 năm 2026" }
+    ],
+    // Chỗ trống trong tệp PDF được điền theo bản ký ban hành; giao diện đánh dấu "Điền theo bản ký"
+    dien: [
+      { loai: "qd", dieu: "2", tim: "có hiệu lực thi hành kể từ ngày tháng năm 2026", thay: "có hiệu lực thi hành kể từ ngày 22 tháng 10 năm 2026" }
+    ]
+  },
 
   vanBan: {
     loai: "Quyết định",
     coQuanBanHanh: "Ủy ban nhân dân tỉnh Sơn La",
     trichYeu: "Ban hành Quy định về trình tự, thủ tục hành chính về đất đai và quy trình luân chuyển hồ sơ xác định nghĩa vụ tài chính về đất đai áp dụng trên địa bàn tỉnh Sơn La",
-    // Số hiệu và ngày ban hành: tệp PDF để trống; giá trị dưới đây do người dùng cung cấp khi giao việc
-    soKyHieu: { giaTri: "75/2026/QĐ-UBND", nguon: "nguoi-dung", ghiChu: "Tệp PDF ghi \"Số: /2026/QĐ-UBND\" (để trống số). Số hiệu do người dùng cung cấp, chưa đối chiếu được trên văn bản." },
-    ngayBanHanh: { giaTri: "22/10/2026", nguon: "nguoi-dung", ghiChu: "Tệp PDF ghi \"Sơn La, ngày tháng năm\" (để trống). Ngày do người dùng cung cấp, chưa đối chiếu được trên văn bản." },
-    ngayHieuLuc: { giaTri: null, nguon: "chua-xac-dinh", ghiChu: "Điều 2 khoản 1 Quyết định ghi \"có hiệu lực thi hành kể từ ngày tháng năm 2026\" (để trống ngày, tháng)." },
-    // "co-hieu-luc" | "chua-xac-minh" | "het-hieu-luc"
+    // nguon: "ban-ky" (đối chiếu bản ký ban hành) | "pdf" | "nguoi-dung" | "chua-xac-dinh"
+    soKyHieu: { giaTri: "75/2026/QĐ-UBND", nguon: "ban-ky", ghiChu: "Theo bản ký ban hành (trang 1). Tệp PDF nội dung để trống số." },
+    ngayBanHanh: { giaTri: "22/10/2026", nguon: "ban-ky", ghiChu: "Theo bản ký ban hành: \"Sơn La, ngày 22 tháng 10 năm 2026\"." },
+    ngayHieuLuc: { giaTri: "22/10/2026", nguon: "ban-ky", ghiChu: "Khoản 1 Điều 2 Quyết định: \"có hiệu lực thi hành kể từ ngày 22 tháng 10 năm 2026\" (theo bản ký ban hành)." },
+    // "co-hieu-luc" | "chua-co-hieu-luc" | "chua-xac-minh" | "het-hieu-luc" — tình trạng tự tính theo ngày hiệu lực
     tinhTrangHieuLuc: "co-hieu-luc",
-    hieuLucGhiChu: "Người dùng xác nhận ngày 29/10/2026 văn bản đã có hiệu lực. Ngày có hiệu lực cụ thể chưa xác định (Điều 2 khoản 1 trong tệp PDF để trống ngày, tháng).",
+    hieuLucGhiChu: "Có hiệu lực thi hành kể từ ngày 22/10/2026 (khoản 1 Điều 2).",
+    // Khoản 2 Điều 2: văn bản hết hiệu lực kể từ ngày Quyết định này có hiệu lực thi hành
+    vanBanHetHieuLuc: [
+      { ten: "Quyết định số 45/2021/QĐ-UBND ngày 13/12/2021 của UBND tỉnh", phamVi: "Toàn bộ", noiDung: "Quy định về cơ quan tiếp nhận, giải quyết thủ tục; thời gian thực hiện thủ tục hành chính của từng cơ quan, đơn vị có liên quan trong lĩnh vực đất đai theo cơ chế một cửa, một cửa liên thông trên địa bàn tỉnh Sơn La", canCu: "Điểm a khoản 2 Điều 2" },
+      { ten: "Quyết định số 106/2025/QĐ-UBND ngày 06/10/2025 của UBND tỉnh Sơn La", phamVi: "Điều 6, Điều 7 Phụ lục III; Phụ lục IV", noiDung: "Ban hành quy định chi tiết một số điều của Luật Đất đai năm 2024 và các Nghị định quy định chi tiết thi hành một số điều Luật Đất đai", canCu: "Điểm b khoản 2 Điều 2" }
+    ],
     nguoiKy: { giaTri: "Nguyễn Thành Công — KT. Chủ tịch, Phó Chủ tịch", nguon: "pdf", trang: 2 }
   },
 
   // Các vấn đề phát hiện trong văn bản nguồn khi chuẩn hóa — hiển thị tại màn hình Đối soát và tại vị trí liên quan.
   vanDeNguon: [
-    { ma: "VD01", mucDo: "trung-binh", viTri: "Trang 1 – phần mở đầu Quyết định", trang: 1, moTa: "Tệp PDF không ghi số và ngày ban hành (\"Số: /2026/QĐ-UBND\", \"Sơn La, ngày tháng năm\"). Phần mềm hiển thị số 75/2026/QĐ-UBND ngày 22/10/2026 theo thông tin người dùng cung cấp. Nên thay tệp nguồn bằng bản đã ký ban hành để đối chiếu nội dung." },
-    { ma: "VD02", mucDo: "thap", viTri: "Điều 2 khoản 1 Quyết định", trang: 2, moTa: "Ngày có hiệu lực thi hành để trống trong tệp PDF. Người dùng đã xác nhận văn bản có hiệu lực (29/10/2026); ngày có hiệu lực cụ thể chưa được ghi nhận." },
+    { ma: "VD01", mucDo: "thong-tin", daXuLy: true, viTri: "Trang 1 – phần mở đầu Quyết định", trang: 1, moTa: "Đã xử lý (v2.0.0): tệp PDF nội dung để trống số, ngày ban hành; đã đối chiếu bản ký ban hành — số 75/2026/QĐ-UBND, ngày 22/10/2026. Nên thay tệp qd75.pdf bằng bản ký số khi có." },
+    { ma: "VD02", mucDo: "thong-tin", daXuLy: true, viTri: "Điều 2 khoản 1 Quyết định", trang: 2, moTa: "Đã xử lý (v2.0.0): ngày có hiệu lực để trống trong tệp PDF; theo bản ký ban hành, Quyết định có hiệu lực thi hành kể từ ngày 22/10/2026." },
     { ma: "VD03", mucDo: "trung-binh", viTri: "Điều 3 Quyết định; Điều 15, 16, 18, 23 Quy định", trang: 2, moTa: "Văn bản ghi \"Kho bạc Nhà nước khu vực X\" — chưa xác định cụ thể số khu vực. Phần mềm giữ nguyên cách ghi." },
     { ma: "VD04", mucDo: "trung-binh", viTri: "Phụ lục V – danh mục mẫu biểu", trang: 148, moTa: "Danh mục mẫu biểu không liệt kê Mẫu số 19 (Phiếu chuyển thông tin để xác định nghĩa vụ tài chính về đất đai), trong khi nội dung Mẫu số 19 có tại trang 192 và được viện dẫn ở nhiều thủ tục." },
     { ma: "VD05", mucDo: "thap", viTri: "Phụ lục V – danh mục mẫu biểu", trang: 148, moTa: "Số thứ tự 26 được dùng hai lần; ký hiệu Mẫu số 18a xuất hiện hai lần với hai tên khác nhau (\"Đơn đăng ký biến động đất đai, tài sản gắn liền với đất\" và \"Danh sách những người sử dụng chung thửa đất, sở hữu chung tài sản gắn liền với đất\"). Nội dung mẫu 18a tại trang 191 là Danh sách những người sử dụng chung." },
@@ -298,6 +317,73 @@ window.QD75_BO_SUNG = {
       ghiChu: []
     }
   ],
+
+  // ---------- Dữ liệu phục vụ tra cứu (Phần mềm lập — không phải nội dung pháp lý) ----------
+  // Tình huống thường gặp: gợi ý thủ tục theo nhu cầu; người dùng luôn phải đọc mục (4) đối tượng thực hiện để chọn đúng.
+  tinhHuong: [
+    { id: "tach-hop-thua", ten: "Tách thửa, hợp thửa đất", moTa: "Chia một thửa thành nhiều thửa hoặc gộp các thửa liền kề", thuTuc: ["III.3"], bieuTuong: "tep" },
+    { id: "chuyen-nhuong", ten: "Mua bán, thừa kế, tặng cho, góp vốn", moTa: "Sang tên quyền sử dụng đất, tài sản gắn liền với đất", thuTuc: ["III.2"], bieuTuong: "nguoi" },
+    { id: "cap-lan-dau", ten: "Cấp Giấy chứng nhận lần đầu", moTa: "Cá nhân, cộng đồng dân cư; tổ chức đang sử dụng đất", thuTuc: ["II.6", "II.5", "I.8"], bieuTuong: "sach" },
+    { id: "cap-doi", ten: "Cấp đổi Giấy chứng nhận", moTa: "Đổi Giấy chứng nhận đã cấp (cũ, hư hỏng, đo đạc lại…)", thuTuc: ["III.6"], bieuTuong: "tep" },
+    { id: "cap-lai", ten: "Cấp lại Giấy chứng nhận bị mất", moTa: "Giấy chứng nhận bị mất", thuTuc: ["III.7"], bieuTuong: "tim" },
+    { id: "chuyen-muc-dich", ten: "Chuyển mục đích sử dụng đất", moTa: "Phải xin phép (giao, cho thuê, chuyển mục đích) hoặc chỉ đăng ký biến động", thuTuc: ["II.1", "I.1", "III.12"], bieuTuong: "luong" },
+    { id: "dinh-chinh", ten: "Đính chính Giấy chứng nhận", moTa: "Giấy chứng nhận đã cấp có sai sót", thuTuc: ["II.9", "III.17", "I.9"], bieuTuong: "kiem" },
+    { id: "thay-doi-thong-tin", ten: "Đổi tên, thay đổi thông tin, địa chỉ thửa đất", moTa: "Thay đổi thông tin người sử dụng đất, số hiệu, địa chỉ thửa; giảm diện tích do sạt lở", thuTuc: ["III.1"], bieuTuong: "nguoi" },
+    { id: "thoa-thuan-ban-an", ten: "Thỏa thuận vợ chồng, hộ gia đình; theo bản án; xử lý thế chấp", moTa: "Thay đổi quyền theo thỏa thuận, kết quả giải quyết tranh chấp, bản án, xử lý tài sản thế chấp", thuTuc: ["III.11"], bieuTuong: "canCan" },
+    { id: "tai-san", ten: "Đăng ký nhà ở, tài sản gắn liền với đất", moTa: "Đăng ký bổ sung hoặc thay đổi tài sản trên thửa đất đã có Giấy chứng nhận", thuTuc: ["III.15"], bieuTuong: "coQuan" },
+    { id: "xoa-no", ten: "Xóa ghi nợ tiền sử dụng đất, lệ phí trước bạ", moTa: "Đã nộp xong khoản ghi nợ trên Giấy chứng nhận", thuTuc: ["III.22"], bieuTuong: "kiem" },
+    { id: "dat-o-truoc-2004", ten: "Xác định lại diện tích đất ở", moTa: "Giấy chứng nhận cấp trước ngày 01/7/2004", thuTuc: ["II.7", "II.8"], bieuTuong: "tim" },
+    { id: "nong-nghiep", ten: "Xác nhận tiếp tục sử dụng đất nông nghiệp", moTa: "Hết thời hạn sử dụng đất nông nghiệp của cá nhân", thuTuc: ["III.4"], bieuTuong: "dongHo" },
+    { id: "du-an", ten: "Giao đất, cho thuê đất thực hiện dự án", moTa: "Tổ chức, nhà đầu tư; điều chỉnh quyết định; gia hạn", thuTuc: ["I.1", "I.2", "I.6"], bieuTuong: "coQuan" },
+    { id: "thu-hoi", ten: "Thu hồi đất, bồi thường, hỗ trợ, tái định cư", moTa: "Trình tự theo Phụ lục IV", lienKet: "#/thu-hoi", bieuTuong: "thuHoi" }
+  ],
+
+  // Từ đồng nghĩa, viết tắt, cách gọi thông dụng → cụm từ dùng trong văn bản (áp dụng cho tìm kiếm, viết không dấu).
+  dongNghia: [
+    { tu: ["so do", "so hong", "so dat", "bia do", "gcn", "gcnqsdd", "giay chung nhan quyen su dung dat"], thanh: "giấy chứng nhận" },
+    { tu: ["qsdd", "qsd dat"], thanh: "quyền sử dụng đất" },
+    { tu: ["nvtc"], thanh: "nghĩa vụ tài chính" },
+    { tu: ["tsd", "tien sdd"], thanh: "tiền sử dụng đất" },
+    { tu: ["lptb", "le phi truoc ba", "phi truoc ba", "truoc ba"], thanh: "lệ phí trước bạ" },
+    { tu: ["chi cuc thue", "cuc thue", "thue co so", "thue tinh"], thanh: "cơ quan thuế" },
+    { tu: ["kbnn"], thanh: "kho bạc nhà nước" },
+    { tu: ["vpdk", "vpdkdd", "van phong dat dai"], thanh: "văn phòng đăng ký đất đai" },
+    { tu: ["cn vpdk", "chi nhanh vpdk"], thanh: "chi nhánh văn phòng đăng ký đất đai" },
+    { tu: ["ubnd"], thanh: "ủy ban nhân dân" },
+    { tu: ["hdnd"], thanh: "hội đồng nhân dân" },
+    { tu: ["snnmt", "so tnmt", "so tai nguyen", "so nong nghiep"], thanh: "sở nông nghiệp và môi trường" },
+    { tu: ["tdc"], thanh: "tái định cư" },
+    { tu: ["gpmb", "giai phong mat bang", "bthttdc", "bt ht tdc"], thanh: "bồi thường, hỗ trợ, tái định cư" },
+    { tu: ["mua ban dat", "ban dat", "mua dat", "sang ten", "sang ten so"], thanh: "chuyển nhượng" },
+    { tu: ["tach so", "chia thua", "tachthua"], thanh: "tách thửa" },
+    { tu: ["gop thua", "nhap thua", "hopthua"], thanh: "hợp thửa" },
+    { tu: ["len tho cu", "len dat o", "chuyen sang dat o", "chuyen len dat o"], thanh: ["chuyển mục đích", "đất ở"] },
+    { tu: ["cmd", "chuyen md"], thanh: "chuyển mục đích" },
+    { tu: ["mat so", "mat giay chung nhan"], thanh: "cấp lại giấy chứng nhận" },
+    { tu: ["doi so"], thanh: "cấp đổi giấy chứng nhận" },
+    { tu: ["sua so", "sai so"], thanh: "đính chính" },
+    { tu: ["tthc"], thanh: "thủ tục hành chính" },
+    { tu: ["dvc", "dich vu cong truc tuyen", "nop online", "nop truc tuyen"], thanh: "dịch vụ công" },
+    { tu: ["mot cua"], thanh: "bộ phận một cửa" },
+    { tu: ["hcc", "trung tam hanh chinh cong"], thanh: "trung tâm phục vụ hành chính công" },
+    { tu: ["the chap"], thanh: "thế chấp" },
+    { tu: ["dat tho cu", "tho cu"], thanh: "đất ở" }
+  ],
+
+  // Lịch nghỉ cho máy tính thời hạn. Ngày lễ dương lịch cố định (1/1, 30/4, 1/5, 2/9) tính tự động theo Điều 112 Bộ luật Lao động,
+  // kể cả nghỉ bù khi trùng ngày nghỉ hằng tuần. Các ngày nghỉ Tết Âm lịch, Giỗ Tổ Hùng Vương, ngày liền kề Quốc khánh, hoán đổi ngày làm việc
+  // phải nhập theo thông báo hằng năm (định dạng YYYY-MM-DD). Năm chưa nhập sẽ được cảnh báo trên giao diện.
+  lichNghi: {
+    // { nam: 2027, ngayNghi: ["2027-02-05", ...], ngayLamBu: ["2027-..."], nguon: "Thông báo số …" }
+    theoNam: []
+  },
+
+  // Liên kết nộp hồ sơ trực tuyến (hiển thị ở trang thủ tục). maQuocGia: mã thủ tục trên Cơ sở dữ liệu quốc gia về TTHC (nhập khi có).
+  dichVuCong: {
+    congQuocGia: "https://dichvucong.gov.vn",
+    ghiChu: "Nộp hồ sơ trực tuyến qua Cổng Dịch vụ công quốc gia; tìm theo tên thủ tục. Mã thủ tục quốc gia chưa được nhập vào dữ liệu.",
+    maQuocGia: {}
+  },
 
   // Quy tắc chung về thời hạn — trích dẫn để hiển thị cạnh thời hạn của mọi thủ tục
   quyTacThoiHan: [

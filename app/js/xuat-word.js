@@ -54,21 +54,69 @@ TT.word = (function () {
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
   }
 
+  // ---------- Dựng lại đoạn văn từ các dòng trích xuất PDF ----------
+  // PDF lưu mỗi dòng hiển thị là một dòng; ghép lại thành đoạn theo dấu kết câu, ký hiệu đầu mục, dòng chấm điền.
+  const reQuocHieu = /^CỘNG H(?:ÒA|OÀ) XÃ HỘI CHỦ NGHĨA VIỆT NAM$/i, reTieuNgu = /^Độc lập\s*-\s*Tự do\s*-\s*Hạnh phúc/;
+  const laHoa = t => t.length > 2 && t === t.toUpperCase() && /[A-ZĐÀ-Ỹ]/.test(t);
+  const dauMuc = t => /^(\d+(\.\d+)*\.?\s|\(\d+\)\s|[a-zđ]\)\s|[-+•]\s|[IVX]+\.\s|Kính gửi|Người làm đơn|Người đề nghị|Số:|NGƯỜI |TM\.|KT\.|\(Ký|Ghi chú|Lưu ý|[.…_]{3,})/.test(t);
+  const laDongCham = t => /^[.…_\s;,]+$/.test(t);
+  const hetDoan = t => /[.:;!?)]$/.test(t) && !/\.\.\.[,)]?$/.test(t.replace(/\.{4,}$/, "x")) || /(\.{4,}|…|_{3,})[;.,]?$/.test(t);
+  function chuanDong(t) {
+    return t.replace(/\(m\s+\)/g, "(m²)").replace(/\bm\s+\)/g, "m²)").replace(/([.…])m\s+([;,])/g, "$1m²$2").replace(/(\d|\.|…)\s*m$/, "$1 m").replace(/\s{2,}/g, " ").trim();
+  }
+  function dungDoan(noiDung) {
+    let dong = String(noiDung || "").split("\n").map(x => x.trim()).filter(Boolean);
+    // "…m" + dòng "2" (số mũ bị tách) → "m²"
+    for (let i = 0; i + 1 < dong.length; i++) if (/m$/.test(dong[i]) && dong[i + 1] === "2" && /[.…\d]\s*m$/.test(dong[i])) { dong[i] = dong[i].replace(/m$/, "m²"); dong.splice(i + 1, 1); }
+    const quocHieu = dong.some(x => reQuocHieu.test(x.replace(/\s+/g, " ")) || reTieuNgu.test(x));
+    dong = dong.filter(x => !reQuocHieu.test(x.replace(/\s+/g, " ")) && !/^[_\-]{3,}$/.test(x)).map(x => reTieuNgu.test(x) ? "" : x).filter(Boolean);
+    const doan = [], chuThich = [];
+    let daKy = false, trongChuThich = false;
+    for (let i = 0; i < dong.length; i++) {
+      let t = chuanDong(dong[i]);
+      if (!t || /^\.$/.test(t)) continue;
+      // Dòng chỉ có số trước phần ký: số trang hoặc số mũ bị tách → bỏ
+      if (!daKy && /^\d{1,2}$/.test(t)) continue;
+      if (/^\(Ký/.test(t) || /^Người làm đơn|^NGƯỜI ĐỀ NGHỊ|^Người đề nghị/.test(t)) daKy = true;
+      // Sau phần ký: dòng chỉ có số = mở chú thích
+      if (daKy && /^\d{1,2}$/.test(t) && dong[i + 1]) { trongChuThich = true; chuThich.push({ so: t, text: "" }); continue; }
+      if (trongChuThich) { const c = chuThich[chuThich.length - 1]; c.text = (c.text ? c.text + " " : "") + t; continue; }
+      const truoc = doan[doan.length - 1];
+      // Dòng chấm điền đứng riêng → nối vào trường phía trước
+      if (laDongCham(t)) { if (truoc) truoc.text += t; continue; }
+      const moi = !truoc || dauMuc(t) || hetDoan(truoc.text) || laHoa(t) !== laHoa(truoc.text) || /^\(\d+\)$/.test(truoc.text) || /ngày\s*[.…]+\s*tháng/.test(t);
+      if (moi) doan.push({ text: t }); else truoc.text += (/[-/]$/.test(truoc.text) ? "" : " ") + t;
+    }
+    // Dấu chú thích "(n)" đứng riêng → gắn vào đầu đoạn sau
+    for (let i = doan.length - 2; i >= 0; i--) if (/^\(\d+\)$/.test(doan[i].text)) { doan[i + 1].text = doan[i].text + " " + doan[i + 1].text; doan.splice(i, 1); }
+    return { quocHieu, doan, chuThich };
+  }
+
   // Dựng nội dung Word cho một mẫu biểu Phụ lục V
   function khoiMau(m, vb) {
-    const khoi = [{ text: `Mẫu số ${m.kyHieu}. ${m.ten}`, dam: true, co: 12, sau: 6 }];
-    for (const dong of String(m.noiDung).split("\n")) {
-      const t = dong.trim(); if (!t) continue;
-      const hoa = t.length > 3 && t === t.toUpperCase() && /[A-ZĐ]/.test(t);
-      const giua = hoa || /^(Độc lập|Kính gửi|\(Ban hành|\(Kèm theo)/.test(t) || /^-{3,}$/.test(t);
-      khoi.push({ text: t, can: giua ? "giua" : undefined, dam: hoa && t.length < 90 });
+    const khoi = [{ text: `Mẫu số ${m.kyHieu}. ${m.ten}`, can: "phai", nghieng: true, co: 11, sau: 6 }];
+    const { quocHieu, doan, chuThich } = dungDoan(m.noiDung);
+    if (quocHieu) {
+      khoi.push({ text: "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", can: "giua", dam: true, co: 13, sau: 0 });
+      khoi.push({ text: "Độc lập - Tự do - Hạnh phúc", can: "giua", dam: true, co: 14, sau: 0 });
+      khoi.push({ text: "_______________________", can: "giua", sau: 8 });
     }
-    khoi.push({ text: `Nguồn: Mẫu số ${m.kyHieu}, Phụ lục V ban hành kèm theo ${vb.loai} số ${vb.soKyHieu.giaTri} ngày ${vb.ngayBanHanh.giaTri} của ${vb.coQuanBanHanh} (trang ${m.trangDau}${m.trangCuoi !== m.trangDau ? "–" + m.trangCuoi : ""} tệp PDF). Nội dung được chuyển tự động từ PDF; đối chiếu định dạng với mẫu gốc trước khi sử dụng.`, nghieng: true, co: 10, truoc: 12 });
+    for (const d of doan) {
+      const t = d.text, hoa = laHoa(t);
+      if (/ngày\s*[.…]+\s*tháng/.test(t) && t.length < 80) { khoi.push({ text: /^[.…]/.test(t) ? t.replace(/^[.…\s]*,?\s*/, "……, ") : t, can: "phai", nghieng: true, sau: 6 }); continue; }
+      const giua = hoa && t.length < 120 || /^\(Ban hành|^\(Kèm theo|^\(Ký/.test(t);
+      khoi.push({ text: t, can: giua ? "giua" : "deu", dam: hoa && t.length < 120, nghieng: /^\(Ký/.test(t), thutLe: !giua && !/^(\d+(\.\d+)*\.|[-+•]|\(\d+\)|[a-zđ]\))/.test(t) && t.length > 90, truoc: hoa ? 6 : 0 });
+    }
+    if (chuThich.length) {
+      khoi.push({ text: "Ghi chú:", dam: true, nghieng: true, co: 11, truoc: 10 });
+      for (const c of chuThich) khoi.push({ text: `(${c.so}) ${c.text}`, can: "deu", co: 11 });
+    }
+    khoi.push({ text: `Nguồn: Mẫu số ${m.kyHieu}, Phụ lục V ban hành kèm theo ${vb.loai} số ${vb.soKyHieu.giaTri} ngày ${vb.ngayBanHanh.giaTri} của ${vb.coQuanBanHanh} (trang ${m.trangDau}${m.trangCuoi !== m.trangDau ? "–" + m.trangCuoi : ""} tệp PDF). Nội dung được dựng lại tự động từ PDF (ghép dòng thành đoạn); bảng biểu, ô đánh dấu có thể khác bố cục gốc — đối chiếu mẫu gốc trước khi sử dụng.`, nghieng: true, co: 10, truoc: 12 });
     return khoi;
   }
   function xuatMau(m, vb, tacGia) {
     taiVe(taoDocx(khoiMau(m, vb), { tieuDe: `Mẫu số ${m.kyHieu}. ${m.ten}`, tacGia }), `Mau-so-${m.kyHieu}.docx`);
   }
 
-  return { taoDocx, xuatMau, khoiMau, zip, crc32, taiVe };
+  return { taoDocx, xuatMau, khoiMau, dungDoan, zip, crc32, taiVe };
 })();

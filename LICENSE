@@ -10,5 +10,6 @@ Liên hệ: Lê Tùng Lâm – điện thoại 0987559092.
 
 Thành phần của bên thứ ba:
 - Phông chữ Be Vietnam Pro: SIL Open Font License 1.1 (app/tai-nguyen/fonts/OFL.txt).
+- Thư viện tạo mã QR qrcode-generator 1.4.4 (Kazuhiko Arase): MIT License (app/js/thu-vien/qrcode.min.js).
 - Nội dung Quyết định số 75/2026/QĐ-UBND và các phụ lục (app/tai-nguyen/qd75.pdf,
   app/du-lieu/nguon.js) là văn bản quy phạm pháp luật của UBND tỉnh Sơn La.

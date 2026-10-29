@@ -41,17 +41,39 @@ TT.ti = (function () {
   const bangThoat ={ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
   function e(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => bangThoat[c]); }
 
-  // Tô sáng các cụm (đã chuẩn hóa) trong văn bản gốc; trả về HTML an toàn
+  // Chuẩn hóa giữ dấu: chữ thường, dạng NFC, gộp khoảng trắng (dùng khi người dùng gõ có dấu)
+  function thuong(s) { return String(s || "").normalize("NFC").toLowerCase().replace(/\s+/g, " ").trim(); }
+  // Chuỗi có dấu tiếng Việt hay không (để quyết định so khớp có dấu)
+  function coDau(s) { s = String(s || "").normalize("NFC").toLowerCase(); return s !== chuanHoa(s) && /[à-ỹđ]/.test(s); }
+  const laChuUni = ch => /[\p{L}\p{N}]/u.test(ch || "");
+  function viTriDauTuCoDau(t, c, tu) {
+    let i = t.indexOf(c, tu || 0);
+    while (i > 0 && laChuUni(t[i - 1]) && laChuUni(c[0])) i = t.indexOf(c, i + 1);
+    return i;
+  }
+  // Cụm tô sáng: chuỗi (đã bỏ dấu) hoặc { c, dau: true } (so khớp có dấu)
+  const laCoDau = x => x && typeof x === "object" && x.dau;
+  const giaTriCum = x => typeof x === "string" ? x : x && x.c;
+  function timVung(goc, ds) {
+    const vung = [];
+    const kd = ds.filter(x => !laCoDau(x)).map(giaTriCum).filter(Boolean), cd = ds.filter(laCoDau).map(giaTriCum).filter(Boolean);
+    if (kd.length) {
+      const { t, map } = chuanHoaCoMap(goc);
+      for (const c of kd) { let i = viTriDauTu(t, c); while (i >= 0) { vung.push([map[i], map[i + c.length - 1] + 1]); i = viTriDauTu(t, c, i + c.length); } }
+    }
+    if (cd.length) {
+      const t = goc.toLowerCase();
+      for (const c of cd) { let i = viTriDauTuCoDau(t, c); while (i >= 0) { vung.push([i, i + c.length]); i = viTriDauTuCoDau(t, c, i + c.length); } }
+    }
+    return vung;
+  }
+
+  // Tô sáng các cụm trong văn bản gốc; trả về HTML an toàn
   function toSang(goc, cum) {
-    goc = String(goc || "");
+    goc = String(goc || "").normalize("NFC");
     const ds = (cum || []).filter(Boolean);
     if (!ds.length) return e(goc);
-    const { t, map } = chuanHoaCoMap(goc);
-    const vung = [];
-    for (const c of ds) {
-      let i = viTriDauTu(t, c);
-      while (i >= 0) { vung.push([map[i], map[i + c.length - 1] + 1]); i = viTriDauTu(t, c, i + c.length); }
-    }
+    const vung = timVung(goc, ds);
     if (!vung.length) return e(goc);
     vung.sort((a, b) => a[0] - b[0]);
     const gop = [];
@@ -63,13 +85,11 @@ TT.ti = (function () {
 
   // Trích đoạn quanh vị trí khớp đầu tiên
   function trichDoan(goc, cum, rong) {
-    goc = gopTrang(goc); rong = rong || 90;
-    const { t, map } = chuanHoaCoMap(goc);
-    let vt = -1;
-    for (const c of cum) { const i = viTriDauTu(t, c); if (i >= 0 && (vt < 0 || i < vt)) vt = i; }
+    goc = gopTrang(goc).normalize("NFC"); rong = rong || 90;
+    const vung = timVung(goc, (cum || []).filter(Boolean));
+    const vt = vung.length ? Math.min(...vung.map(v => v[0])) : -1;
     if (vt < 0) return goc.length > rong * 2 ? goc.slice(0, rong * 2) + "…" : goc;
-    const g = map[vt];
-    const a = Math.max(0, g - rong), b = Math.min(goc.length, g + rong);
+    const a = Math.max(0, vt - rong), b = Math.min(goc.length, vt + rong);
     return (a > 0 ? "…" : "") + goc.slice(a, b) + (b < goc.length ? "…" : "");
   }
 
@@ -86,5 +106,5 @@ TT.ti = (function () {
     return m ? m[1] + m[2] : k;
   }
 
-  return { boDauKyTu, chuanHoa, chuanHoaCoMap, chuanHoaManh, gopTrang, e, toSang, trichDoan, ngayHienTai, chuanKyHieu, viTriDauTu, chuaDauTu };
+  return { boDauKyTu, chuanHoa, chuanHoaCoMap, chuanHoaManh, gopTrang, e, toSang, trichDoan, ngayHienTai, chuanKyHieu, viTriDauTu, chuaDauTu, thuong, coDau, viTriDauTuCoDau };
 })();

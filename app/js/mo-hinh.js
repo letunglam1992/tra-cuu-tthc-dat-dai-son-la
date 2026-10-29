@@ -28,7 +28,19 @@ TT.taoMoHinh = function (N, B) {
     if (moConLai.length && /^[a-zđà-ỹ(]/.test(moConLai[0])) tieuDe = (tieuDe + " " + moConLai.shift()).trim();
     return { so: d.so, nguon, tieuDe, chuong: d.chuong || "", mo: moConLai, khoan, noiDung: d.noiDung, trangDau: d.trangDau, trangCuoi: d.trangCuoi };
   }
-  const dieuQD = N.quyetDinh.map(d => dungDieu(d, "qd"));
+  // Điền chỗ trống của tệp PDF theo bản ký ban hành (B.banKy.dien); ghi lại để giao diện đánh dấu
+  const dienBanKy = [];
+  const quyetDinhDien = N.quyetDinh.map(d => {
+    let noiDung = d.noiDung;
+    for (const x of (B.banKy && B.banKy.dien) || []) {
+      if (x.loai !== "qd" || x.dieu !== d.so) continue;
+      const dong = noiDung.split("\n"), i = dong.findIndex(l => ti.gopTrang(l).includes(x.tim));
+      if (i >= 0) { dong[i] = ti.gopTrang(dong[i]).replace(x.tim, x.thay); noiDung = dong.join("\n"); dienBanKy.push({ ...x, apDung: true }); }
+      else dienBanKy.push({ ...x, apDung: false });
+    }
+    return { ...d, noiDung };
+  });
+  const dieuQD = quyetDinhDien.map(d => ({ ...dungDieu(d, "qd"), dienBanKy: dienBanKy.filter(x => x.dieu === d.so && x.apDung) }));
   const dieu = N.quyDinh.map(d => dungDieu(d, "qdinh"));
   const dieuTheoSo = Object.fromEntries(dieu.map(d => [d.so, d]));
   const chuong = [];
@@ -351,7 +363,7 @@ TT.taoMoHinh = function (N, B) {
   function bangDoiSoat() {
     const rows = [];
     const add = r => rows.push({ stt: rows.length + 1, ...r });
-    for (const d of dieuQD) add({ nhom: "Quyết định", nguon: `Điều ${d.so}. ${d.tieuDe}`, viTriNguon: `Điều ${d.so} Quyết định`, trang: d.trangDau, duLieu: `Nguyên văn ${d.khoan.length || 1} đoạn`, hienThi: "#/can-cu/qd-" + d.so, ketQua: d.so === "2" ? "Cần xác minh" : "Đạt", ghiChu: d.so === "2" ? "Ngày hiệu lực để trống (VD02)" : "" });
+    for (const d of dieuQD) add({ nhom: "Quyết định", nguon: `Điều ${d.so}. ${d.tieuDe}`, viTriNguon: `Điều ${d.so} Quyết định`, trang: d.trangDau, duLieu: `Nguyên văn ${d.khoan.length || 1} đoạn`, hienThi: "#/can-cu/qd-" + d.so, ketQua: d.so === "2" && !d.dienBanKy.length ? "Cần xác minh" : "Đạt", ghiChu: d.so === "2" ? (d.dienBanKy.length ? "Ngày hiệu lực điền theo bản ký ban hành (VD02 đã xử lý)" : "Ngày hiệu lực để trống (VD02)") : "" });
     for (const d of dieu) add({ nhom: "Quy định", nguon: `Điều ${d.so}. ${d.tieuDe}`, viTriNguon: `${d.chuong.split(".")[0]}, Điều ${d.so}`, trang: d.trangDau, duLieu: `${d.khoan.length} khoản`, hienThi: "#/can-cu/dieu-" + d.so, ketQua: "Đạt", ghiChu: "" });
     for (const t of thuTuc) {
       const thieu = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(i => !t.muc[i]);
@@ -383,9 +395,20 @@ TT.taoMoHinh = function (N, B) {
   const HIEU_LUC = {
     "co-hieu-luc": { nhan: "Có hiệu lực", lop: "xanh", ngan: "Hiệu lực: có hiệu lực" },
     "het-hieu-luc": { nhan: "Hết hiệu lực", lop: "do", ngan: "Hiệu lực: hết hiệu lực" },
+    "chua-co-hieu-luc": { nhan: "Chưa có hiệu lực", lop: "vang", ngan: "Hiệu lực: chưa có hiệu lực" },
     "chua-xac-minh": { nhan: "Chưa xác minh", lop: "vang", ngan: "Hiệu lực: chưa xác minh" }
   };
-  const hieuLuc = { ma: B.vanBan.tinhTrangHieuLuc, ...(HIEU_LUC[B.vanBan.tinhTrangHieuLuc] || HIEU_LUC["chua-xac-minh"]), ghiChu: B.vanBan.hieuLucGhiChu || "" };
+  // Tình trạng tự tính theo ngày có hiệu lực (nếu có); "het-hieu-luc" do người biên soạn đặt khi có văn bản thay thế
+  function tinhHieuLuc(homNay) {
+    const vb = B.vanBan;
+    let ma = vb.tinhTrangHieuLuc;
+    const m = vb.ngayHieuLuc && String(vb.ngayHieuLuc.giaTri || "").match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (m && ma !== "het-hieu-luc") ma = (homNay || new Date()) >= new Date(+m[3], +m[2] - 1, +m[1]) ? "co-hieu-luc" : "chua-co-hieu-luc";
+    return { ma, ...(HIEU_LUC[ma] || HIEU_LUC["chua-xac-minh"]), ghiChu: ma === "chua-co-hieu-luc" ? `Có hiệu lực thi hành kể từ ngày ${vb.ngayHieuLuc.giaTri}.` : (vb.hieuLucGhiChu || "") };
+  }
+  const hieuLuc = tinhHieuLuc();
+  const daDoiChieuBanKy = B.vanBan.soKyHieu.nguon === "ban-ky" && B.vanBan.ngayBanHanh.nguon === "ban-ky";
+  const tenVanBan = `${B.vanBan.loai} số ${B.vanBan.soKyHieu.giaTri} ngày ${B.vanBan.ngayBanHanh.giaTri} của ${B.vanBan.coQuanBanHanh}`;
 
   const thongKe = {
     thuTuc: thuTuc.length,
@@ -404,7 +427,7 @@ TT.taoMoHinh = function (N, B) {
 
   return {
     N, B, PDF, lienKetPdf, TEN_MUC, PL, dieu, dieuQD, dieuTheoSo, chuong, thuTuc, thuTucTheoMa, phuLucIV, mauBieu, mauTheoKhoa, mauNgoai,
-    quyTrinh, quyTrinhTheoId, coQuan, coQuanTheoId, chiMucCoQuan, vanBanDanChieu, vanDeNguon, thongKe, hieuLuc,
+    quyTrinh, quyTrinhTheoId, coQuan, coQuanTheoId, chiMucCoQuan, vanBanDanChieu, vanDeNguon, thongKe, hieuLuc, tinhHieuLuc, daDoiChieuBanKy, tenVanBan, dienBanKy,
     giaiCanCu, kiemTra, bangDoiSoat, timCoQuan, timMau, thoiHanRutGon, hienThiHan, tachBuoc
   };
 };

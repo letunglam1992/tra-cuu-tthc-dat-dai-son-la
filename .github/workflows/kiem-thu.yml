@@ -1,0 +1,33 @@
+name: Kiểm thử
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  kiem-thu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Kiểm thử dữ liệu, tìm kiếm, thời hạn, xuất Word (Node)
+        run: npm test
+      - name: Cài Playwright (Chromium)
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Kiểm thử giao diện (trình duyệt, điện thoại, ngoại tuyến, in ấn)
+        run: npm run test:ui
+      - name: Lưu kết quả kiểm thử
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ket-qua-kiem-thu
+          path: tai-lieu/ket-qua-kiem-thu.csv

@@ -113,7 +113,7 @@ TT.tp = (function () {
         <div class="chu-nho mo" style="margin-top:4px">${e(cc.tieuDe)}</div></div>
         <button class="nut nut-nho" data-dong aria-label="Đóng">${bt("dong")}</button></div>
       <div class="ngan-than">
-        <div class="khoi-nv"><div class="khoi-nv-dau">${dauNguon.nv()} <span>${e(vb.loai)} số ${e(vb.soKyHieu.giaTri)} ${dauNguon.cxm()} · trang ${cc.trang}${cc.trangCuoi && cc.trangCuoi !== cc.trang ? "–" + cc.trangCuoi : ""}</span></div>
+        <div class="khoi-nv"><div class="khoi-nv-dau">${dauNguon.nv()} <span>${e(vb.loai)} số ${e(vb.soKyHieu.giaTri)} ${mh.daDoiChieuBanKy ? "" : dauNguon.cxm()} · trang ${cc.trang}${cc.trangCuoi && cc.trangCuoi !== cc.trang ? "–" + cc.trangCuoi : ""}</span></div>
         ${cc.laMau ? `<div class="van-ban-mau">${e(cc.noiDung)}</div>` : nguyenVan(cc.noiDung)}</div>
         <p class="chu-nho mo" style="margin-top:12px">Văn bản được trích tự động từ tệp PDF nguồn. Khi cần sử dụng chính thức, đối chiếu với trang PDF gốc. Tình trạng hiệu lực của Quyết định: <b>${e(mh.hieuLuc.nhan.toLowerCase())}</b>${mh.hieuLuc.ghiChu ? " — " + e(mh.hieuLuc.ghiChu) : ""}</p>
       </div>
@@ -124,7 +124,7 @@ TT.tp = (function () {
   // ---------- Xuất CSV (UTF-8 có BOM để Excel đọc đúng tiếng Việt) ----------
   function xuatCsv(tenTep, cot, dong) {
     const esc = v => { const s = String(v == null ? "" : v); return /[",\n\r;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const nguon = `Nguồn: ${mh.B.vanBan.loai} ${mh.B.vanBan.soKyHieu.giaTri} (số hiệu do người dùng cung cấp, chưa đối chiếu) — Dữ liệu v${mh.B.phienBanDuLieu} — Xuất ngày ${ti.ngayHienTai()}`;
+    const nguon = `Nguồn: ${mh.tenVanBan}${mh.daDoiChieuBanKy ? "" : " (số hiệu do người dùng cung cấp, chưa đối chiếu)"} — Dữ liệu v${mh.B.phienBanDuLieu} — Xuất ngày ${ti.ngayHienTai()}`;
     const csv = "﻿" + [esc(nguon), cot.map(esc).join(","), ...dong.map(r => r.map(esc).join(","))].join("\r\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = tenTep;
@@ -139,7 +139,7 @@ TT.tp = (function () {
   // Đầu trang khi in: tiêu đề, ngày in, nguồn
   function dauIn(tieuDe) {
     const vb = mh.B.vanBan;
-    return `<div class="chi-in dau-in"><b>${e(tieuDe)}</b><br>Nguồn: ${e(vb.loai)} số ${e(vb.soKyHieu.giaTri)} của ${e(vb.coQuanBanHanh)} (số hiệu, ngày ban hành chưa đối chiếu trên tệp PDF). Bộ dữ liệu v${e(mh.B.phienBanDuLieu)}. In ngày ${ti.ngayHienTai()}.<br>Tài liệu tra cứu — không thay thế văn bản gốc.</div>`;
+    return `<div class="chi-in dau-in"><b>${e(tieuDe)}</b><br>Nguồn: ${e(mh.tenVanBan)}${mh.daDoiChieuBanKy ? "" : " (số hiệu, ngày ban hành chưa đối chiếu trên tệp PDF)"}. Bộ dữ liệu v${e(mh.B.phienBanDuLieu)}. In ngày ${ti.ngayHienTai()}.<br>Tài liệu tra cứu — không thay thế văn bản gốc.</div>`;
   }
 
   function nhanMucDo(m) {

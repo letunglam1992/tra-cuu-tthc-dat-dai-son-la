@@ -27,7 +27,7 @@ TT.soDo = (function () {
       const x = c * LANE_W + (LANE_W - NUT_W) / 2, y = DAU_H + b.hang * HANG_H + (HANG_H - NUT_H) / 2;
       viTri[b.id] = { x, y, w: NUT_W, h: NUT_H, cx: x + NUT_W / 2, cy: y + NUT_H / 2, cot: c, hang: b.hang };
     }
-    let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sơ đồ ${e(qt.ten)}">
+    let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="group" aria-label="Sơ đồ ${e(qt.ten)}">
       <defs>${["chinh", "tra-lai", "dieu-kien", "dong-thoi"].map(l => `<marker id="mui-${l}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="sd-mui-${l}" style="fill:${{ "chinh": "var(--chu-phu)", "tra-lai": "var(--do-to)", "dieu-kien": "var(--vang-to)", "dong-thoi": "var(--xanh-duong-to)" }[l]}"/></marker>`).join("")}</defs>`;
     // Làn
     lanes.forEach((id, i) => {

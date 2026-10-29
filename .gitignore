@@ -3,3 +3,4 @@ cong-cu/tam/
 cong-cu/trich-pdf/bin/
 cong-cu/trich-pdf/obj/
 .claude/
+node_modules/

@@ -38,6 +38,7 @@ TT.man = TT.man || {};
 
   TT.man["quy-trinh"] = function (ctx) {
     const { mh, thamSo } = ctx;
+    if (thamSo[0] && !mh.quyTrinhTheoId[thamSo[0]]) return { tieuDe: "Không tìm thấy quy trình", html: `<div class="trang"><div class="the trong"><h1 class="sr">Không tìm thấy quy trình</h1><b>Không có quy trình mã “${e(thamSo[0])}”.</b><a href="#/quy-trinh">Về danh sách quy trình luân chuyển</a></div></div>` };
     const qt = mh.quyTrinhTheoId[thamSo[0]] || mh.quyTrinh[0];
     const b = thamSo[1] ? qt.buocTheoId[thamSo[1]] : null;
     const d = mh.dieuTheoSo[qt.dieu];
@@ -48,10 +49,16 @@ TT.man = TT.man || {};
         <h1>${e(qt.ten)}</h1>
         <div class="mo-ta">${tp.dauNguon.dg()} ${e(qt.dienGiai)}</div></div>
         <div class="phai khong-in"><button class="nut" id="xuat-qt">${bt("taiXuong", 15)} Xuất CSV</button><button class="nut" onclick="window.print()">${bt("in", 15)} In quy trình</button></div></div>
-      <div class="ds-qt khong-in" role="tablist" aria-label="Chọn quy trình">${mh.quyTrinh.map(x => `<a class="nut ${x.id === qt.id ? "chon" : ""}" role="tab" aria-selected="${x.id === qt.id}" href="#/quy-trinh/${x.id}">${x.khoan ? `Điều ${x.dieu} k.${x.khoan}` : `Điều ${x.dieu}`} · ${e(x.ten.length > 46 ? x.ten.slice(0, 44) + "…" : x.ten)}</a>`).join("")}</div>
+      <div class="ds-qt khong-in" role="tablist" aria-label="Chọn quy trình">${mh.quyTrinh.map(x => `<a class="nut ${x.id === qt.id ? "chon" : ""}" role="tab" aria-selected="${x.id === qt.id}" href="#/quy-trinh/${x.id}" title="${e(x.ten)}"><b>${x.khoan ? `Điều ${x.dieu} k.${x.khoan}` : `Điều ${x.dieu}`}</b><span class="ds-qt-ten"> · ${e(x.ten.length > 46 ? x.ten.slice(0, 44) + "…" : x.ten)}</span></a>`).join("")}</div>
       <div class="khoi-nv" style="margin-bottom:12px"><div class="khoi-nv-dau">${tp.dauNguon.nv()} Tên Điều ${e(qt.dieu)} Quy định ${tp.chipCanCu({ dieu: qt.dieu }, "Xem toàn văn Điều " + qt.dieu)} ${tp.lkPdf(d && d.trangDau)}</div><div style="font-weight:600">Điều ${e(qt.dieu)}. ${e(d ? d.tieuDe : "")}</div></div>
       <div class="thong-bao thong-bao-xanh">${bt("thongTin")}<div>Thời hạn ghi trên từng bước là thời hạn văn bản quy định cho cơ quan thực hiện bước đó. <b>Văn bản không quy định tổng thời hạn cho quy trình luân chuyển; phần mềm không cộng dồn.</b>
         Việc luân chuyển hồ sơ xác định NVTC thực hiện qua phần mềm VBDLIS ${tp.chipCanCu({ dieu: "5", khoan: "3" }, "Khoản 3 Điều 5")}; thời gian thực hiện nghĩa vụ tài chính của người sử dụng đất không tính vào thời gian giải quyết thủ tục ${tp.chipCanCu({ dieu: "8", khoan: "1" }, "Khoản 1 Điều 8")}.</div></div>
+      <div class="qt-che-do khong-in"><button type="button" class="nut nut-nho" data-che-do="ds">${bt("danhSach", 14)} Danh sách bước</button><button type="button" class="nut nut-nho" data-che-do="so-do">${bt("luong", 14)} Sơ đồ theo cơ quan</button></div>
+      <ol class="qt-dong" id="qt-dong" aria-label="Các bước theo trình tự">${qt.buoc.slice().sort((a, c) => a.hang - c.hang || qt.lanes.indexOf(a.lane) - qt.lanes.indexOf(c.lane)).map(x => {
+        const ra = qt.canh.filter(c => c.tu === x.id);
+        return `<li class="qt-dong-buoc loai-${x.loai}"><a href="#/quy-trinh/${qt.id}/${x.id}" data-chon-buoc="${x.id}"><span class="qt-cq">${e(tp.tenCoQuan(x.lane))}</span><span class="qt-ten">${e(x.ten)}</span>
+          <span class="qt-han">${x.thoiHan ? (x.thoiHan.ngay != null ? `${String(x.thoiHan.ngay).replace(".", ",")} ngày làm việc` : "Không quy định thời hạn") : TEN_LOAI[x.loai]}</span></a>
+          ${ra.length ? `<div class="qt-ra">${ra.map(c => `<span class="qt-canh ${c.loai}">→ ${e(qt.buocTheoId[c.den].ten.length > 48 ? qt.buocTheoId[c.den].ten.slice(0, 46) + "…" : qt.buocTheoId[c.den].ten)}${c.nhan ? ` <i>(${e(c.nhan)})</i>` : ""}</span>`).join("")}</div>` : ""}</li>`; }).join("")}</ol>
       <div class="so-do-khung">
         <div class="so-do" id="so-do"><div class="so-do-cong-cu khong-in"><button class="nut nut-nho" id="sd-to" title="Phóng to" aria-label="Phóng to">${bt("phongTo", 15)}</button><button class="nut nut-nho" id="sd-nho" title="Thu nhỏ" aria-label="Thu nhỏ">${bt("thuNho", 15)}</button><button class="nut nut-nho" id="sd-vua" title="Xem toàn bộ sơ đồ" aria-label="Xem toàn bộ sơ đồ">${bt("vuaKhung", 15)}</button></div>
           <div id="sd-ve" style="height:100%"></div>
@@ -71,6 +78,13 @@ TT.man = TT.man || {};
       tieuDe: qt.ten, html, giuCuon: true,
       sau(root) {
         const ct = root.querySelector("#chi-tiet");
+        // Điện thoại: mặc định danh sách bước; máy tính: sơ đồ. Người dùng có thể đổi.
+        const trang = root.querySelector(".trang");
+        const datCheDo = m => { trang.setAttribute("data-qt", m); root.querySelectorAll("[data-che-do]").forEach(n => n.setAttribute("aria-pressed", n.getAttribute("data-che-do") === m)); };
+        let cheDo = null; try { cheDo = sessionStorage.getItem("tthc-qt-che-do"); } catch (_) { }
+        datCheDo(cheDo || (matchMedia("(max-width: 700px)").matches ? "ds" : "so-do"));
+        root.querySelectorAll("[data-che-do]").forEach(n => n.addEventListener("click", () => { const m = n.getAttribute("data-che-do"); try { sessionStorage.setItem("tthc-qt-che-do", m); } catch (_) { } datCheDo(m); if (m === "so-do") dk.vuaKhung(); }));
+        root.querySelectorAll("[data-chon-buoc]").forEach(a => a.addEventListener("click", ev => { ev.preventDefault(); dk.chon(a.getAttribute("data-chon-buoc")); ct.scrollIntoView({ block: "start" }); }));
         let lanDau = true;
         const dk = TT.soDo.ve(root.querySelector("#sd-ve"), qt, mh, { khiChon: id => {
           history.replaceState(null, "", `#/quy-trinh/${qt.id}/${id}`);

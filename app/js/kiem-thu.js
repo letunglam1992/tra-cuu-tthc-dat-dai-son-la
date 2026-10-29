@@ -64,6 +64,27 @@
   kiem("TK-06", "Tìm kiếm", "Tìm theo tên cơ quan", "“Kho bạc” → cơ quan KBNN", () => { const r = tk.tim("Kho bạc", { loai: "co-quan" }).ketQua.map(x => x.id); return [r.join(", "), r.includes("kbnn")]; });
   kiem("TK-07", "Tìm kiếm", "Mọi kết quả chứa đủ các từ khóa", "100% kết quả “giấy chứng nhận đính chính” chứa đủ 2 cụm từ", () => { const { ketQua } = tk.tim("đính chính giấy chứng nhận"); const ok = ketQua.every(r => ["dinh", "chinh", "giay", "chung", "nhan"].every(w => r.truong.some(f => ti.chuaDauTu(f.chuan, w)))); return [`${ketQua.length} kết quả`, ok && ketQua.length > 0]; });
   kiem("TK-08", "Tìm kiếm", "Tìm theo thời hạn", "“15 ngày làm việc” có I.1", () => { const r = timThuTuc("15 ngày làm việc"); return [`${r.length} thủ tục`, r.includes("I.1")]; });
+  const top = (q, n) => tk.tim(q, { loai: "thu-tuc" }).ketQua.slice(0, n || 3).map(r => r.id);
+  kiem("TK-09", "Tìm kiếm", "Gõ có dấu thì so khớp đúng dấu", "“thừa kế” không khớp “thừa” + “kê”; ít kết quả hơn “thua ke”", () => { const a = tk.tim("thừa kế").ketQua.length, b = tk.tim("thua ke").ketQua.length; return [`có dấu ${a} / không dấu ${b}`, a > 0 && a < b]; });
+  kiem("TK-10", "Tìm kiếm", "Từ đồng nghĩa, cách gọi thông dụng", "“sổ đỏ”, “GCN” → Giấy chứng nhận; “QSDĐ”; “chi cục thuế” → Cơ quan thuế; “NVTC”", () => { const a = tk.tim("sổ đỏ").ketQua.length, b = tk.tim("QSDĐ").ketQua.length, c = tk.tim("chi cục thuế", { loai: "co-quan" }).ketQua.map(x => x.id), d = tk.tim("NVTC").ketQua.length; return [`sổ đỏ ${a}; QSDĐ ${b}; chi cục thuế → ${c[0]}; NVTC ${d}`, a > 10 && b > 10 && c[0] === "co-quan-thue" && d > 10]; });
+  kiem("TK-11", "Tìm kiếm", "Sửa lỗi gõ, từ viết liền", "“chuyen nhuog” ≈ “chuyển nhượng”; “tachthua” → III.3", () => { const a = tk.tim("chuyen nhuog"), b = top("tachthua", 1); return [`${a.ketQua.length} kết quả, sửa: ${a.giaiThich.suaChinhTa.map(x => x.thanh).join(",")}; tachthua → ${b[0]}`, a.ketQua.length > 0 && b[0] === "III.3"]; });
+  kiem("TK-12", "Tìm kiếm", "Mã thủ tục, mẫu biểu", "“III.3” → III.3; “mẫu 19” → Mẫu số 19", () => { const a = tk.tim("III.3").ketQua[0], b = tk.tim("mẫu 19").ketQua[0]; return [`${a && a.id}; ${b && b.id}`, a && a.id === "III.3" && b && b.id === "19"]; });
+  kiem("TK-13", "Tìm kiếm", "Số + đơn vị thời gian khớp cách viết văn bản", "“15 ngày làm việc” khớp “15 (mười lăm) ngày làm việc” ở I.1", () => { const r = timThuTuc("15 ngày làm việc"); return [`${r.length} thủ tục`, r.includes("I.1")]; });
+  kiem("TK-14", "Tìm kiếm", "Không có kết quả: gợi ý bỏ từ kèm số kết quả thật", "“sổ đỏ xe máy” → 0 kết quả, có gợi ý", () => { const r = tk.tim("sổ đỏ xe máy"); return [`${r.ketQua.length} kết quả; gợi ý: ${r.goiY.map(g => g.q + " (" + g.soKetQua + ")").join("; ")}`, r.ketQua.length === 0 && r.goiY.length > 0 && r.goiY.every(g => tk.tim(g.q).ketQua.length === g.soKetQua)]; });
+  kiem("TK-15", "Tìm kiếm", "Thứ hạng theo tình huống thường gặp", "tách thửa → III.3; cấp lại GCN bị mất → III.7; đính chính → I.9/II.9/III.17; cấp lần đầu → II.6 trong top 3", () => { const a = top("tách thửa", 1)[0], b = top("cấp lại giấy chứng nhận bị mất", 1)[0], c = top("đính chính"), d = top("cap giay chung nhan lan dau"); return [`${a}; ${b}; ${c.join(",")}; ${d.join(",")}`, a === "III.3" && b === "III.7" && ["I.9", "II.9", "III.17"].every(x => c.includes(x)) && d.includes("II.6")]; });
+  // ---------- Hiệu lực văn bản ----------
+  kiem("HL-01", "Hiệu lực", "Số, ngày ban hành, ngày hiệu lực theo bản ký ban hành", "75/2026/QĐ-UBND; 22/10/2026; hiệu lực 22/10/2026", () => { const vb = mh.B.vanBan; return [`${vb.soKyHieu.giaTri}; ${vb.ngayBanHanh.giaTri}; ${vb.ngayHieuLuc.giaTri}; ${mh.daDoiChieuBanKy ? "đã đối chiếu bản ký" : "chưa đối chiếu"}`, vb.soKyHieu.giaTri === "75/2026/QĐ-UBND" && vb.ngayBanHanh.giaTri === "22/10/2026" && vb.ngayHieuLuc.giaTri === "22/10/2026" && mh.daDoiChieuBanKy]; });
+  kiem("HL-02", "Hiệu lực", "Tình trạng tự tính theo ngày hiệu lực", "21/10/2026: chưa có hiệu lực; 22/10/2026: có hiệu lực", () => { const a = mh.tinhHieuLuc(new Date(2026, 9, 21)).ma, b = mh.tinhHieuLuc(new Date(2026, 9, 22)).ma; return [`${a} / ${b}`, a === "chua-co-hieu-luc" && b === "co-hieu-luc"]; });
+  kiem("HL-03", "Hiệu lực", "Điều 2 khoản 1 điền ngày theo bản ký; văn bản hết hiệu lực theo khoản 2", "“kể từ ngày 22 tháng 10 năm 2026”; QĐ 45/2021 và QĐ 106/2025", () => { const k1 = mh.dieuQD.find(d => d.so === "2").khoan[0].noiDung, ds = mh.B.vanBan.vanBanHetHieuLuc.map(x => x.ten).join("; "); return [k1, k1.includes("kể từ ngày 22 tháng 10 năm 2026") && /45\/2021/.test(ds) && /106\/2025/.test(ds)]; });
+  // ---------- Thời hạn ----------
+  const th = TT.thoiHan, kh = th.khoa;
+  kiem("TH-01", "Thời hạn", "Âm lịch: Tết Nguyên đán, Giỗ Tổ Hùng Vương", "Tết 2025: 29/01; 2026: 17/02; 2027: 06/02 · Giỗ Tổ 2026: 26/04", () => { const s = [2025, 2026, 2027].map(y => kh(th.amSangDuong(1, 1, y))).join(", ") + " · " + kh(th.amSangDuong(10, 3, 2026)); return [s, s === "2025-01-29, 2026-02-17, 2027-02-06 · 2026-04-26"]; });
+  kiem("TH-02", "Thời hạn", "Đếm ngày làm việc từ ngày tiếp theo, bỏ thứ Bảy, Chủ nhật", "Nhận 29/10/2026 (thứ Năm), 12 ngày làm việc → 16/11/2026", () => { const r = th.tinh({ ngayNhan: new Date(2026, 9, 29), soNgay: 12, donVi: "ngày làm việc" }); return [th.hienThi(r.ngayHen), kh(r.ngayHen) === "2026-11-16"]; });
+  kiem("TH-03", "Thời hạn", "Cộng thời gian xã khu vực III", "III.3 nhận 29/10/2026: 12 + 10 ngày làm việc → 30/11/2026", () => { const r = th.tinh({ ngayNhan: new Date(2026, 9, 29), soNgay: 12, donVi: "ngày làm việc", tangThem: 10 }); return [th.hienThi(r.ngayHen), kh(r.ngayHen) === "2026-11-30"]; });
+  kiem("TH-04", "Thời hạn", "Trừ ngày lễ, nghỉ bù khi lễ trùng cuối tuần", "Nhận 31/12/2026, 1 ngày làm việc → 04/01/2027 (1/1 nghỉ lễ); 1/5/2027 thứ Bảy → nghỉ bù 3/5", () => { const r = th.tinh({ ngayNhan: new Date(2026, 11, 31), soNgay: 1, donVi: "ngày làm việc" }); const bu = th.thongTinNgay(new Date(2027, 4, 3)); return [`${th.hienThi(r.ngayHen)}; 03/05/2027: ${bu.ly || "ngày làm việc"}`, kh(r.ngayHen) === "2027-01-04" && !bu.lam]; });
+  kiem("TH-05", "Thời hạn", "Thời hạn tính bằng “ngày”: ngày cuối là ngày nghỉ thì lùi sang ngày làm việc tiếp theo", "Nhận 23/10/2026, 30 ngày → 22/11 (Chủ nhật) → 23/11/2026", () => { const r = th.tinh({ ngayNhan: new Date(2026, 9, 23), soNgay: 30, donVi: "ngày" }); return [th.hienThi(r.ngayHen), kh(r.ngayHen) === "2026-11-23" && r.canhBao.length > 0]; });
+  kiem("TH-06", "Thời hạn", "Năm chưa có thông báo lịch nghỉ: tạm tính Tết và cảnh báo", "Hồ sơ qua Tết 2027 có cảnh báo “tạm tính”", () => { const r = th.tinh({ ngayNhan: new Date(2027, 0, 25), soNgay: 15, donVi: "ngày làm việc" }); return [r.canhBao.join(" ").slice(0, 80), r.canhBao.some(c => /TẠM TÍNH/.test(c)) && r.nghiBiTru.some(x => x.loai === "tam-tinh")]; });
+  kiem("TH-07", "Thời hạn", "Nhận diện số ngày tăng thêm cho xã khu vực III ở mục (3)", "45/45 thủ tục có nêu khu vực III đều nhận diện được", () => { const co = mh.thuTuc.filter(t => /khu vực III/i.test(t.muc[3].noiDung)), ok = co.filter(t => th.tangThemKhuVucIII(t.muc[3].noiDung)); return [`${ok.length}/${co.length}`, ok.length === co.length && co.length > 0]; });
 
   // ---------- Xuất Word ----------
   let docxMau19 = null;
@@ -86,8 +107,30 @@
     }
     ghi("WD-01", "Xuất Word", "Tạo tệp .docx cho toàn bộ mẫu biểu Phụ lục V", "45/45 tệp: ZIP đúng chữ ký, CRC khớp, document.xml hợp lệ", hong.length ? hong.join(", ") : `${mh.mauBieu.length}/${mh.mauBieu.length} hợp lệ`, !hong.length, "Mở thử bằng Microsoft Word: kiểm thử WD-03 (chỉ có khi chạy cong-cu/chay-kiem-thu.ps1 trên máy có Word)");
     const khoi = TT.word.khoiMau(mh.mauTheoKhoa["19"], mh.B.vanBan);
-    ghi("WD-02", "Xuất Word", "Nội dung tệp Word giữ nguyên văn mẫu và ghi nguồn", "Có tiêu đề Mẫu số 19, đủ số dòng nội dung, dòng ghi nguồn", `${khoi.length} đoạn; tiêu đề: ${khoi[0].text.slice(0, 40)}…`, khoi[0].text.startsWith("Mẫu số 19") && khoi.length - 2 === mh.mauTheoKhoa["19"].noiDung.split("\n").filter(s => s.trim()).length && /^Nguồn:/.test(khoi[khoi.length - 1].text));
+    const tuNguon = new Set((mh.mauTheoKhoa["19"].noiDung.match(/[\p{L}]{3,}/gu) || []).map(x => x.toLowerCase()));
+    const vanBanWord = khoi.map(k => k.text).join(" ").toLowerCase();
+    const giuDuoc = [...tuNguon].filter(w => vanBanWord.includes(w)).length;
+    ghi("WD-02", "Xuất Word", "Nội dung tệp Word giữ nguyên văn mẫu, ghép dòng thành đoạn và ghi nguồn", "Tiêu đề Mẫu số 19; ≥ 99% từ của mẫu có trong tệp; số đoạn < số dòng PDF; có dòng nguồn", `${khoi.length} đoạn / ${mh.mauTheoKhoa["19"].noiDung.split("\n").length} dòng PDF; giữ ${giuDuoc}/${tuNguon.size} từ`, khoi[0].text.startsWith("Mẫu số 19") && giuDuoc / tuNguon.size >= 0.99 && khoi.length < mh.mauTheoKhoa["19"].noiDung.split("\n").length && /^Nguồn:/.test(khoi[khoi.length - 1].text));
+    { const d = TT.word.dungDoan(mh.mauTheoKhoa["1"].noiDung); const vb = d.doan.map(x => x.text).join("\n");
+      ghi("WD-04", "Xuất Word", "Mẫu 01: ghép dòng bị ngắt, khôi phục m², tách quốc hiệu và chú thích", "“1. Người đề nghị” liền một đoạn; có “(m²)”; quốc hiệu riêng; ≥ 4 chú thích", `quốc hiệu: ${d.quocHieu}; chú thích: ${d.chuThich.length}; m²: ${vb.includes("(m²)")}; đoạn 1: ${vb.includes("1. Người đề nghị")}`, d.quocHieu && d.chuThich.length >= 4 && vb.includes("(m²)") && vb.includes("1. Người đề nghị")); }
   } catch (err) { ghi("WD-01", "Xuất Word", "Tạo tệp .docx", "Không lỗi", "Lỗi: " + err.message, false); }
+
+  // ---------- Ngoại tuyến (PWA) ----------
+  if (location.protocol !== "file:") {
+    try {
+      const sw = await (await fetch("sw.js", { cache: "no-store" })).text();
+      const ds = JSON.parse("[" + sw.split("const TEP = [")[1].split("];")[0] + "]");
+      const thieu = [];
+      for (const f of ds) { const r = await fetch(f, { method: "HEAD", cache: "no-store" }); if (!r.ok) thieu.push(f + " (" + r.status + ")"); }
+      const tepTrang = [...document.querySelectorAll("script[src]")].map(x => x.getAttribute("src")).filter(x => !/kiem-thu/.test(x));
+      const trangChinh = await (await fetch("index.html", { cache: "no-store" })).text();
+      const scriptChinh = [...trangChinh.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
+      const ngoaiDS = scriptChinh.filter(x => !ds.includes(x));
+      ghi("PW-01", "Ngoại tuyến", "Danh sách tệp lưu ngoại tuyến (sw.js) đầy đủ, tồn tại", "Mọi tệp trong danh sách tải được; mọi script của index.html có trong danh sách", `${ds.length} tệp; thiếu: ${thieu.join(", ") || "0"}; script ngoài danh sách: ${ngoaiDS.join(", ") || "0"}`, !thieu.length && !ngoaiDS.length, `Script của trang kiểm thử: ${tepTrang.length}`);
+      const mf = await (await fetch("manifest.webmanifest", { cache: "no-store" })).json();
+      ghi("PW-02", "Ngoại tuyến", "Tệp manifest cài đặt ứng dụng", "Có tên, biểu tượng 192/512, start_url", `${mf.short_name}; ${mf.icons.map(i => i.sizes).join(", ")}`, !!(mf.name && mf.start_url && mf.icons.some(i => i.sizes === "192x192") && mf.icons.some(i => i.sizes === "512x512")));
+    } catch (err) { ghi("PW-01", "Ngoại tuyến", "Danh sách tệp ngoại tuyến", "Không lỗi", "Lỗi: " + err.message, false); }
+  }
 
   // ---------- Giao diện (khung ẩn) ----------
   const khung = document.getElementById("khung-ui");
@@ -122,7 +165,7 @@
       return { h1: (d.querySelector("#noi-dung h1") || {}).textContent || "", loi: loiHien ? loiHien.textContent.trim() : null, khongCo: khongCo ? khongCo.textContent : null, d };
     }
     const tuyen = [
-      ["#/tong-quan", "Thủ tục hành chính về đất đai và luân chuyển hồ sơ NVTC"], ["#/thu-tuc", "Thủ tục hành chính về đất đai"], ["#/thu-tuc/I.1", "Giao đất, cho thuê đất"],
+      ["#/tong-quan", "Tra cứu thủ tục hành chính về đất đai"], ["#/tinh-han?ma=III.3", "Tính thời hạn"], ["#/phieu", "Phiếu hướng dẫn"], ["#/phieu/III.3", "PHIẾU HƯỚNG DẪN"], ["#/thu-tuc", "Thủ tục hành chính về đất đai"], ["#/thu-tuc/I.1", "Giao đất, cho thuê đất"],
       ["#/thu-tuc/II.6/trinh-tu", "Đăng ký đất đai"], ["#/thu-tuc/III.2/ho-so", "Đăng ký biến động"], ["#/thu-tuc/I.5/thoi-han", "Thẩm định, phê duyệt phương án sử dụng đất"], ["#/thu-tuc/III.1/co-quan", "Đăng ký biến động"],
       ["#/thu-tuc/I.1/mau", "Giao đất"], ["#/thu-tuc/I.1/can-cu", "Giao đất"], ["#/quy-trinh/QT15", "tính theo bảng giá đất"], ["#/quy-trinh/QT15-6", "Tính hoặc tính lại"], ["#/quy-trinh/QT16/b1", "giá đất cụ thể"],
       ["#/quy-trinh/QT17", "Khấu trừ kinh phí"], ["#/quy-trinh/QT18", "đăng ký biến động"], ["#/thu-hoi", "Thu hồi đất"], ["#/thu-hoi/IV", "Trình tự, thủ tục bồi thường"], ["#/mau-bieu", "Hồ sơ và mẫu biểu"],
@@ -133,8 +176,8 @@
     let datTuyen = 0; const saiTuyen = [];
     for (const [h, mong] of tuyen) { const r = await mo(h); if (!r.loi && r.h1.includes(mong)) datTuyen++; else saiTuyen.push(`${h}: h1="${r.h1.slice(0, 50)}" ${r.loi || ""}`); }
     ghi("UI-01", "Giao diện", "Mở các màn hình chính, mọi tab", `${tuyen.length}/${tuyen.length} màn hình hiển thị đúng tiêu đề, không lỗi`, `${datTuyen}/${tuyen.length}`, datTuyen === tuyen.length, saiTuyen.join(" | "));
-    const r404 = await mo("#/khong-ton-tai"), rMa = await mo("#/thu-tuc/IX.99"), rMau = await mo("#/mau-bieu/99");
-    ghi("UI-02", "Giao diện", "Trạng thái không tìm thấy (đường dẫn, mã thủ tục, mẫu sai)", "Hiển thị thông báo rõ ràng, không lỗi", [r404.khongCo, rMa.khongCo, rMau.khongCo].join(" | "), !!(r404.khongCo && rMa.khongCo && rMau.khongCo));
+    const r404 = await mo("#/khong-ton-tai"), rMa = await mo("#/thu-tuc/IX.99"), rMau = await mo("#/mau-bieu/99"), rQT = await mo("#/quy-trinh/QT99");
+    ghi("UI-02", "Giao diện", "Trạng thái không tìm thấy (đường dẫn, mã thủ tục, mẫu sai)", "Hiển thị thông báo rõ ràng, không lỗi", [r404.khongCo, rMa.khongCo, rMau.khongCo, rQT.khongCo].join(" | "), !!(r404.khongCo && rMa.khongCo && rMau.khongCo && rQT.khongCo));
     const rRong = await mo("#/tra-cuu?q=xyzkhongco");
     ghi("UI-03", "Giao diện", "Tra cứu không có kết quả", "Thông báo không tìm thấy, không có kết quả giả", rRong.khongCo || "(không có thông báo)", !!(rRong.khongCo && !rRong.d.querySelector(".ket-qua-tim li")));
     const rLoc = await mo("#/thu-tuc?pl=III&han=le5");
@@ -187,7 +230,7 @@
       rTQ.d.querySelector("[data-ban-quyen]").click(); await cho(20);
       const hop = rTQ.d.querySelector(".hop-ban-quyen"); const nd = hop ? hop.innerText : "";
       rTQ.d.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape" })); await cho(20);
-      ghi("UI-12", "Giao diện", "Hộp “Giới thiệu, bản quyền”: tác giả, đơn vị, liên hệ, phiên bản, lời bản quyền; đóng bằng Esc", "Đủ thông tin; Esc đóng", `${["Lê Tùng Lâm", "Sở Nông nghiệp và Môi trường tỉnh Sơn La", "0987559092", "All rights reserved", "Phiên bản"].filter(s => nd.includes(s)).length}/5 thông tin; đóng: ${!rTQ.d.querySelector(".hop-ban-quyen")}`, ["Lê Tùng Lâm", "Sở Nông nghiệp và Môi trường tỉnh Sơn La", "0987559092", "All rights reserved", "Phiên bản"].every(s => nd.includes(s)) && !rTQ.d.querySelector(".hop-ban-quyen"));
+      ghi("UI-12", "Giao diện", "Hộp “Giới thiệu, bản quyền”: tác giả, đơn vị, liên hệ, phiên bản, lời bản quyền; đóng bằng Esc", "Đủ thông tin; Esc đóng", `${["Lê Tùng Lâm", "Sở Nông nghiệp và Môi trường tỉnh Sơn La", "0987559092", "Bảo lưu mọi quyền", "Phiên bản"].filter(s => nd.includes(s)).length}/5 thông tin; đóng: ${!rTQ.d.querySelector(".hop-ban-quyen")}`, ["Lê Tùng Lâm", "Sở Nông nghiệp và Môi trường tỉnh Sơn La", "0987559092", "Bảo lưu mọi quyền", "Phiên bản"].every(s => nd.includes(s)) && !rTQ.d.querySelector(".hop-ban-quyen"));
     } catch (err) { ghi("UI-11", "Giao diện", "Nút Quay lại, hộp bản quyền", "Không lỗi", "Lỗi: " + err.message, false); }
     // Lỗi JavaScript trong khung
     ghi("UI-10", "Giao diện", "Không phát sinh lỗi JavaScript khi duyệt", "0 lỗi", `${loiJs.length} lỗi`, loiJs.length === 0, loiJs.slice(0, 5).join(" | "));

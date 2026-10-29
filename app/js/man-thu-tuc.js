@@ -53,7 +53,8 @@ TT.man = TT.man || {};
         <div class="phai khong-in"><button class="nut" id="xuat-csv">${bt("taiXuong", 15)} Xuất CSV</button><button class="nut" onclick="window.print()">${bt("in", 15)} In danh mục</button></div></div>
       <div class="the">
         <form class="thanh-loc" id="loc">
-          <div class="o-tim">${bt("tim", 16)}<input type="search" name="q" value="${e(q.q || "")}" placeholder="Tìm trong tên và toàn bộ nội dung thủ tục (có dấu hoặc không dấu)" aria-label="Tìm thủ tục"></div>
+          <div class="o-tim">${bt("tim", 16)}<input type="search" name="q" value="${e(q.q || "")}" placeholder="Tìm trong tên và nội dung thủ tục" aria-label="Tìm thủ tục"></div>
+          <button type="button" class="nut nut-loc" aria-expanded="false" aria-controls="loc">${bt("danhSach", 15)} Bộ lọc${[q.pl, q.cq, q.han, q.nvtc, q.mau].filter(Boolean).length ? ` <span class="dem-loc">${[q.pl, q.cq, q.han, q.nvtc, q.mau].filter(Boolean).length}</span>` : ""}</button>
           ${sel("pl", q.pl, { nhan: "Phụ lục", ds: [["", "Mọi cấp giải quyết"], ...mh.PL.map(p => [p.so, `Phụ lục ${p.so} — ${p.cap}`])] })}
           ${sel("cq", q.cq, { nhan: "Cơ quan", ds: [["", "Mọi cơ quan"], ...cqCoMat.map(c => [c.id, c.ten])] })}
           ${sel("han", q.han, { nhan: "Thời hạn", ds: NHOM_HAN.map(g => [g.id, g.ten]) })}
@@ -61,6 +62,7 @@ TT.man = TT.man || {};
           <label class="chu-nho" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" name="nvtc" value="1" ${q.nvtc === "1" ? "checked" : ""}> Có nội dung nghĩa vụ tài chính</label>
           ${sel("sx", q.sx, { nhan: "Sắp xếp", ds: [["", "Sắp xếp theo mã"], ["han", "Sắp xếp theo thời hạn"]] })}
         </form>
+        ${q.q ? TT.giaiThichTim(tk.tim(q.q, { loai: "thu-tuc" }), q.q).replace('class="giai-thich-tim"', 'class="giai-thich-tim" style="padding:8px 14px 0;margin:0"') : ""}
         <div class="ket-loc"><b>${ds.length}</b> / ${mh.thuTuc.length} thủ tục${coLoc ? ` · <a href="#/thu-tuc">Bỏ lọc</a>` : ""}
           <span class="mo" style="margin-left:auto">${tp.dauNguon.pm()} Cột “Thời hạn” (số ngày nêu đầu tiên tại mục 3, giữ đơn vị văn bản) và “Cơ quan” là chỉ mục để lọc nhanh — luôn đối chiếu nguyên văn.</span></div>
         ${ds.length ? `<div class="bang-cuon"><table class="bang dap-ung"><thead><tr><th>Mã</th><th>Thủ tục hành chính</th><th>Thời hạn</th><th>Cơ quan có thẩm quyền</th><th>Mẫu PL V</th><th class="so">Trang</th></tr></thead><tbody>
@@ -87,6 +89,8 @@ TT.man = TT.man || {};
           location.hash = "#/thu-tuc" + (s ? "?" + s : "");
         };
         f.addEventListener("change", apDung);
+        const nutLoc = f.querySelector(".nut-loc");
+        nutLoc.addEventListener("click", () => { const mo = f.classList.toggle("mo-loc"); nutLoc.setAttribute("aria-expanded", mo); });
         f.addEventListener("submit", ev => { ev.preventDefault(); apDung(); });
         let hen; f.q.addEventListener("input", () => { clearTimeout(hen); hen = setTimeout(() => { apDung(); setTimeout(() => { const o = document.querySelector("#loc input[name=q]"); if (o) { o.focus(); o.setSelectionRange(o.value.length, o.value.length); } }, 0); }, 450); });
         root.querySelectorAll("tr[data-href]").forEach(tr => tr.addEventListener("click", ev => { if (!ev.target.closest("a")) location.hash = tr.getAttribute("data-href"); }));
@@ -133,6 +137,7 @@ TT.man = TT.man || {};
     const cungPL = mh.thuTuc.filter(x => x.phuLuc === t.phuLuc);
     const iCung = cungPL.indexOf(t);
     const truoc = cungPL[iCung - 1], sau = cungPL[iCung + 1];
+    const dvc = mh.B.dichVuCong || {};
 
     let than = "";
     if (tab === "") {
@@ -202,11 +207,17 @@ TT.man = TT.man || {};
           <div><div class="k">Trực tiếp thực hiện</div><div class="v">${trucTiep.map(id => e(tp.tenCoQuan(id))).join("; ") || "Xem mục (5)"}</div></div>
           <div><div class="k">Hồ sơ · Mẫu đơn</div><div class="v">${e(t.suyRa.soLuongHoSo || "Xem mục (2)")}<small>${t.suyRa.mau.length} mẫu Phụ lục V${t.suyRa.mauNgoai.length ? ` · ${t.suyRa.mauNgoai.length} mẫu văn bản khác` : ""}</small></div></div>
         </div>
+        <div class="tt-hanh-dong khong-in">
+          <a class="nut nut-chinh" href="#/phieu/${t.ma}">${bt("kiem", 15)} Phiếu hướng dẫn hồ sơ</a>
+          <a class="nut" href="#/tinh-han?ma=${t.ma}">${bt("dongHo", 15)} Tính ngày hẹn trả</a>
+          ${dvc.congQuocGia ? `<a class="nut" href="${e(dvc.congQuocGia)}" target="_blank" rel="noopener" title="${e(dvc.ghiChu || "")}">${bt("ngoai", 15)} Nộp trực tuyến (Cổng DVC)</a>` : ""}
+          ${dvc.maQuocGia && dvc.maQuocGia[t.ma] ? `<span class="nhan nhan-xam">Mã TTHC quốc gia: ${e(dvc.maQuocGia[t.ma])}</span>` : ""}
+        </div>
         <div class="chu-nho mo">${tp.dauNguon.pm()} Ô tóm tắt rút từ nguyên văn để đọc nhanh; nội dung pháp lý là phần nguyên văn bên dưới.</div>
       </div>
       <nav class="tab khong-in" aria-label="Nhóm thông tin">${TAB.map(x => `<a href="#/thu-tuc/${t.ma}${x.id ? "/" + x.id : ""}" class="${x.id === tab ? "chon" : ""}" ${x.id === tab ? 'aria-current="page"' : ""}>${e(x.ten)}</a>`).join("")}</nav>
       ${than}</div>`;
-    return { tieuDe: `${t.ma} ${t.ten}`, html, cuonDen: soMuc ? "#muc-" + soMuc : null };
+    return { tieuDe: `${t.ma} ${t.ten}`, html, cuonDen: soMuc ? "#muc-" + soMuc : null, giuCuon: true };
   }
 
   function noiDungQuyTac(mh) {
@@ -229,10 +240,10 @@ TT.man = TT.man || {};
     const chung = [["3", "Nguyên tắc thực hiện"], ["4", "Tiếp nhận hồ sơ"], ["5", "Luân chuyển hồ sơ"], ["6", "Giải quyết thủ tục hành chính"], ["7", "Trả kết quả"], ["8", "Thời gian thực hiện thủ tục hành chính"], ["9", "Thu phí, lệ phí"]];
     return `<div class="luoi luoi-2" style="align-items:start"><div style="display:grid;gap:16px">
       <div class="the"><div class="the-dau"><h3>Căn cứ trực tiếp</h3></div><div class="the-than"><table class="bang"><thead><tr><th>Văn bản</th><th>Vị trí</th><th>Nội dung</th></tr></thead><tbody>
-        <tr><td>${e(vb.loai)} ${e(vb.soKyHieu.giaTri)} ${tp.dauNguon.cxm()}</td><td>${tp.chipCanCu({ dieu: t.dieuCanCu }, "Điều " + t.dieuCanCu + " Quy định")}</td><td>Trình tự thủ tục thuộc ${e(t.capDai.toLowerCase())} thực hiện theo Phụ lục ${t.phuLuc}.</td></tr>
+        <tr><td>${e(vb.loai)} ${e(vb.soKyHieu.giaTri)} ${mh.daDoiChieuBanKy ? "" : tp.dauNguon.cxm()}</td><td>${tp.chipCanCu({ dieu: t.dieuCanCu }, "Điều " + t.dieuCanCu + " Quy định")}</td><td>Trình tự thủ tục thuộc ${e(t.capDai.toLowerCase())} thực hiện theo Phụ lục ${t.phuLuc}.</td></tr>
         <tr><td>Quy định ban hành kèm Quyết định</td><td>Phụ lục ${t.phuLuc}, mục A STT ${t.stt}; mục B thủ tục ${t.stt}</td><td>Toàn bộ nội dung thủ tục ${tp.lkPdf(t.trangDau, "tr. " + t.trangDau + "–" + t.trangCuoi)}</td></tr>
         ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(so => t.muc[so] ? `<tr><td class="mo">—</td><td>${tp.chipCanCu({ loai: "muc", ma: t.ma, muc: so }, `Mục (${so})`)}</td><td>${e(mh.TEN_MUC[so])} ${tp.lkPdf(t.muc[so].trangDau)}</td></tr>` : "").join("")}
-      </tbody></table><p class="chu-nho mo">Tình trạng hiệu lực: <b>${e(mh.hieuLuc.nhan.toLowerCase())}</b>. ${e(mh.hieuLuc.ghiChu)} Tệp PDF nguồn chưa ghi số, ngày ban hành (VD01).</p></div></div>
+      </tbody></table><p class="chu-nho mo">Tình trạng hiệu lực: <b>${e(mh.hieuLuc.nhan.toLowerCase())}</b>. ${e(mh.hieuLuc.ghiChu)}${mh.daDoiChieuBanKy ? "" : " Tệp PDF nguồn chưa ghi số, ngày ban hành (VD01)."}</p></div></div>
       <div class="the"><div class="the-dau"><h3>Quy định chung áp dụng cho mọi thủ tục</h3></div><div class="the-than" style="display:grid;gap:6px">${chung.map(([d, ten]) => `<div class="tang">${tp.chipCanCu({ dieu: d }, "Điều " + d)} <span>${e(ten)}</span></div>`).join("")}</div></div></div>
       <div class="the"><div class="the-dau"><h3>Văn bản được viện dẫn trong nội dung thủ tục</h3><div class="phai">${tp.dauNguon.pm()}</div></div><div class="the-than">
         <p class="chu-nho mo" style="margin-top:0">Liệt kê tự động các văn bản có tên trong 9 mục của thủ tục. Hiệu lực của các văn bản này <b>chưa được phần mềm xác minh</b>; tài liệu nguồn không kèm toàn văn.</p>

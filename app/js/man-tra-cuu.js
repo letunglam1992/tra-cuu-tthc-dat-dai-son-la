@@ -15,15 +15,16 @@ TT.man = TT.man || {};
     const ds = kq ? kq.ketQua.filter(r => !loaiChon || r.loai === loaiChon) : [];
     const html = `<div class="trang">
       <div class="dong-tieu-de"><div><div class="nhan-trang">Tra cứu nhanh</div><h1>Tìm trong toàn bộ dữ liệu</h1>
-        <div class="mo-ta">Tìm theo tên thủ tục, nội dung thủ tục, tên cơ quan, mẫu đơn, điều khoản, thời hạn, công đoạn luân chuyển. Gõ có dấu hoặc không dấu; nhiều từ khóa thì kết quả phải chứa đủ tất cả; đặt cụm trong ngoặc kép để tìm chính xác cụm.</div></div></div>
+        <div class="mo-ta">Tìm theo tên thủ tục, nội dung, cơ quan, mẫu đơn, điều khoản, thời hạn, công đoạn luân chuyển. Gõ không dấu thì tìm không dấu; gõ có dấu thì tìm đúng dấu. Hiểu cả cách gọi thông dụng (sổ đỏ, lên thổ cư, NVTC, QSDĐ…). Đặt cụm trong ngoặc kép để tìm chính xác cụm; gõ mã (III.3) hoặc “mẫu 19” để mở nhanh.</div></div></div>
       <form class="the thanh-loc" id="form-tc" style="border-radius:var(--r-lg);margin-bottom:14px"><div class="o-tim">${bt("tim", 16)}<input type="search" name="q" value="${e(q.q || "")}" placeholder="Ví dụ: tach thua; “phiếu chuyển thông tin”; 15 ngày làm việc; Mẫu số 18" aria-label="Từ khóa"></div><button class="nut nut-chinh">Tìm</button></form>
       ${!kq ? `<div class="the trong"><b>Nhập từ khóa để tra cứu.</b>Gợi ý thử: <a href="#/tra-cuu?q=t%C3%A1ch%20th%E1%BB%ADa">tách thửa</a> · <a href="#/tra-cuu?q=phieu%20chuyen%20thong%20tin">phieu chuyen thong tin</a> · <a href="#/tra-cuu?q=Kho%20b%E1%BA%A1c">Kho bạc</a> · <a href="#/tra-cuu?q=gia%20h%E1%BA%A1n%20s%E1%BB%AD%20d%E1%BB%A5ng%20%C4%91%E1%BA%A5t">gia hạn sử dụng đất</a></div>`
-      : `<div class="ds-qt">${LOAI.map(([id, ten]) => { const n = id ? kq.ketQua.filter(r => r.loai === id).length : kq.ketQua.length; return `<a class="nut nut-nho ${id === loaiChon ? "chon" : ""}" href="#/tra-cuu?q=${encodeURIComponent(q.q)}${id ? "&loai=" + id : ""}">${e(ten)} <span class="mo">${n}</span></a>`; }).join("")}</div>
+      : `${giaiThich(kq, q.q)}<div class="ds-qt">${LOAI.map(([id, ten]) => { const n = id ? kq.ketQua.filter(r => r.loai === id).length : kq.ketQua.length; return `<a class="nut nut-nho ${id === loaiChon ? "chon" : ""}" href="#/tra-cuu?q=${encodeURIComponent(q.q)}${id ? "&loai=" + id : ""}">${e(ten)} <span class="mo">${n}</span></a>`; }).join("")}</div>
         ${ds.length ? `<div class="the"><ul class="ket-qua-tim">${ds.slice(0, 200).map(r => `<li><a class="tieu" href="${r.lienKetTruong && r.loai === "thu-tuc" ? r.lienKetTruong + "?tu=" + encodeURIComponent(q.q) : r.lienKet}">${ti.toSang(r.tieuDe, kq.tu)}</a>
             <div class="phu"><span class="nhan nhan-xam" style="padding:0 7px">${e(r.nhom)}</span> ${e(r.phu)}</div>
             ${r.trich ? `<div class="trich"><span class="mo chu-nho">${e(r.truongTrich)}:</span> ${ti.toSang(r.trich, kq.tu)}</div>` : ""}</li>`).join("")}</ul>
             ${ds.length > 200 ? `<div class="ket-loc">Hiển thị 200/${ds.length} kết quả đầu tiên — hãy thêm từ khóa để thu hẹp.</div>` : ""}</div>`
-        : `<div class="the trong"><b>Không tìm thấy kết quả cho “${e(q.q)}”${loaiChon ? " trong nhóm đã chọn" : ""}.</b>Phần mềm chỉ trả kết quả chứa đủ mọi từ khóa trong dữ liệu đã chuẩn hóa từ văn bản nguồn. Thử bớt từ khóa, dùng từ đồng nghĩa có trong văn bản, hoặc kiểm tra chính tả.</div>`}`}
+        : `<div class="the trong"><b>Không tìm thấy kết quả cho “${e(q.q)}”${loaiChon ? " trong nhóm đã chọn" : ""}.</b>Phần mềm chỉ trả kết quả chứa đủ mọi từ khóa trong dữ liệu chuẩn hóa từ văn bản nguồn.
+          ${kq.goiY.length ? `<div class="goi-y-bo">${kq.goiY.map(g => `<a class="nut nut-nho" href="#/tra-cuu?q=${encodeURIComponent(g.q)}">Bỏ “${e(g.bo)}”: ${g.soKetQua} kết quả</a>`).join("")}</div>` : "Thử bớt từ khóa hoặc kiểm tra chính tả."}</div>`}`}
     </div>`;
     return { tieuDe: q.q ? "Tra cứu: " + q.q : "Tra cứu nhanh", html,
       sau(root) {
@@ -32,6 +33,16 @@ TT.man = TT.man || {};
         if (!q.q) f.q.focus();
       } };
   };
+
+  // Giải thích cách phần mềm hiểu câu tìm (đồng nghĩa, sửa chính tả, nới dấu)
+  function giaiThich(kq, q) {
+    const g = kq.giaiThich || {}, ds = [];
+    for (const x of g.dongNghia || []) ds.push(`“${e(x.tu)}” → <b>${e(x.thanh)}</b>`);
+    for (const x of g.suaChinhTa || []) ds.push(`“${e(x.tu)}” → <b>${e(x.thanh)}</b> (sửa gần đúng)`);
+    if (g.noiDau) ds.push("không tìm thấy đúng dấu, đã tìm không dấu");
+    return ds.length ? `<div class="giai-thich-tim">${tp.dauNguon.pm()} Đã hiểu là: ${ds.join("; ")}. <a href="#/tra-cuu?q=${encodeURIComponent('"' + q.replace(/"/g, "") + '"')}">Tìm đúng nguyên cụm</a></div>` : "";
+  }
+  TT.giaiThichTim = giaiThich;
 
   // ---------- Hồ sơ và mẫu biểu ----------
   TT.man["mau-bieu"] = function (ctx) {
@@ -154,7 +165,7 @@ TT.man = TT.man || {};
     const vb = mh.B.vanBan;
     const ma = thamSo[0] || "";
     if (/^(dieu|qd)-\d+$/.test(ma)) return chiTietDieu(mh, ma);
-    const tt = (o, cxm) => `${e(o.giaTri || "Không xác định")} ${cxm ? tp.dauNguon.cxm() : ""}<div class="chu-nho mo">${e(o.ghiChu || "")}</div>`;
+    const tt = o => `${e(o.giaTri || "Không xác định")} ${o.nguon === "ban-ky" ? `<span class="nhan nhan-xanh" title="Đối chiếu bản ký ban hành">Theo bản ký</span>` : o.nguon === "pdf" ? "" : tp.dauNguon.cxm()}<div class="chu-nho mo">${e(o.ghiChu || "")}</div>`;
     const vdChon = q.vb ? mh.vanBanDanChieu[q.vb] : null;
     const html = `<div class="trang">${tp.dauIn("Căn cứ pháp lý")}
       <div class="dong-tieu-de"><div><div class="nhan-trang">Căn cứ pháp lý</div><h1>Văn bản nguồn và điều khoản</h1>
@@ -165,13 +176,14 @@ TT.man = TT.man || {};
       <div class="luoi luoi-chinh"><div style="display:grid;gap:16px">
         <div class="the"><div class="the-dau"><h3>Thông tin văn bản</h3><div class="phai">${tp.lkPdf(1, "Trang 1 PDF")}</div></div><div class="the-than"><dl class="dl-gon">
           <dt>Loại văn bản</dt><dd>${e(vb.loai)} — ${e(vb.coQuanBanHanh)}</dd>
-          <dt>Số, ký hiệu</dt><dd>${tt(vb.soKyHieu, true)}</dd>
-          <dt>Ngày ban hành</dt><dd>${tt(vb.ngayBanHanh, true)}</dd>
-          <dt>Ngày có hiệu lực</dt><dd>${tt(vb.ngayHieuLuc, true)}</dd>
+          <dt>Số, ký hiệu</dt><dd>${tt(vb.soKyHieu)}</dd>
+          <dt>Ngày ban hành</dt><dd>${tt(vb.ngayBanHanh)}</dd>
+          <dt>Ngày có hiệu lực</dt><dd>${tt(vb.ngayHieuLuc)}</dd>
           <dt>Tình trạng hiệu lực</dt><dd><span class="nhan nhan-${mh.hieuLuc.lop}">${e(mh.hieuLuc.nhan)}</span><div class="chu-nho mo">${e(mh.hieuLuc.ghiChu)} Phần mềm không tự kết luận các văn bản được viện dẫn còn hiệu lực hoặc nội dung đã cập nhật theo văn bản sửa đổi sau này.</div></dd>
           <dt>Trích yếu</dt><dd>${e(vb.trichYeu)}</dd>
           <dt>Người ký</dt><dd>${e(vb.nguoiKy.giaTri)} <span class="chu-nho mo">(theo tệp PDF, tr.${vb.nguoiKy.trang})</span></dd>
-          <dt>Văn bản hết hiệu lực</dt><dd>${tp.chipCanCu({ loai: "qd", dieu: "2" }, "Khoản 2 Điều 2 Quyết định")}<div class="chu-nho">Quyết định số 45/2021/QĐ-UBND; Điều 6, Điều 7 Phụ lục III và Phụ lục IV kèm Quyết định số 106/2025/QĐ-UBND (kể từ ngày Quyết định này có hiệu lực).</div></dd>
+          <dt>Văn bản hết hiệu lực</dt><dd>${tp.chipCanCu({ loai: "qd", dieu: "2" }, "Khoản 2 Điều 2 Quyết định")}<ul class="ds-gon">${(vb.vanBanHetHieuLuc || []).map(x => `<li><b>${e(x.ten)}</b> — ${e(x.phamVi)}<div class="chu-nho mo">${e(x.noiDung)} (${e(x.canCu)})</div></li>`).join("")}</ul><div class="chu-nho">Hết hiệu lực kể từ ngày ${e(vb.ngayHieuLuc.giaTri || "Quyết định này có hiệu lực")}.</div></dd>
+          ${mh.B.banKy ? `<dt>Bản ký ban hành</dt><dd><div class="chu-nho mo">${e(mh.B.banKy.moTa)}</div><div class="anh-ban-ky">${mh.B.banKy.anh.map(a => `<a href="${e(a.tep)}" target="_blank" rel="noopener"><img src="${e(a.tep)}" alt="${e(a.noiDung)}" loading="lazy"><span>${e(a.noiDung)}</span></a>`).join("")}</div></dd>` : ""}
           <dt>Tệp nguồn</dt><dd>${e(mh.N.thongTinTrichXuat.tepNguon)} · ${mh.N.thongTinTrichXuat.soTrang} trang<div class="chu-nho mo" style="word-break:break-all">SHA-256: ${e(mh.N.thongTinTrichXuat.sha256)}</div></dd>
         </dl></div></div>
         <div class="the"><div class="the-dau"><h3>Căn cứ ban hành Quyết định</h3><div class="phai">${tp.dauNguon.nv()} ${tp.lkPdf(1, "Tr. 1–2")}</div></div><div class="the-than">${tp.nguyenVan(mh.N.moDau.canCu.join("\n"), { lienKetMau: false })}</div></div>
@@ -203,7 +215,7 @@ TT.man = TT.man || {};
       <div class="dong-tieu-de"><div><div class="nhan-trang">${loai === "qd" ? "Quyết định" : e(d.chuong)}</div><h1 style="max-width:100ch">Điều ${d.so}. ${e(d.tieuDe)}</h1>
         <div class="mo-ta tang">${tp.dauNguon.nv()} ${tp.lkPdf(d.trangDau, "Trang " + d.trangDau + (d.trangCuoi !== d.trangDau ? "–" + d.trangCuoi : ""))}</div></div>
         <div class="phai khong-in">${ds[i - 1] ? `<a class="nut nut-nho" href="#/can-cu/${loai}-${ds[i - 1].so}">← Điều ${ds[i - 1].so}</a>` : ""}${ds[i + 1] ? `<a class="nut nut-nho" href="#/can-cu/${loai}-${ds[i + 1].so}">Điều ${ds[i + 1].so} →</a>` : ""}<button class="nut nut-nho" onclick="window.print()">${bt("in", 14)} In</button></div></div>
-      <div class="luoi luoi-chinh"><div class="the"><div class="the-than">${d.mo.length ? tp.nguyenVan(d.mo.join("\n")) : ""}
+      <div class="luoi luoi-chinh"><div class="the"><div class="the-than">${(d.dienBanKy || []).length ? `<div class="thong-bao thong-bao-xanh" style="margin-bottom:12px">${bt("thongTin")}<div>Chỗ trống trong tệp PDF đã được điền theo bản ký ban hành: ${d.dienBanKy.map(x => `“${e(x.thay)}”`).join("; ")}. <a href="#/can-cu">Xem ảnh bản ký</a>.</div></div>` : ""}${d.mo.length ? tp.nguyenVan(d.mo.join("\n")) : ""}
         ${d.khoan.map(k => `<div id="khoan-${k.so}" style="margin-top:6px">${tp.nguyenVan(k.noiDung)}</div>`).join("")}${!d.mo.length && !d.khoan.length ? '<p class="mo">Nội dung điều nằm trọn trong tiêu đề.</p>' : ""}</div></div>
         <aside class="muc-luc">${apDung.length ? `<div class="the"><div class="the-dau"><h3>Áp dụng trong phần mềm</h3></div><div class="the-than chu-nho" style="display:grid;gap:6px">${apDung.join("")}</div></div>` : ""}
           ${d.khoan.length ? `<div class="the"><div class="the-dau"><h3>Các khoản</h3></div><nav class="the-than" style="padding:8px">${d.khoan.map(k => `<a href="#/can-cu/${ma}" data-khoan="${k.so}"><b>${k.so}.</b>${e(k.noiDung.replace(/^\d+\.\s*/, "").slice(0, 70))}…</a>`).join("")}</nav></div>` : ""}</aside></div></div>`;
