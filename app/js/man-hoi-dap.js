@@ -29,7 +29,7 @@ TT.man = TT.man || {};
   // Hiển thị câu trả lời: thoát HTML, xuống dòng, gạch đầu dòng, [n] → liên kết nguồn
   function veTraLoi(text, nguon) {
     return e(text).split(/\n+/).map(dong => {
-      let d = dong.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\[(\d+)\]/g, (m, n) => nguon[+n - 1] ? `<a class="trich-dan" href="${nguon[+n - 1].lienKet}" title="${e(nguon[+n - 1].tieuDe)}">[${n}]</a>` : m);
+      let d = dong.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\[(\d+(?:\s*[,;–-]\s*\d+)*)\]/g, (m, ds) => { const so = ds.split(/\s*[,;–-]\s*/); return so.every(n => nguon[+n - 1]) ? so.map(n => `<a class="trich-dan" href="${nguon[+n - 1].lienKet}" title="${e(nguon[+n - 1].tieuDe)}">[${n}]</a>`).join("") : m; });
       return /^\s*[-*•]\s+/.test(dong) ? `<li>${d.replace(/^\s*[-*•]\s+/, "")}</li>` : `<p>${d}</p>`;
     }).join("").replace(/(<li>.*?<\/li>)+/g, m => `<ul>${m}</ul>`);
   }

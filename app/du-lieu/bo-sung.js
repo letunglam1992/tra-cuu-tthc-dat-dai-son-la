@@ -6,8 +6,9 @@
  *   tăng "phienBanDuLieu" và ghi "lichSu".
  */
 window.QD75_BO_SUNG = {
-  phienBanDuLieu: "2.1.3",
+  phienBanDuLieu: "2.1.4",
   lichSu: [
+    { phienBan: "2.1.4", ngay: "2026-10-29", noiDung: "Trợ lý AI: nguồn ghi gộp dạng [1, 5] được tách thành từng liên kết." },
     { phienBan: "2.1.3", ngay: "2026-10-29", noiDung: "Bật trợ lý hỏi đáp AI qua Worker Cloudflare Workers AI (rasoatvanban.letunglam1992.workers.dev, giao thức messages); lời nhắc dẫn nguồn dựng tại trình duyệt." },
     { phienBan: "2.1.2", ngay: "2026-10-29", noiDung: "Thống kê truy cập (Vercel Web Analytics) bật bằng cờ thongKeTruyCap sau khi đã bật Analytics cho dự án — tránh lỗi 404 trên console." },
     { phienBan: "2.1.0", ngay: "2026-10-29", noiDung: "Gắn mã TTHC quốc gia theo danh mục công bố (tệp 21/8/2025): 39 thủ tục khớp, 3 gợi ý cần xác minh. Bổ sung phí, lệ phí lĩnh vực đất đai theo Nghị quyết số 155/2025/NQ-HĐND (hiệu lực 08/01/2026). Tình trạng hiệu lực văn bản viện dẫn lấy từ phần căn cứ ban hành. Cấu hình ước tính nghĩa vụ tài chính, trợ lý hỏi đáp." },

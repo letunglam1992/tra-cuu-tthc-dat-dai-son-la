@@ -1,6 +1,6 @@
 {
   "name": "tra-cuu-tthc-dat-dai-son-la",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "private": true,
   "description": "Phần mềm tra cứu thủ tục hành chính đất đai tỉnh Sơn La (ứng dụng tĩnh trong app/, không cần build).",
   "scripts": {

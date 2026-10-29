@@ -39,3 +39,12 @@ test("Cấu hình trợ lý: địa chỉ HTTPS *.workers.dev, nằm trong conne
   const csp = v.headers.flatMap(h => h.headers).find(h => h.key === "Content-Security-Policy").value;
   assert.match(csp, /connect-src[^;]*https:\/\/\*\.workers\.dev/);
 });
+
+test("Hiển thị trả lời: nguồn gộp [1, 2] tách thành từng liên kết, [9] không có nguồn giữ nguyên", () => {
+  const vm = require("vm"), fs2 = require("fs");
+  ctx.TT.tp = { bt: () => "", dauNguon: {} }; ctx.TT.man = {};
+  vm.runInContext(fs2.readFileSync(path.join(__dirname, "..", "app", "js", "man-hoi-dap.js"), "utf8"), ctx);
+  const nguon = [{ lienKet: "#/a", tieuDe: "A" }, { lienKet: "#/b", tieuDe: "B" }];
+  const h = TT.hoiDap.veTraLoi("Ý một [1, 2]. Ý hai [9].", nguon);
+  assert.equal((h.match(/class="trich-dan"/g) || []).length, 2); assert.match(h, /href="#\/b"/); assert.match(h, /\[9\]/);
+});

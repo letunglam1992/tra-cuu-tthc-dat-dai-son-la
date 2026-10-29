@@ -1,5 +1,9 @@
 # Nhật ký thay đổi
 
+## 2.1.4 — 29/10/2026
+
+- Trợ lý AI: nguồn ghi gộp dạng [1, 5] được tách thành từng liên kết.
+
 ## 2.1.3 — 29/10/2026
 
 - **Bong bóng chat trợ lý AI** ở góc phải dưới mọi màn hình (ẩn ở trang Hỏi đáp đầy đủ): hội thoại dạng bong bóng, câu hỏi gợi ý, trả lời dẫn nguồn [n] bấm mở đúng vị trí, danh sách nguồn nguyên văn dưới mỗi câu trả lời; phím Esc để đóng; trên điện thoại mở dạng tấm trượt toàn chiều rộng. Hội thoại chỉ lưu trong thẻ trình duyệt đang mở.
