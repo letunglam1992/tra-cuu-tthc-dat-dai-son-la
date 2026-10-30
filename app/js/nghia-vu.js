@@ -34,17 +34,41 @@ TT.nghiaVu = (function () {
     if (!k) return { loi: "Loại khoản thu không hợp lệ" };
     const S = so(ts.dienTich), canhBao = [...(k.canhBao || [])];
     const heSo = isFinite(so(ts.heSo)) ? so(ts.heSo) : 1;
-    let T = NaN, congThuc = "";
+    let T = NaN, congThuc = "", them = {};
     if (ts.loai === "giao-dat") {
       const G = so(ts.gia);
       T = S * G * heSo;
       congThuc = `${soVN(S)} m² × ${soVN(G, 0)} đồng/m²${heSo !== 1 ? ` × hệ số ${soVN(heSo)}` : ""}`;
     } else if (ts.loai === "chuyen-muc-dich") {
-      const G1 = so(ts.giaTruoc), G2 = so(ts.giaSau), r = isFinite(so(ts.tyLeThu)) ? so(ts.tyLeThu) : 100;
-      const chenh = G2 * heSo - G1 * heSo;
-      T = S * Math.max(0, chenh) * r / 100;
-      congThuc = `${soVN(S)} m² × (${soVN(G2, 0)} − ${soVN(G1, 0)}) đồng/m²${heSo !== 1 ? ` × hệ số ${soVN(heSo)}` : ""}${r !== 100 ? ` × ${soVN(r)}%` : ""}`;
-      if (chenh < 0) canhBao.push("Giá đất sau khi chuyển mục đích thấp hơn giá đất trước — chênh lệch âm, tạm tính 0.");
+      /* Tiền SDĐ = Σ tiền đất SAU − Σ tiền đất TRƯỚC (âm thì bằng 0), theo từng lớp/vị trí (ts.lop) nếu có.
+       * Tiền đất trước theo trường hợp (ts.truongHop, cấu hình truongHopChuyenMucDich): bình thường | bằng 0 | × thời hạn còn lại / thời hạn giao, thuê. */
+      const r = isFinite(so(ts.tyLeThu)) ? so(ts.tyLeThu) : 100;
+      const th = (ch.truongHopChuyenMucDich || []).find(x => x.id === ts.truongHop);
+      let heSoTruoc = 1, ghiTruoc = "";
+      if (th && th.cachTinh === "bang-0") { heSoTruoc = 0; ghiTruoc = " (tiền đất trước bằng 0)"; }
+      else if (th && th.cachTinh === "theo-thoi-han") {
+        const goc = so(ts.thoiHanGoc), da = so(ts.daSuDung);
+        if (!(goc > 0) || !(da >= 0)) return { loi: "Nhập thời hạn giao, thuê đất và thời gian đã sử dụng (năm)" };
+        const con = Math.max(0, goc - da); heSoTruoc = con / goc; ghiTruoc = ` × ${soVN(con)}/${soVN(goc)} năm còn lại`;
+        if (da > goc) canhBao.push("Thời gian đã sử dụng lớn hơn thời hạn giao, thuê — tiền đất trước tính bằng 0.");
+      }
+      const lop = Array.isArray(ts.lop) && ts.lop.length ? ts.lop : [{ dienTich: ts.dienTich, giaSau: ts.giaSau, giaTruoc: ts.giaTruoc }];
+      let sau = 0, truoc = 0; const phan = [], chiTiet = [];
+      for (const [i, l] of lop.entries()) {
+        const s1 = so(l.dienTich), g2 = so(l.giaSau), g1 = heSoTruoc === 0 && !String(l.giaTruoc ?? "").trim() ? 0 : so(l.giaTruoc);
+        if (!isFinite(s1) || !isFinite(g2) || !isFinite(g1)) return { loi: lop.length > 1 ? `Thiếu hoặc sai số liệu ở ${l.ten || "lớp " + (i + 1)} (diện tích, giá đất)` : "Thiếu hoặc sai số liệu (diện tích, giá đất)" };
+        const ts2 = s1 * g2 * heSo, tt1 = s1 * g1 * heSo * heSoTruoc;
+        sau += ts2; truoc += tt1;
+        phan.push(`${soVN(s1)} m² × ${soVN(g2, 0)}`);
+        chiTiet.push({ ten: l.ten || (lop.length > 1 ? "Lớp " + (i + 1) : ""), dienTich: s1, giaSau: g2, giaTruoc: g1, tienSau: Math.round(ts2), tienTruoc: Math.round(tt1) });
+      }
+      const chenh = sau - truoc;
+      T = Math.max(0, chenh) * r / 100;
+      congThuc = lop.length === 1
+        ? `${soVN(so(lop[0].dienTich))} m² × (${soVN(so(lop[0].giaSau), 0)} − ${soVN(chiTiet[0].giaTruoc, 0)}${ghiTruoc}) đồng/m²${heSo !== 1 ? ` × hệ số ${soVN(heSo)}` : ""}${r !== 100 ? ` × ${soVN(r)}%` : ""}`
+        : `Tiền đất sau ${tien(sau)} − tiền đất trước ${tien(truoc)}${ghiTruoc}${heSo !== 1 ? ` (đã nhân hệ số ${soVN(heSo)})` : ""}${r !== 100 ? ` × ${soVN(r)}%` : ""}`;
+      if (chenh < 0) canhBao.push("Tiền đất sau khi chuyển mục đích thấp hơn tiền đất trước — chênh lệch âm, tạm tính 0.");
+      them = { chiTiet, tienSau: Math.round(sau), tienTruoc: Math.round(truoc), truongHop: th ? th.nhan : "", canCuTruongHop: th ? th.canCu : "" };
     } else if (ts.loai === "thue-hang-nam") {
       const G = so(ts.gia), r = so(ts.tyLe);
       if (!isFinite(r)) return { loi: "Nhập tỷ lệ phần trăm (%) tính đơn giá thuê đất do UBND tỉnh quy định" };
@@ -68,7 +92,7 @@ TT.nghiaVu = (function () {
     let ghiTru = "";
     if (isFinite(mg) && mg > 0) { T = T * (1 - Math.min(100, mg) / 100); ghiTru += ` × (1 − ${soVN(mg)}% miễn, giảm)`; }
     if (isFinite(tru) && tru > 0) { const t0 = T; T = Math.max(0, T - tru); ghiTru += ` − ${soVN(tru, 0)} đồng được trừ`; if (tru > t0) canhBao.push("Khoản được trừ lớn hơn số phải nộp — tạm tính 0; phần chênh lệch xử lý theo quy định."); }
-    return { loai: ts.loai, ten: k.ten, soTien: Math.round(T), bangChu: docSo(T), congThuc: congThuc + ghiTru, canCu: k.canCu, canhBao, xacMinh: !!k.canXacMinh };
+    return { loai: ts.loai, ten: k.ten, soTien: Math.round(T), bangChu: docSo(T), congThuc: congThuc + ghiTru, canCu: k.canCu, canhBao, xacMinh: !!k.canXacMinh, ...them };
   }
 
   // ---------- Phí thẩm định hồ sơ và lệ phí cấp Giấy chứng nhận (Nghị quyết số 155/2025/NQ-HĐND) ----------

@@ -6,8 +6,9 @@
  *   tăng "phienBanDuLieu" và ghi "lichSu".
  */
 window.QD75_BO_SUNG = {
-  phienBanDuLieu: "2.1.4",
+  phienBanDuLieu: "2.2.0",
   lichSu: [
+    { phienBan: "2.2.0", ngay: "2026-10-29", noiDung: "Bảng giá đất tỉnh Sơn La (Nghị quyết 152/2025/NQ-HĐND từ phần mềm GPMB; bổ sung Nghị quyết 28/2026/NQ-HĐND từ phần mềm Tính tiền đất đai và môi trường) — tra cứu theo xã, tuyến, vị trí; tính tiền chuyển mục đích theo 6 trường hợp Điều 8 Nghị định 103/2024/NĐ-CP (sửa đổi tại Nghị định 50/2026/NĐ-CP), nhiều lớp/vị trí." },
     { phienBan: "2.1.4", ngay: "2026-10-29", noiDung: "Trợ lý AI: nguồn ghi gộp dạng [1, 5] được tách thành từng liên kết." },
     { phienBan: "2.1.3", ngay: "2026-10-29", noiDung: "Bật trợ lý hỏi đáp AI qua Worker Cloudflare Workers AI (rasoatvanban.letunglam1992.workers.dev, giao thức messages); lời nhắc dẫn nguồn dựng tại trình duyệt." },
     { phienBan: "2.1.2", ngay: "2026-10-29", noiDung: "Thống kê truy cập (Vercel Web Analytics) bật bằng cờ thongKeTruyCap sau khi đã bật Analytics cho dự án — tránh lỗi 404 trên console." },
@@ -344,6 +345,16 @@ window.QD75_BO_SUNG = {
       "thue-tncn": { ten: "Thuế thu nhập cá nhân từ chuyển nhượng bất động sản", mucMacDinh: 2, canCu: "Luật Thuế thu nhập cá nhân và văn bản hướng dẫn hiện hành (thuế suất 2% trên giá chuyển nhượng)", canXacMinh: true,
         canhBao: ["Trường hợp miễn thuế (nhà, đất duy nhất; chuyển nhượng giữa vợ chồng, cha mẹ, con…) và giá tính thuế khi giá chuyển nhượng thấp hơn giá trong bảng giá: đối chiếu văn bản."] }
     },
+    // Trường hợp đất trước khi chuyển mục đích (hộ gia đình, cá nhân) — cách tính tiền đất TRƯỚC; theo phần mềm Tính tiền đất đai và môi trường
+    //   cachTinh: "binh-thuong" (diện tích × giá đất trước) | "bang-0" | "theo-thoi-han" (× thời hạn còn lại / thời hạn giao, thuê)
+    truongHopChuyenMucDich: [
+      { id: "nn-giao-khong-thu", nhom: "Đất nông nghiệp", nhan: "Đất nông nghiệp được Nhà nước giao không thu tiền sử dụng đất, hoặc nhận chuyển nhượng hợp pháp từ đất được giao không thu tiền", cachTinh: "binh-thuong", canCu: "điểm a khoản 2 Điều 8 Nghị định số 103/2024/NĐ-CP (sửa đổi, bổ sung tại khoản 4 Điều 13 Nghị định số 50/2026/NĐ-CP)" },
+      { id: "nn-thue-1-lan", nhom: "Đất nông nghiệp", nhan: "Đất nông nghiệp thuê trả tiền thuê đất một lần cho cả thời gian thuê", cachTinh: "theo-thoi-han", canCu: "điểm b khoản 2 Điều 8 Nghị định số 103/2024/NĐ-CP (sửa đổi, bổ sung tại khoản 4 Điều 13 Nghị định số 50/2026/NĐ-CP)" },
+      { id: "nn-thue-hang-nam", nhom: "Đất nông nghiệp", nhan: "Đất nông nghiệp thuê trả tiền thuê đất hằng năm — tiền đất trước bằng 0", cachTinh: "bang-0", canCu: "điểm c khoản 2 Điều 8 Nghị định số 103/2024/NĐ-CP (sửa đổi, bổ sung tại khoản 4 Điều 13 Nghị định số 50/2026/NĐ-CP)" },
+      { id: "pnn-on-dinh", nhom: "Đất phi nông nghiệp", nhan: "Đất phi nông nghiệp được công nhận quyền sử dụng đất ổn định lâu dài", cachTinh: "binh-thuong", canCu: "điểm a khoản 3 Điều 8 Nghị định số 103/2024/NĐ-CP (sửa đổi, bổ sung tại khoản 4 Điều 13 Nghị định số 50/2026/NĐ-CP)" },
+      { id: "pnn-thue-hang-nam", nhom: "Đất phi nông nghiệp", nhan: "Đất phi nông nghiệp thuê trả tiền thuê đất hằng năm — tiền đất trước bằng 0", cachTinh: "bang-0", canCu: "điểm b khoản 3 Điều 8 Nghị định số 103/2024/NĐ-CP (sửa đổi, bổ sung tại khoản 4 Điều 13 Nghị định số 50/2026/NĐ-CP)" },
+      { id: "pnn-co-thoi-han", nhom: "Đất phi nông nghiệp", nhan: "Đất phi nông nghiệp được giao có thu tiền sử dụng đất có thời hạn, hoặc thuê trả tiền thuê đất một lần", cachTinh: "theo-thoi-han", canCu: "điểm c khoản 3 Điều 8 Nghị định số 103/2024/NĐ-CP (sửa đổi, bổ sung tại khoản 4 Điều 13 Nghị định số 50/2026/NĐ-CP)" }
+    ],
     // Gợi ý tỷ lệ thu trên chênh lệch khi chuyển mục đích (CẦN XÁC MINH với Nghị quyết số 254/2025/QH15, Nghị định số 50/2026/NĐ-CP)
     tyLeChuyenMucDich: [
       { nhan: "100% chênh lệch (nguyên tắc chung)", giaTri: 100 },

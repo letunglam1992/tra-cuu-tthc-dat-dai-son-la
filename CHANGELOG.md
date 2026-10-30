@@ -1,5 +1,17 @@
 # Nhật ký thay đổi
 
+## 2.2.0 — 30/10/2026
+
+### Bảng giá đất tỉnh Sơn La
+- **Dữ liệu**: Bảng giá đất ban hành kèm Nghị quyết số 152/2025/NQ-HĐND (hiệu lực 01/01/2026) lấy từ phần mềm GPMB (trích từ bản Word, có cảnh báo dòng bất thường): 1.795 tuyến đất ở, 1.793 tuyến TM-DV, 1.797 tuyến SXKD phi nông nghiệp, giá đất nông nghiệp 75 xã, phường. Bổ sung 396 tuyến theo Nghị quyết số 28/2026/NQ-HĐND (hiệu lực 01/11/2026, Phụ lục I–III) lấy từ phần mềm Tính tiền đất đai và môi trường; tuyến chưa đến ngày hiệu lực được đánh dấu theo thời điểm tính giá. Công cụ dựng dữ liệu: `cong-cu/nhap-bang-gia-dat.js`.
+- **Trang Bảng giá đất** (`#/gia-dat`): chọn xã, phường → loại đất → gõ tên tuyến (không dấu cũng được) → bấm vị trí VT1–VT5 để xem giá; hướng dẫn xác định vị trí, điều chỉnh giá theo Điều 3–9 Quy định kèm theo Nghị quyết 152; chuyển thẳng sang tính tiền chuyển mục đích với giá đã chọn.
+- **Đối chiếu dữ liệu giữa hai phần mềm**: `tai-lieu/doi-chieu-bang-gia-dat.md` — 179 ô giá Nghị quyết 152 hai phần mềm ghi khác nhau, trong đó 119 ô có dấu hiệu lệch cột ở phần mềm Tính tiền đất đai (ví dụ xã Chiềng Sơ, Quốc lộ 12: vị trí 4 ghi 530.000 là giá vị trí 2).
+
+### Tiền sử dụng đất khi chuyển mục đích
+- Nhập theo 4 bước: (1) xã, thời điểm tính giá, trường hợp đất trước; (2) giá đất sau — chọn tuyến, vị trí; điều chỉnh chênh cao ≥ 1,5 m (−30%), đường đất vị trí 2–5 (70%); (3) giá đất trước — đất nông nghiệp theo xã (tăng 50% nếu xen kẹt đất ở) hoặc đất phi nông nghiệp; nút “Cùng tuyến, cùng vị trí”; (4) diện tích theo lớp/vị trí, áp tỷ lệ phân lớp chiều sâu (khoản 6 Điều 4).
+- 6 trường hợp đất trước theo Điều 8 Nghị định số 103/2024/NĐ-CP (sửa đổi, bổ sung tại khoản 4 Điều 13 Nghị định số 50/2026/NĐ-CP), như phần mềm Tính tiền đất đai: tiền đất trước bằng 0 (thuê trả hằng năm) hoặc nhân thời hạn còn lại/thời hạn giao, thuê. Kết quả ghi nguồn giá (bảng, xã, STT, tuyến, vị trí) và bảng tiền từng lớp.
+- Các khoản khác (giao đất, thuê đất, lệ phí trước bạ): nút “Tra bảng giá” tra trực tiếp Bảng giá đất tỉnh; bảng giá tự nhập từ Excel chuyển thành tùy chọn.
+
 ## 2.1.4 — 29/10/2026
 
 - Trợ lý AI: nguồn ghi gộp dạng [1, 5] được tách thành từng liên kết.

@@ -29,6 +29,7 @@ Phần mềm tra cứu trình tự, thủ tục hành chính về đất đai v�
 - **Tra cứu thông minh**: có dấu/không dấu, cách gọi thông dụng (sổ đỏ, lên thổ cư, NVTC…), sửa lỗi gõ; gõ mã thủ tục (III.3), mã TTHC quốc gia (1.012784) hoặc “mẫu 19”.
 - **Trang chủ theo tình huống**; **mã TTHC quốc gia** cho 39 thủ tục; **phí, lệ phí** theo Nghị quyết 155/2025/NQ-HĐND tại mục (7) từng thủ tục.
 - **Công cụ**: tính thời hạn giải quyết; phiếu hướng dẫn hồ sơ (A4, QR); ước tính nghĩa vụ tài chính, phí, lệ phí (nhập bảng giá đất từ Excel); điền mẫu đơn → Word; báo cáo tổng hợp TTHC (Word theo thể thức); sổ theo dõi hạn hồ sơ (Excel).
+- **Bảng giá đất tỉnh Sơn La** (Nghị quyết 152/2025/NQ-HĐND, bổ sung Nghị quyết 28/2026/NQ-HĐND): tra theo xã, tuyến, vị trí; dùng trực tiếp khi tính tiền chuyển mục đích. Dựng lại dữ liệu: `node cong-cu/nhap-bang-gia-dat.js <thư mục phanmemGPMB> <thư mục tinhtiendatdai>`.
 - **Hỏi đáp (trợ lý AI)** có dẫn nguồn nguyên văn, dạng trang riêng và bong bóng chat trên mọi màn hình. Cấu hình `troLyAI` trong `app/du-lieu/bo-sung.js`: giao thức `messages` (Worker Workers AI dùng chung, hiện dùng `rasoatvanban.letunglam1992.workers.dev`) hoặc `tthc` (Worker riêng `tro-ly-ai/`, Gemini → dự phòng Workers AI — xem [tro-ly-ai/README.md](tro-ly-ai/README.md)).
 - **Chạy khi mất mạng**, cài như ứng dụng; **chế độ kiểm soát dữ liệu** cho người biên soạn (`?quan-tri=1`).
 

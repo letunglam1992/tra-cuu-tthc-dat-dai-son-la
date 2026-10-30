@@ -29,7 +29,7 @@ const ghi = (ma, nhom, noiDung, mongDoi, thucTe, dat, ghiChu) => { kq.push({ ma,
     {
       const ctx = await b.newContext({ viewport: { width: 375, height: 812 }, serviceWorkers: "block", hasTouch: true, isMobile: true });
       const p = await ctx.newPage(); const loi = []; p.on("pageerror", e => loi.push(e.message));
-      const tuyen = ["#/tong-quan", "#/thu-tuc", "#/thu-tuc/III.3", "#/thu-tuc/I.1/ho-so", "#/quy-trinh/QT15", "#/thu-hoi", "#/mau-bieu", "#/mau-bieu/19", "#/co-quan", "#/can-cu", "#/tra-cuu?q=s%E1%BB%95%20%C4%91%E1%BB%8F", "#/tinh-han?ma=III.3", "#/phieu/III.3", "#/gioi-thieu", "#/doi-soat", "#/nghia-vu?phi=III.3", "#/phi-le-phi", "#/dien-mau", "#/dien-mau/22", "#/bao-cao", "#/so-theo-doi", "#/hoi-dap", "#/doi-soat?tab=ma-tthc"];
+      const tuyen = ["#/tong-quan", "#/thu-tuc", "#/thu-tuc/III.3", "#/thu-tuc/I.1/ho-so", "#/quy-trinh/QT15", "#/thu-hoi", "#/mau-bieu", "#/mau-bieu/19", "#/co-quan", "#/can-cu", "#/tra-cuu?q=s%E1%BB%95%20%C4%91%E1%BB%8F", "#/tinh-han?ma=III.3", "#/phieu/III.3", "#/gioi-thieu", "#/doi-soat", "#/nghia-vu?phi=III.3", "#/phi-le-phi", "#/dien-mau", "#/dien-mau/22", "#/bao-cao", "#/so-theo-doi", "#/hoi-dap", "#/doi-soat?tab=ma-tthc", "#/gia-dat"];
       const tran = [];
       await p.goto(GOC + "#/tong-quan"); await p.waitForSelector(".ben-muc");
       for (const h of tuyen) {
@@ -116,6 +116,14 @@ const ghi = (ma, nhom, noiDung, mongDoi, thucTe, dat, ghiChu) => { kq.push({ ma,
       await p.keyboard.press("Escape"); const daDong = await p.$eval(".bb-khung", k => k.hidden);
       await p.goto(GOC + "#/hoi-dap"); const anNut = await p.$eval(".bb-nut", n => n.hidden);
       ghi("GD-12", "Công cụ", "Bong bóng chat trợ lý: mở từ nút nổi, trả lời dẫn nguồn, Esc đóng, ẩn ở trang Hỏi đáp", "có [n]; Esc đóng; nút ẩn", `trả lời: ${coBB}; Esc đóng: ${daDong}; ẩn ở hỏi đáp: ${anNut}`, coBB && daDong && anNut);
+      // Bảng giá đất → tiền chuyển mục đích: chọn xã, tuyến, vị trí (giá sau) và đất nông nghiệp (giá trước)
+      await p.goto(GOC + "#/nghia-vu"); await p.evaluate(() => localStorage.removeItem("tthc-du-tru-nvtc")); await p.reload();
+      await p.waitForSelector(".khoan-nv .cg-sau .cg-loc", { timeout: 15000 });
+      await p.selectOption('.khoan-nv [data-cmd="xa"]', { label: "Xã Đoàn Kết" }); await p.fill('.khoan-nv .cg-sau [data-cg="q"]', "hua pang");
+      await p.click('.khoan-nv .cg-sau button.cg-gia[data-vt="2"] >> nth=0'); await p.selectOption('.khoan-nv .cg-truoc [data-cg="loai"]', "nn:CLN");
+      await p.click(".khoan-nv .cg-truoc button.cg-gia"); await p.fill('.khoan-nv [data-lop="0"] [data-k="dienTich"]', "200");
+      const tienCMD = await p.$eval(".khoan-nv .kq-nv .v", x => x.textContent);
+      ghi("GD-13", "Công cụ", "Tiền chuyển mục đích tra Bảng giá đất: Đoàn Kết, QL 43 VT2 (420.000) ← đất trồng cây lâu năm (68.000), 200 m²", "70.400.000 đồng", tienCMD, tienCMD === "70.400.000 đồng");
       ghi("GD-10a", "Công cụ", "Hỏi đáp qua Worker Workers AI dùng chung (giao thức messages): lời nhắc có chỉ dẫn + đoạn trích, trả lời dẫn nguồn", "system + user; có liên kết [1]", `trả lời: ${coTraLoi1}; system: ${!!(thanMessages && thanMessages.messages[0].role === "system")}`, coTraLoi1 && !!thanMessages && thanMessages.messages.length === 2 && /ĐOẠN TRÍCH/.test(thanMessages.messages[1].content));
       await p.route("https://tro-ly.vi-du.workers.dev/hoi", r => r.fulfill({ status: 200, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ traLoi: "- Thời hạn: 12 ngày làm việc [1]\nThông tin tham khảo.", nhaCungCap: "Giả lập", moHinh: "kiem-thu" }) }));
       await p.evaluate(() => localStorage.setItem("tthc-tro-ly-dia-chi", "https://tro-ly.vi-du.workers.dev"));
