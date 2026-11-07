@@ -59,6 +59,8 @@ TT.tp = (function () {
       else if (/^Bước\s*\d/.test(d)) cls = "buoc-dau";
       else if (/^([a-zđ]\d?\)|\([ivx]+\))/.test(d) && d.length < 160 && !/[.;,]$/.test(d.trim())) cls = "tieu";
       let html = opts.toSang ? ti.toSang(d, opts.toSang) : e(d);
+      // Viện dẫn văn bản pháp luật có nguyên văn trong phần mềm (không áp khi đang tô sáng từ khóa — chuỗi đã có thẻ <mark>)
+      if (TT.phapLuat && !opts.toSang && opts.lienKetPL !== false) html = TT.phapLuat.lienKet(html, opts);
       if (mh && opts.lienKetMau !== false) html = ganLienKetMau(html);
       return `<p class="${cls}">${html}</p>`;
     }).join("")}</div>`;

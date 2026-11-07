@@ -6,8 +6,9 @@
  *   tăng "phienBanDuLieu" và ghi "lichSu".
  */
 window.QD75_BO_SUNG = {
-  phienBanDuLieu: "2.2.0",
+  phienBanDuLieu: "2.3.0",
   lichSu: [
+    { phienBan: "2.3.0", ngay: "2026-11-07", noiDung: "Tính thời hạn theo từng trường hợp của mục (3), cộng thêm khi phát sinh nghĩa vụ tài chính; trang Chọn đúng thủ tục và khung “Dễ nhầm với”; nguyên văn 11 văn bản pháp luật đất đai, gắn liên kết viện dẫn trong Quyết định 75; cơ chế Phụ lục IV, V và khoản 8 Điều 7 Nghị quyết 28/2026; phiếu Word dự trù tiền chuyển mục đích; hạn mức lượt hỏi trợ lý AI." },
     { phienBan: "2.2.0", ngay: "2026-10-29", noiDung: "Bảng giá đất tỉnh Sơn La (Nghị quyết 152/2025/NQ-HĐND từ phần mềm GPMB; bổ sung Nghị quyết 28/2026/NQ-HĐND từ phần mềm Tính tiền đất đai và môi trường) — tra cứu theo xã, tuyến, vị trí; tính tiền chuyển mục đích theo 6 trường hợp Điều 8 Nghị định 103/2024/NĐ-CP (sửa đổi tại Nghị định 50/2026/NĐ-CP), nhiều lớp/vị trí." },
     { phienBan: "2.1.4", ngay: "2026-10-29", noiDung: "Trợ lý AI: nguồn ghi gộp dạng [1, 5] được tách thành từng liên kết." },
     { phienBan: "2.1.3", ngay: "2026-10-29", noiDung: "Bật trợ lý hỏi đáp AI qua Worker Cloudflare Workers AI (rasoatvanban.letunglam1992.workers.dev, giao thức messages); lời nhắc dẫn nguồn dựng tại trình duyệt." },
@@ -363,10 +364,115 @@ window.QD75_BO_SUNG = {
     ]
   },
 
+  // Phân định các thủ tục gần giống nhau (trang “Chọn đúng thủ tục” và khung “Dễ nhầm với” trên trang thủ tục).
+  // Tiêu chí lấy từ mục (4) đối tượng thực hiện, mục (5) cơ quan thực hiện và tên thủ tục tại Quyết định 75.
+  phanDinh: [
+    { id: "quyet-dinh-dat", ten: "Giao đất, cho thuê đất, chuyển mục đích; điều chỉnh, chuyển hình thức; sử dụng đất kết hợp",
+      cauHoi: "Người sử dụng đất là ai, Nhà nước giao đất, cho thuê đất theo hình thức nào?",
+      tieuChi: "Mục (4) Phụ lục I chỉ gồm tổ chức được giao đất có thu tiền sử dụng đất (Điều 119 Luật Đất đai), thuê đất trả tiền một lần (khoản 2 Điều 120), dự án có diện tích thuộc các hình thức đó, hoặc dự án trên địa bàn 02 xã trở lên; Phụ lục II gồm cá nhân, cộng đồng dân cư và tổ chức được giao đất không thu tiền (Điều 118), thuê đất trả tiền hằng năm (khoản 3 Điều 120), chuyển mục đích không phải nộp tiền hoặc được miễn toàn bộ.",
+      luaChon: [
+        { nhan: "Tổ chức — giao đất có thu tiền, thuê trả tiền một lần, hoặc dự án trên 02 xã trở lên", ketQua: "Chủ tịch UBND tỉnh (Phụ lục I)", ma: ["I.1", "I.2", "I.3", "I.4", "I.7"] },
+        { nhan: "Tổ chức — giao đất không thu tiền, thuê trả tiền hằng năm, không phải nộp hoặc được miễn toàn bộ tiền", ketQua: "Chủ tịch UBND cấp xã (Phụ lục II)", ma: ["II.1", "II.2", "II.3", "II.4", "II.12"] },
+        { nhan: "Cá nhân, cộng đồng dân cư; hộ gia đình chuyển mục đích sang đất ở", ketQua: "Chủ tịch UBND cấp xã (Phụ lục II)", ma: ["II.1", "II.2", "II.3", "II.12"] }],
+      cap: [["I.1", "II.1"], ["I.2", "II.2"], ["I.3", "II.3"], ["I.4", "II.4"], ["I.7", "II.12"]],
+      canhBao: ["Mục (4) của II.4 (chuyển hình thức sử dụng đất, cấp xã) ghi tổ chức “được giao đất có thu tiền sử dụng đất quy định tại Điều 119… thuê đất thu tiền thuê đất một lần” — trùng đối tượng với I.4 (cấp tỉnh). Đề nghị xác minh thẩm quyền trước khi tiếp nhận."] },
+    { id: "chuyen-muc-dich", ten: "Chuyển mục đích sử dụng đất: phải xin phép hay chỉ đăng ký biến động",
+      cauHoi: "Việc chuyển mục đích có thuộc trường hợp phải được cơ quan nhà nước có thẩm quyền cho phép không?",
+      tieuChi: "Thủ tục giao đất, cho thuê đất, chuyển mục đích (I.1, II.1) áp dụng khi phải xin phép; III.12 áp dụng khi chuyển mục đích không phải xin phép, chỉ đăng ký biến động tại Văn phòng đăng ký đất đai.",
+      luaChon: [
+        { nhan: "Phải được cho phép — tổ chức thuộc nhóm thu tiền / dự án nhiều xã", ketQua: "Chủ tịch UBND tỉnh", ma: ["I.1"] },
+        { nhan: "Phải được cho phép — cá nhân, hộ gia đình (sang đất ở…), tổ chức nhóm không thu tiền", ketQua: "Chủ tịch UBND cấp xã", ma: ["II.1"] },
+        { nhan: "Không phải xin phép — chỉ đăng ký biến động", ketQua: "Văn phòng đăng ký đất đai / Chi nhánh", ma: ["III.12"] }],
+      cap: [["II.1", "III.12"], ["I.1", "III.12"]] },
+    { id: "dang-ky-lan-dau", ten: "Đăng ký đất đai, cấp Giấy chứng nhận lần đầu",
+      cauHoi: "Ai đang sử dụng đất và đất được Nhà nước giao, cho thuê theo hình thức nào?",
+      tieuChi: "I.8 dành cho tổ chức thuộc nhóm giao đất có thu tiền, thuê trả tiền một lần; II.5 cho tổ chức nhóm không thu tiền, thuê hằng năm, được miễn; II.6 cho hộ gia đình, cá nhân, cộng đồng dân cư, người gốc Việt Nam định cư ở nước ngoài.",
+      luaChon: [
+        { nhan: "Tổ chức — giao đất có thu tiền, thuê trả tiền một lần", ketQua: "Chủ tịch UBND tỉnh (Sở Nông nghiệp và Môi trường thực hiện)", ma: ["I.8"] },
+        { nhan: "Tổ chức — giao đất không thu tiền, thuê trả tiền hằng năm, được miễn toàn bộ", ketQua: "Chủ tịch UBND cấp xã", ma: ["II.5"] },
+        { nhan: "Hộ gia đình, cá nhân, cộng đồng dân cư, người gốc Việt Nam định cư ở nước ngoài", ketQua: "Chủ tịch UBND cấp xã", ma: ["II.6"] }],
+      cap: [["I.8", "II.5"], ["II.5", "II.6"]] },
+    { id: "dinh-chinh", ten: "Đính chính Giấy chứng nhận đã cấp",
+      cauHoi: "Giấy chứng nhận có sai sót được cấp trong trường hợp nào?",
+      tieuChi: "Tên thủ tục phân định: III.17 — Giấy chứng nhận đã cấp khi thực hiện đăng ký biến động; II.9 — Giấy chứng nhận đã cấp lần đầu (cá nhân, cộng đồng dân cư, tổ chức nhóm không thu tiền); I.9 — Giấy chứng nhận cấp cho tổ chức nhóm thu tiền, thuê một lần (Sở Nông nghiệp và Môi trường quyết định).",
+      luaChon: [
+        { nhan: "Giấy chứng nhận cấp khi đăng ký biến động (chuyển nhượng, tặng cho, cấp đổi…)", ketQua: "Văn phòng đăng ký đất đai / Chi nhánh", ma: ["III.17"] },
+        { nhan: "Cấp lần đầu — cá nhân, cộng đồng dân cư, tổ chức nhóm không thu tiền", ketQua: "Chủ tịch UBND cấp xã", ma: ["II.9"] },
+        { nhan: "Cấp lần đầu — tổ chức nhóm giao đất có thu tiền, thuê trả tiền một lần", ketQua: "Sở Nông nghiệp và Môi trường", ma: ["I.9"] }],
+      cap: [["I.9", "II.9", "III.17"]] },
+    { id: "thu-hoi-gcn", ten: "Thu hồi Giấy chứng nhận cấp không đúng quy định (người sử dụng đất phát hiện)",
+      cauHoi: "Giấy chứng nhận cấp không đúng quy định được cấp trong trường hợp nào?",
+      tieuChi: "Như đính chính: III.21 — Giấy chứng nhận cấp khi đăng ký biến động (hoặc cấp lần đầu sai nhưng đã được cấp đổi); II.10 — Giấy chứng nhận đã cấp lần đầu thuộc thẩm quyền cấp xã; I.10 — tổ chức nhóm thu tiền, thuê một lần (Sở Nông nghiệp và Môi trường quyết định).",
+      luaChon: [
+        { nhan: "Giấy chứng nhận cấp khi đăng ký biến động; hoặc cấp lần đầu sai nhưng đã được cấp đổi", ketQua: "Văn phòng đăng ký đất đai / Chi nhánh", ma: ["III.21"] },
+        { nhan: "Cấp lần đầu — cá nhân, cộng đồng dân cư, tổ chức nhóm không thu tiền", ketQua: "Chủ tịch UBND cấp xã", ma: ["II.10"] },
+        { nhan: "Cấp lần đầu — tổ chức nhóm giao đất có thu tiền, thuê trả tiền một lần", ketQua: "Sở Nông nghiệp và Môi trường", ma: ["I.10"] }],
+      cap: [["I.10", "II.10", "III.21"]] },
+    { id: "chap-thuan-nhan-qsdd", ten: "Chấp thuận về việc thỏa thuận nhận quyền sử dụng đất để thực hiện dự án",
+      cauHoi: "Tổ chức kinh tế nhận quyền sử dụng đất theo hình thức sử dụng đất nào?",
+      tieuChi: "I.6 ghi đối tượng là tổ chức kinh tế thuộc nhóm giao đất có thu tiền, thuê trả tiền một lần; II.13 chỉ ghi “Tổ chức kinh tế”.",
+      luaChon: [
+        { nhan: "Nhóm giao đất có thu tiền, thuê trả tiền một lần, dự án có diện tích thuộc các hình thức đó", ketQua: "Chủ tịch UBND tỉnh", ma: ["I.6"] },
+        { nhan: "Các trường hợp còn lại", ketQua: "Chủ tịch UBND cấp xã", ma: ["II.13"] }],
+      cap: [["I.6", "II.13"]],
+      canhBao: ["Quyết định 75 chưa phân định đối tượng của II.13 (chỉ ghi “Tổ chức kinh tế”) với I.6 — cách phân chia trên suy ra từ mục (4) của I.6; đề nghị xác minh với cơ quan giải quyết."] },
+    { id: "cap-doi-cap-lai", ten: "Cấp đổi hay cấp lại Giấy chứng nhận",
+      cauHoi: "Giấy chứng nhận còn hay đã mất?",
+      tieuChi: "III.7 khi Giấy chứng nhận bị mất; III.6 khi còn Giấy chứng nhận nhưng cần đổi (mẫu cũ trước 01/8/2024, hư hỏng, cấp riêng từng thửa, ghi tên vợ chồng, đo đạc lại…).",
+      luaChon: [
+        { nhan: "Giấy chứng nhận bị mất", ketQua: "Văn phòng đăng ký đất đai / Chi nhánh", ma: ["III.7"] },
+        { nhan: "Còn Giấy chứng nhận, cần đổi sang Giấy mới", ketQua: "Văn phòng đăng ký đất đai / Chi nhánh", ma: ["III.6"] }],
+      cap: [["III.6", "III.7"]] }
+  ],
+
+  // Thời hạn theo từng trường hợp, đọc từ mục (3) của từng thủ tục (công cụ Tính thời hạn). Đơn vị: "nlv" ngày làm việc | "ngay" ngày (theo nguyên văn).
+  //   nvtc: số ngày làm việc tăng thêm khi phát sinh nghĩa vụ tài chính (áp cho mọi trường hợp; trường hợp có nvtc: false thì không áp).
+  //   canhBao: điểm chưa thống nhất của chính Quyết định 75 (rà soát ngày 30/10/2026) — hiển thị để người dùng đối chiếu.
+  thoiHanTruongHop: {
+    "I.2": { nvtc: 3, ds: [{ nhan: "Điều chỉnh quyết định giao đất, cho thuê đất, cho phép chuyển mục đích sử dụng đất", ngay: 5, dv: "nlv" }, { nhan: "Điều chỉnh thời hạn sử dụng đất của dự án đầu tư", ngay: 12, dv: "nlv" }] },
+    "I.3": { nvtc: 3, ds: [{ nhan: "Điều chỉnh quyết định do sai sót", ngay: 7, dv: "nlv" }] },
+    "I.5": { ds: [{ nhan: "Thẩm định, phê duyệt phương án sử dụng đất", ngay: 30, dv: "ngay" }], canhBao: ["Mục (3) ghi “30 (ba mươi) ngày”, không ghi “ngày làm việc” — đối chiếu cách tính với cơ quan giải quyết."] },
+    "I.7": { nvtc: 3, ds: [{ nhan: "Thẩm định, phê duyệt phương án sử dụng đất kết hợp", ngay: 12, dv: "nlv" }, { nhan: "Gia hạn phương án sử dụng đất kết hợp", ngay: 7, dv: "nlv" }] },
+    "I.8": { ds: [
+      { nhan: "a) Đã có quyết định giao đất, cho thuê đất, chuyển mục đích — thẩm định 08 + ký cấp Giấy chứng nhận 03", ngay: 11, dv: "nlv" },
+      { nhan: "a) Như trên, cấp đồng loạt (trên 20 Giấy chứng nhận) — 08 + 13", ngay: 21, dv: "nlv" },
+      { nhan: "b) Phải ban hành quyết định hình thức sử dụng đất — chỉ đăng ký đất đai (theo con số ghi trong mục 3)", ngay: 15, dv: "nlv" },
+      { nhan: "b) Phải ban hành quyết định hình thức sử dụng đất — có cấp Giấy chứng nhận: 09 + 03 + 03 (thuế) + 03 (ký)", ngay: 18, dv: "nlv" },
+      { nhan: "b) Như trên, cấp đồng loạt (trên 20 Giấy chứng nhận): 09 + 03 + 03 + 10", ngay: 25, dv: "nlv" }],
+      canhBao: ["Điểm b mục (3) ghi “không quá 15 ngày làm việc (trường hợp chỉ đăng ký đất đai)” nhưng các thành phần liệt kê cộng lại 18 ngày; cùng trường hợp tại thủ tục II.5 ghi 18 ngày. Đề nghị đối chiếu khi hẹn trả."] },
+    "I.9": { nvtc: 3, ds: [{ nhan: "Đính chính Giấy chứng nhận (tăng thêm 03 ngày nếu đính chính làm thay đổi số thuế phải nộp)", ngay: 8, dv: "nlv" }] },
+    "I.10": { nvtc: 3, ds: [{ nhan: "Thu hồi Giấy chứng nhận đã cấp", ngay: 25, dv: "nlv", nvtc: false }, { nhan: "Đăng ký, cấp lại Giấy chứng nhận sau thu hồi", ngay: 20, dv: "nlv" }, { nhan: "Thu hồi và cấp lại (25 + 20)", ngay: 45, dv: "nlv" }], canhBao: ["Nguyên văn ghi “Trưởng hợp phát sinh nghĩa vụ tài chính” (lỗi chính tả “Trường hợp”)."] },
+    "II.2": { nvtc: 3, ds: [{ nhan: "Điều chỉnh quyết định giao đất, cho thuê đất, cho phép chuyển mục đích sử dụng đất", ngay: 5, dv: "ngay" }, { nhan: "Điều chỉnh thời hạn sử dụng đất của dự án đầu tư", ngay: 12, dv: "ngay" }], canhBao: ["Mục (3) ghi “ngày” (cùng thủ tục ở cấp tỉnh — I.2 — ghi “ngày làm việc”); đối chiếu cách tính."] },
+    "II.3": { nvtc: 3, ds: [{ nhan: "Điều chỉnh quyết định do sai sót", ngay: 13, dv: "nlv" }] },
+    "II.4": { nvtc: 3, ds: [{ nhan: "Chuyển hình thức sử dụng đất", ngay: 10, dv: "ngay" }], canhBao: ["Mục (3) ghi “10 (mười) ngày” (cùng thủ tục ở cấp tỉnh — I.4 — ghi “ngày làm việc”); đối chiếu cách tính."] },
+    "II.5": { ds: [
+      { nhan: "a) Đã có quyết định giao đất, cho thuê đất, chuyển mục đích — thẩm định 08 + ký cấp Giấy chứng nhận 03", ngay: 11, dv: "nlv" },
+      { nhan: "a) Như trên, cấp đồng loạt cho Khu, Cụm công nghiệp (trên 20 Giấy chứng nhận) — 08 + 13", ngay: 21, dv: "nlv" },
+      { nhan: "b) Phải ban hành quyết định hình thức sử dụng đất — chỉ đăng ký đất đai", ngay: 18, dv: "nlv" },
+      { nhan: "b) Như trên, có cấp Giấy chứng nhận: 09 + 03 + 03 (thuế) + 03 (ký)", ngay: 18, dv: "nlv" },
+      { nhan: "b) Như trên, cấp đồng loạt (trên 20 Giấy chứng nhận): 09 + 03 + 03 + 10", ngay: 25, dv: "nlv" }],
+      canhBao: ["Mục (3) không quy định tổng thời gian riêng cho trường hợp “đăng ký và cấp Giấy chứng nhận”; phần mềm cộng các thành phần liệt kê. Cùng trường hợp tại I.8 ghi 15 ngày."] },
+    "II.6": { ds: [{ nhan: "Thẩm định 12 + xác định nghĩa vụ tài chính 03 + ký cấp Giấy chứng nhận 03", ngay: 18, dv: "nlv" }] },
+    "II.7": { ds: [{ nhan: "Thẩm định 12 + xác định nghĩa vụ tài chính 03 + ký cấp Giấy chứng nhận 03", ngay: 18, dv: "nlv" }] },
+    "II.8": { ds: [{ nhan: "Thẩm định 12 + xác định nghĩa vụ tài chính 03 + ký cấp Giấy chứng nhận 03", ngay: 18, dv: "nlv" }] },
+    "II.9": { nvtc: 3, ds: [{ nhan: "Đính chính Giấy chứng nhận (tăng thêm 03 ngày nếu đính chính làm thay đổi số thuế phải nộp)", ngay: 8, dv: "nlv" }] },
+    "II.10": { nvtc: 3, ds: [{ nhan: "Thu hồi Giấy chứng nhận đã cấp lần đầu", ngay: 25, dv: "nlv", nvtc: false }, { nhan: "Đăng ký, cấp lại Giấy chứng nhận sau thu hồi", ngay: 20, dv: "nlv" }, { nhan: "Thu hồi và cấp lại (25 + 20)", ngay: 45, dv: "nlv" }], canhBao: ["Nguyên văn ghi “Trưởng hợp phát sinh nghĩa vụ tài chính” (lỗi chính tả “Trường hợp”)."] },
+    "II.11": { ds: [{ nhan: "Giao đất ở không thông qua đấu giá", ngay: 35, dv: "ngay" }], canhBao: ["Mục (3) ghi “35 (ba mươi lăm) ngày”, không ghi “ngày làm việc” — đối chiếu cách tính."] },
+    "II.12": { nvtc: 3, ds: [{ nhan: "Thẩm định, phê duyệt phương án sử dụng đất kết hợp", ngay: 10, dv: "nlv" }, { nhan: "Gia hạn phương án sử dụng đất kết hợp", ngay: 7, dv: "nlv", nvtc: false }] },
+    "III.1": { ds: [{ nhan: "Đổi tên, thay đổi thông tin người sử dụng đất; thay đổi số hiệu, địa chỉ thửa đất", ngay: 4, dv: "nlv" }, { nhan: "Thay đổi hạn chế quyền; thay đổi quyền đối với thửa đất liền kề", ngay: 5, dv: "nlv" }, { nhan: "Giảm diện tích thửa đất do sạt lở tự nhiên", ngay: 10, dv: "nlv" }] },
+    "III.2": { ds: [{ nhan: "Chuyển đổi, chuyển nhượng, thừa kế, tặng cho, góp vốn…", ngay: 11, dv: "nlv" }, { nhan: "Cho thuê, cho thuê lại quyền sử dụng đất trong dự án kinh doanh kết cấu hạ tầng", ngay: 7, dv: "nlv" }] },
+    "III.6": { ds: [{ nhan: "Cấp đổi (Giấy chứng nhận cũ, hư hỏng, cấp riêng từng thửa, sai mục đích, ghi tên vợ chồng, thành viên hộ…)", ngay: 8, dv: "nlv" }, { nhan: "Cấp đổi do thay đổi kích thước, diện tích, số hiệu thửa khi đo đạc (ranh giới không đổi) hoặc vị trí không chính xác", ngay: 13, dv: "nlv" }], canhBao: ["Cấp đổi đồng loạt do đo đạc lập bản đồ địa chính: thời gian theo dự án được phê duyệt."] },
+    "III.10": { ds: [{ nhan: "Chia, tách, hợp nhất, sáp nhập, chuyển đổi mô hình tổ chức, loại hình doanh nghiệp", ngay: 8, dv: "nlv" }, { nhan: "Cấp Giấy chứng nhận theo quy hoạch xây dựng chi tiết hoặc điều chỉnh quy hoạch", ngay: 5, dv: "nlv" }] },
+    "III.11": { ds: [{ nhan: "Các trường hợp đăng ký biến động theo thỏa thuận, kết quả hòa giải, bản án, xử lý tài sản thế chấp, công trình ngầm, tài sản công", ngay: 13, dv: "nlv" }] },
+    "III.14": { ds: [{ nhan: "Đất thực hiện dự án chưa được cấp Giấy chứng nhận", ngay: 23, dv: "nlv" }, { nhan: "Đất thực hiện dự án đã được cấp Giấy chứng nhận", ngay: 11, dv: "nlv" }] },
+    "III.15": { ds: [{ nhan: "Đăng ký quyền sở hữu tài sản gắn liền với thửa đất đã cấp Giấy chứng nhận; gia hạn sở hữu nhà ở của tổ chức, cá nhân nước ngoài", ngay: 11, dv: "nlv" }, { nhan: "Đăng ký thay đổi về tài sản gắn liền với đất", ngay: 8, dv: "nlv" }] },
+    "III.21": { ds: [{ nhan: "Thu hồi Giấy chứng nhận đã cấp", ngay: 20, dv: "nlv" }, { nhan: "Cấp lại sau thu hồi — Giấy chứng nhận cấp lần đầu sai nhưng đã được cấp đổi", ngay: 20, dv: "nlv" }, { nhan: "Cấp lại sau thu hồi — Giấy chứng nhận cấp khi đăng ký biến động", ngay: 8, dv: "nlv" }, { nhan: "Thu hồi và cấp lại (đã cấp đổi): 20 + 20", ngay: 40, dv: "nlv" }, { nhan: "Thu hồi và cấp lại (đăng ký biến động): 20 + 08", ngay: 28, dv: "nlv" }] }
+  },
+
   // Trợ lý hỏi đáp AI qua Cloudflare Worker trung gian. Để trống diaChi = chỉ tìm đoạn nguyên văn liên quan.
   //   giaoThuc "tthc": Worker riêng tro-ly-ai/ (POST /hoi; Gemini → dự phòng Workers AI)
   //   giaoThuc "messages": Worker Workers AI dùng chung (POST {model, messages} → {text}); moHinh trống = mô hình mặc định của Worker
-  troLyAI: { diaChi: "https://rasoatvanban.letunglam1992.workers.dev", giaoThuc: "messages", moHinh: "" },
+  troLyAI: { diaChi: "https://rasoatvanban.letunglam1992.workers.dev", giaoThuc: "messages", moHinh: "", gioiHanNgay: 30 },
 
   // Thống kê truy cập ẩn danh (Vercel Web Analytics). Bật Analytics trong bảng điều khiển dự án Vercel trước, rồi đặt true.
   thongKeTruyCap: false,

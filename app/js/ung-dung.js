@@ -50,6 +50,8 @@ TT.THONG_TIN_PM = {
       { id: "co-quan", ten: "Cơ quan và trách nhiệm", bt: "coQuan" },
       { id: "phi-le-phi", ten: "Phí, lệ phí", bt: "taiXuong" },
       { id: "gia-dat", ten: "Bảng giá đất", bt: "danhSach" },
+      { id: "chon-thu-tuc", ten: "Chọn đúng thủ tục", bt: "luong" },
+      { id: "phap-luat", ten: "Văn bản pháp luật", bt: "sach" },
       { id: "can-cu", ten: "Căn cứ pháp lý", bt: "canCan" },
       { id: "tra-cuu", ten: "Tra cứu nhanh", bt: "tim" }
     ] },

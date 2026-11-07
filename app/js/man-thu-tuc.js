@@ -200,6 +200,7 @@ TT.man = TT.man || {};
           <span class="tang khong-in" style="margin-left:auto">${truoc ? `<a class="nut nut-nho" href="#/thu-tuc/${truoc.ma}${tab ? "/" + tab : ""}" title="${e(truoc.ten)}">← ${truoc.ma}</a>` : ""}${sau ? `<a class="nut nut-nho" href="#/thu-tuc/${sau.ma}${tab ? "/" + tab : ""}" title="${e(sau.ten)}">${sau.ma} →</a>` : ""}
           <button class="nut nut-nho" onclick="window.print()">${bt("in", 14)} In phiếu tra cứu</button></span></div>
         <h1 class="tt-ten">${e(t.ten)}</h1>
+        ${TT.phanDinh ? TT.phanDinh.hop(mh, t.ma) : ""}
         ${!t.khopTen ? `<div class="thong-bao thong-bao-vang">${bt("canhBao")}<div><b>Tên tại nội dung chi tiết (mục B) khác tên tại danh mục (mục A):</b> “${e(t.tenNoiDung)}”. Phần mềm hiển thị tên theo danh mục; cần xác minh với cơ quan ban hành.</div></div>` : ""}
         <div class="tom-tat">
           <div><div class="k">Thời hạn giải quyết</div><div class="v">${h ? `${mh.hienThiHan(h)}${h.donVi === "ngày" ? "<small>Văn bản ghi “ngày”, không ghi “ngày làm việc”</small>" : ""}${h.nhieuTruongHop ? "<small>Có nhiều trường hợp — xem mục (3)</small>" : "<small>Theo mục (3)</small>"}` : "Xem nguyên văn mục (3)"}${h && h.tangThemKhuVucIII ? "<small>Xã khu vực III: được tăng thêm (mục 3)</small>" : ""}</div></div>

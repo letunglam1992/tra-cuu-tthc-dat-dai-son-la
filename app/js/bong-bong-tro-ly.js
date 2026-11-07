@@ -26,6 +26,8 @@ TT.bongBong = (function () {
     const goiY = ds.length ? "" : `<div class="bb-goi-y">${GOI_Y.map(g => `<button type="button" data-goi-y="${e(g)}">${e(g)}</button>`).join("")}</div>`;
     const go = dangHoi ? `<div class="bb-dong bb-tro-ly"><span class="bb-anh" aria-hidden="true">${ROBOT}</span><div class="bb-bong bb-dang-go" aria-label="Đang soạn câu trả lời"><i></i><i></i><i></i></div></div>` : "";
     than.innerHTML = chao + ds.map(veTin).join("") + go + goiY;
+    const hmEl = khung.querySelector("[data-han-muc]"), ch = TT.hoiDap.cauHinh(mh);
+    if (hmEl && ch.diaChi && TT.troLy.hanMuc) { const hm = TT.troLy.hanMuc(ch); hmEl.textContent = hm.het ? "Hạn mức AI hôm nay đã hết." : `Còn ${hm.conLai}/${hm.toiDa} lượt hỏi AI hôm nay.`; }
     than.scrollTop = than.scrollHeight;
   }
 
@@ -63,7 +65,7 @@ TT.bongBong = (function () {
         <button type="button" class="nut nut-chu nut-nho" data-dong title="Thu nhỏ (Esc)" aria-label="Đóng trợ lý">${bt("dong", 18)}</button></header>
       <div class="bb-than" aria-live="polite"></div>
       <form class="bb-nhap"><label class="sr" for="bb-o">Câu hỏi cho trợ lý</label><textarea id="bb-o" rows="1" maxlength="600" placeholder="Nhập câu hỏi…"></textarea><button class="bb-gui" aria-label="Gửi câu hỏi" title="Gửi (Enter)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></form>
-      <div class="bb-chu-thich">AI có thể sai — không nhập thông tin cá nhân.</div>`;
+      <div class="bb-chu-thich">AI có thể sai — không nhập thông tin cá nhân. <span data-han-muc></span></div>`;
     document.body.append(nut, khung);
     than = khung.querySelector(".bb-than"); o = khung.querySelector("#bb-o"); nutGui = khung.querySelector(".bb-gui");
     nut.addEventListener("click", () => khung.hidden ? mo() : dong(true));

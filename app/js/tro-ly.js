@@ -25,19 +25,39 @@ Quy tắc bắt buộc:
     const r = await fetch(url, op);
     return { r, d: await r.json().catch(() => ({})) };
   }
-  // cauHinh: { diaChi, giaoThuc, moHinh }; nguCanh: [{tieuDe, nguon, noiDung}]
+  /* Hạn mức lượt hỏi trên trình duyệt này (Worker Workers AI dùng chung có hạn mức miễn phí theo ngày cho cả tài khoản):
+   * - tối đa cauHinh.gioiHanNgay lượt/ngày (mặc định 30) để một người dùng không làm cạn hạn mức chung;
+   * - khi Worker báo hết hạn mức (429) thì ngừng gọi đến hết ngày, chỉ hiện đoạn nguyên văn. */
+  const KHOA_HM = "tthc-tro-ly-han-muc";
+  const homNay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  function docHM() { let v = null; try { v = JSON.parse(localStorage.getItem(KHOA_HM) || "null"); } catch (_) { } return v && v.ngay === homNay() ? v : { ngay: homNay(), so: 0, het: false }; }
+  function ghiHM(v) { try { localStorage.setItem(KHOA_HM, JSON.stringify(v)); } catch (_) { } }
+  function hanMuc(cauHinh) {
+    const v = docHM(), toiDa = (cauHinh && cauHinh.gioiHanNgay) || 30;
+    return { da: v.so, toiDa, conLai: Math.max(0, toiDa - v.so), het: v.het, chan: v.het || v.so >= toiDa };
+  }
+  class LoiHanMuc extends Error { constructor(m) { super(m); this.hanMuc = true; } }
+
+  // cauHinh: { diaChi, giaoThuc, moHinh, gioiHanNgay }; nguCanh: [{tieuDe, nguon, noiDung}]
   async function hoi(cauHinh, cauHoi, nguCanh) {
+    const hm = hanMuc(cauHinh);
+    if (hm.het) throw new LoiHanMuc("hạn mức Workers AI miễn phí hôm nay đã hết — trợ lý tạm dừng đến ngày mai");
+    if (hm.chan) throw new LoiHanMuc(`đã dùng hết ${hm.toiDa} lượt hỏi AI hôm nay trên trình duyệt này`);
+    try { const kq = await hoiMang(cauHinh, cauHoi, nguCanh); const v = docHM(); v.so++; ghiHM(v); return kq; }
+    catch (err) { if (err.status === 429 || /hết hạn mức/.test(err.message)) { const v = docHM(); v.het = true; ghiHM(v); } throw err; }
+  }
+  async function hoiMang(cauHinh, cauHoi, nguCanh) {
     const dc = String(cauHinh.diaChi || "").replace(/\/+$/, "");
     if (cauHinh.giaoThuc === "messages") {
       const body = { messages: [{ role: "system", content: CHI_DAN }, { role: "user", content: dungLoiNhac(cauHoi, nguCanh) }], max_tokens: 1024 };
       if (cauHinh.moHinh) body.model = cauHinh.moHinh;
       const { r, d } = await goiJson(dc, body);
       const text = String(d.text || "").trim();
-      if (!r.ok || !text) throw new Error(giaiThich(r.status, d.error || (r.ok ? "mô hình không trả nội dung" : "")));
+      if (!r.ok || !text) throw Object.assign(new Error(giaiThich(r.status, d.error || (r.ok ? "mô hình không trả nội dung" : ""))), { status: r.status });
       return { traLoi: text, nhaCungCap: "Cloudflare Workers AI", moHinh: d.model || cauHinh.moHinh || "", tenMoHinh: tenMoHinh(d.model || cauHinh.moHinh) };
     }
     const { r, d } = await goiJson(dc + "/hoi", { cauHoi, nguCanh });
-    if (!r.ok || !d.traLoi) throw new Error(giaiThich(r.status, d.loi));
+    if (!r.ok || !d.traLoi) throw Object.assign(new Error(giaiThich(r.status, d.loi)), { status: r.status });
     return { ...d, tenMoHinh: tenMoHinh(d.moHinh) };
   }
   // Kiểm tra kết nối (chế độ kiểm soát)
@@ -53,5 +73,5 @@ Quy tắc bắt buộc:
     const r = await fetch(dc + "/suc-khoe"); const d = await r.json();
     return `Kết nối được · Gemini: ${d.gemini ? "có khóa" : "chưa có khóa"} · Workers AI: ${d.workersAi ? "có" : "không"} · mô hình ${d.moHinh || ""}`;
   }
-  return { CHI_DAN, dungLoiNhac, hoi, kiemTra };
+  return { CHI_DAN, dungLoiNhac, hoi, kiemTra, hanMuc };
 })();

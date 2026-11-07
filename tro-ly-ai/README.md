@@ -55,3 +55,24 @@ Workers AI dùng chính tài khoản Cloudflare đang triển khai (binding `AI`
 ## Kiểm thử
 
 `npm test` (thư mục gốc) chạy kiểm thử Worker với Gemini/Workers AI giả lập (`kiem-thu/tro-ly.test.mjs`).
+
+## Đang dùng: Worker Workers AI dùng chung `rasoatvanban`
+
+Phần mềm hiện gọi Worker `rasoatvanban.letunglam1992.workers.dev` (của app Rà soát văn bản) theo giao thức `messages` — xem `troLyAI` trong `app/du-lieu/bo-sung.js`.
+
+### Giới hạn trang web được gọi Worker (khuyến nghị)
+Worker đang để trống `ALLOWED_ORIGIN` nên **mọi trang web** gọi được và dùng chung hạn mức Workers AI miễn phí của tài khoản. Đặt biến này để chỉ hai phần mềm của mình gọi được:
+
+1. Cloudflare Dashboard → Workers & Pages → `rasoatvanban` → Settings → Variables and Secrets → Add.
+2. Type: **Text**; Variable name: `ALLOWED_ORIGIN`; Value (cách nhau bằng dấu phẩy, không có dấu `/` cuối):
+   ```
+   https://tra-cuu-tthc-dat-dai-son-la.vercel.app,https://<địa chỉ app Rà soát văn bản>
+   ```
+   Nếu app Rà soát văn bản còn được mở trực tiếp từ tệp trên máy (`file://`), thêm `null` vào danh sách.
+3. Deploy. Kiểm tra: mở trang Hỏi đáp của phần mềm, hỏi thử một câu; gọi từ trang khác sẽ bị trình duyệt chặn (thiếu `Access-Control-Allow-Origin`).
+
+Không dùng `APP_TOKEN` cho phần mềm này: mã sẽ nằm trong mã nguồn công khai của trang nên không còn bí mật.
+
+### Hạn mức phía phần mềm
+- Mỗi trình duyệt được hỏi tối đa `troLyAI.gioiHanNgay` lượt/ngày (mặc định 30); khung chat hiện số lượt còn lại.
+- Khi Worker trả 429 (hết hạn mức Workers AI trong ngày), phần mềm ngừng gọi đến hết ngày, chỉ hiện các đoạn nguyên văn liên quan.

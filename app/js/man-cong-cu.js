@@ -16,6 +16,11 @@ TT.man = TT.man || {};
     const h = t && t.suyRa.thoiHan;
     const kv3 = t ? th.tangThemKhuVucIII(t.muc[3] && t.muc[3].noiDung) : null;
     const homNay = th.khoa(new Date());
+    // Trường hợp thời hạn theo mục (3) (bo-sung.js › thoiHanTruongHop): chọn trường hợp → điền số ngày, đơn vị; cộng thêm khi phát sinh NVTC
+    const cfg = t && mh.B.thoiHanTruongHop && mh.B.thoiHanTruongHop[t.ma];
+    const iTH = cfg ? Math.min(Math.max(0, +q.th || 0), cfg.ds.length - 1) : 0, thChon = cfg ? cfg.ds[iTH] : null;
+    const coNV = c => !!(cfg && cfg.nvtc && (c || {}).nvtc !== false);
+    const soMacDinh = thChon ? thChon.ngay : h ? h.ngay : "", dvMacDinh = thChon ? (thChon.dv === "ngay" ? "ngày" : "ngày làm việc") : h && h.donVi;
     const html = `<div class="trang">
       ${tp.dauIn("Tính thời hạn giải quyết (tham khảo)")}
       <div class="dong-tieu-de"><div><div class="nhan-trang">Công cụ</div><h1>Tính thời hạn giải quyết</h1>
@@ -24,10 +29,12 @@ TT.man = TT.man || {};
         <form class="the" id="form-han" autocomplete="off"><div class="the-dau"><h3>Thông tin hồ sơ</h3><div class="phai">${tp.dauNguon.pm()}</div></div><div class="the-than form-luoi">
           <label class="truong"><span>Thủ tục</span>${chonThuTuc(mh, q.ma)}</label>
           <label class="truong"><span>Ngày nhận hồ sơ đầy đủ, hợp lệ</span><input type="date" name="nhan" value="${e(q.nhan || homNay)}" required></label>
+          ${cfg && cfg.ds.length > 1 ? `<fieldset class="truong-hop-han"><legend>Trường hợp (theo mục 3)</legend>${cfg.ds.map((c, i) => `<label class="o-chon"><input type="radio" name="th" value="${i}" ${i === iTH ? "checked" : ""}> <span>${e(c.nhan)} — <b>${c.ngay} ${c.dv === "ngay" ? "ngày" : "ngày làm việc"}</b></span></label>`).join("")}</fieldset>` : ""}
           <div class="hai-cot">
-            <label class="truong"><span>Thời hạn</span><input type="number" name="so" min="0" step="0.5" inputmode="decimal" value="${e(q.so || (h ? h.ngay : ""))}" required></label>
-            <label class="truong"><span>Đơn vị</span><select name="dv"><option value="ngày làm việc" ${(q.dv || (h && h.donVi)) !== "ngày" ? "selected" : ""}>ngày làm việc</option><option value="ngày" ${(q.dv || (h && h.donVi)) === "ngày" ? "selected" : ""}>ngày (ngày lịch)</option></select></label>
+            <label class="truong"><span>Thời hạn</span><input type="number" name="so" min="0" step="0.5" inputmode="decimal" value="${e(q.so || soMacDinh)}" required></label>
+            <label class="truong"><span>Đơn vị</span><select name="dv"><option value="ngày làm việc" ${(q.dv || dvMacDinh) !== "ngày" ? "selected" : ""}>ngày làm việc</option><option value="ngày" ${(q.dv || dvMacDinh) === "ngày" ? "selected" : ""}>ngày (ngày lịch)</option></select></label>
           </div>
+          ${cfg && cfg.nvtc ? `<label class="o-chon" data-o-nv><input type="checkbox" name="nv" value="1" ${q.nv === "1" && coNV(thChon) ? "checked" : ""} ${coNV(thChon) ? "" : "disabled"}> <span>Phát sinh nghĩa vụ tài chính — cộng thêm <b>${cfg.nvtc} ngày làm việc</b> <span class="mo" data-nv-ghi>${coNV(thChon) ? "(mục 3)" : "(không áp dụng cho trường hợp này)"}</span></span></label>` : ""}
           <label class="o-chon"><input type="checkbox" name="kv3" value="1" ${q.kv3 === "1" ? "checked" : ""} ${t && !kv3 ? "disabled" : ""}> <span>Xã khu vực III — cộng thêm <input type="number" name="them" min="0" step="1" value="${e(q.them || (kv3 ? kv3.ngay : 10))}" aria-label="Số ngày làm việc tăng thêm" class="o-so"> ngày làm việc${kv3 ? ` <span class="mo">(mục 3: “…${e(kv3.nguyenVan.slice(-60))}”)</span>` : t ? ` <span class="mo">(mục 3 không nêu)</span>` : ""}</span></label>
           <label class="truong"><span>Số ngày làm việc không tính vào thời hạn <span class="mo">(xác định giá đất cụ thể, thực hiện NVTC, trích đo, niêm yết… — khoản 1 Điều 8)</span></span><input type="number" name="dung" min="0" step="1" value="${e(q.dung || "0")}"></label>
           <details class="chu-nho"><summary>Ngày nghỉ khác (nghỉ bù, nghỉ đột xuất do cơ quan thông báo)</summary>
@@ -36,7 +43,7 @@ TT.man = TT.man || {};
             <p class="mo">Lưu trên trình duyệt này. Ngày Tết Âm lịch và ngày liền kề Quốc khánh của năm chưa có thông báo chính thức được tạm tính theo thông lệ.</p></details>
           <div><button class="nut nut-chinh">${bt("dongHo", 15)} Tính ngày hẹn trả</button></div>
         </div></form>
-        <div id="ket-qua-han">${t ? `<div class="the"><div class="the-dau"><h3>Nguyên văn mục (3) — ${t.ma}</h3><div class="phai">${tp.dauNguon.nv()} ${tp.lkPdf(t.muc[3].trangDau)}</div></div><div class="the-than">${tp.nguyenVan(t.muc[3].noiDung)}${h && h.nhieuTruongHop ? `<div class="thong-bao thong-bao-vang" style="margin:10px 0 0">${bt("canhBao")}<div>Mục (3) có nhiều trường hợp thời hạn. Phần mềm điền số ngày nêu đầu tiên — sửa lại cho đúng trường hợp của hồ sơ.</div></div>` : ""}</div></div>` : `<div class="the trong"><b>Chọn thủ tục để điền sẵn thời hạn.</b>Hoặc nhập số ngày trực tiếp.</div>`}</div>
+        <div id="ket-qua-han">${cfg && cfg.canhBao ? cfg.canhBao.map(c => `<div class="thong-bao thong-bao-vang">${bt("canhBao")}<div><b>Lưu ý về Quyết định 75:</b> ${e(c)}</div></div>`).join("") : ""}${t ? `<div class="the"><div class="the-dau"><h3>Nguyên văn mục (3) — ${t.ma}</h3><div class="phai">${tp.dauNguon.nv()} ${tp.lkPdf(t.muc[3].trangDau)}</div></div><div class="the-than">${tp.nguyenVan(t.muc[3].noiDung)}${h && h.nhieuTruongHop && !(cfg && cfg.ds.length > 1) ? `<div class="thong-bao thong-bao-vang" style="margin:10px 0 0">${bt("canhBao")}<div>Mục (3) có nhiều trường hợp thời hạn. Phần mềm điền số ngày nêu đầu tiên — sửa lại cho đúng trường hợp của hồ sơ.</div></div>` : ""}</div></div>` : `<div class="the trong"><b>Chọn thủ tục để điền sẵn thời hạn.</b>Hoặc nhập số ngày trực tiếp.</div>`}</div>
       </div>
       <div class="chu-nho mo" style="margin-top:14px">Căn cứ tính: ${tp.chipCanCu({ dieu: "8", khoan: "1" }, "Khoản 1 Điều 8 Quy định")} mốc tính và thời gian không tính vào thời hạn; ngày đầu tiên của thời hạn không tính (khoản 2 Điều 147 Bộ luật Dân sự 2015); ngày cuối là ngày nghỉ thì kết thúc vào ngày làm việc tiếp theo (Điều 148 Bộ luật Dân sự 2015); ngày nghỉ lễ, Tết theo Điều 112 Bộ luật Lao động 2019. <b>Kết quả chỉ để tham khảo</b> — ngày hẹn trả chính thức ghi trên Giấy tiếp nhận hồ sơ và hẹn trả kết quả.</div>
     </div>`;
@@ -52,12 +59,16 @@ TT.man = TT.man || {};
         function tinh(capNhatDiaChi) {
           const nhan = th.tuKhoa(f.nhan.value), so = parseFloat(String(f.so.value).replace(",", "."));
           if (!nhan || !(so >= 0)) { kq.innerHTML = nguyenVanMuc3; return; }
-          const r = th.tinh({ ngayNhan: nhan, soNgay: so, donVi: f.dv.value, tangThem: f.kv3.checked ? +f.them.value || 0 : 0, tamDung: +f.dung.value || 0, lichNghi: mh.B.lichNghi, nghiThem: new Set(docNghiThem()) });
+          const themKV3 = f.kv3.checked ? +f.them.value || 0 : 0, themNV = f.nv && f.nv.checked && !f.nv.disabled ? cfg.nvtc : 0;
+          const r = th.tinh({ ngayNhan: nhan, soNgay: so, donVi: f.dv.value, tangThem: themKV3 + themNV, tamDung: +f.dung.value || 0, lichNghi: mh.B.lichNghi, nghiThem: new Set(docNghiThem()) });
+          const moTaThem = [themNV ? `${themNV} ngày làm việc (phát sinh nghĩa vụ tài chính)` : "", themKV3 ? `${themKV3} ngày làm việc (xã khu vực III)` : ""].filter(Boolean);
+          const thDangChon = cfg && cfg.ds.length > 1 && f.querySelector('[name="th"]:checked') ? cfg.ds[+f.querySelector('[name="th"]:checked').value] : null;
           const nghiKhac = r.nghiBiTru.filter(x => x.loai !== "cuoi-tuan");
           kq.innerHTML = `<div class="the ket-qua-han"><div class="the-than">
             <div class="k">Ngày hẹn trả kết quả (tham khảo)</div>
             <div class="ngay-hen">${e(th.hienThi(r.ngayHen))}</div>
-            <div class="chu-nho">Nhận hồ sơ: ${e(th.hienThi(r.ngayNhan))} · ${String(r.tong.soNgay).replace(".", ",")} ${e(f.dv.value)}${r.tong.tangThem ? ` + ${r.tong.tangThem} ngày làm việc (xã khu vực III)` : ""}${r.tong.tamDung ? ` + ${r.tong.tamDung} ngày làm việc không tính vào thời hạn` : ""}</div>
+            <div class="chu-nho">Nhận hồ sơ: ${e(th.hienThi(r.ngayNhan))} · ${String(r.tong.soNgay).replace(".", ",")} ${e(f.dv.value)}${moTaThem.map(x => " + " + e(x)).join("")}${r.tong.tamDung ? ` + ${r.tong.tamDung} ngày làm việc không tính vào thời hạn` : ""}</div>
+            ${thDangChon ? `<div class="chu-nho mo">Trường hợp: ${e(thDangChon.nhan)}</div>` : ""}
             ${r.canhBao.map(c => `<div class="thong-bao thong-bao-vang" style="margin:10px 0 0">${bt("canhBao")}<div>${e(c)}</div></div>`).join("")}
             <div class="tang" style="margin-top:12px"><span class="nhan nhan-xam">${r.nghiBiTru.length} ngày nghỉ không tính</span>${nghiKhac.length ? `<span class="nhan nhan-vang">${nghiKhac.length} ngày lễ, Tết, nghỉ bù</span>` : ""}
               <button type="button" class="nut nut-nho khong-in" onclick="window.print()">${bt("in", 14)} In</button>
@@ -66,12 +77,20 @@ TT.man = TT.man || {};
             <details class="chu-nho" style="margin-top:6px"><summary>Lịch đếm từng ngày làm việc</summary><ol class="ds-gon lich-dem">${r.cacNgay.map(x => `<li>${e(th.hienThi(x.ngay))}</li>`).join("")}</ol></details>
           </div></div>${nguyenVanMuc3}`;
           const chep = kq.querySelector("#chep-han");
-          if (chep) chep.addEventListener("click", () => { const s = `Ngày hẹn trả (tham khảo): ${th.hienThi(r.ngayHen)}. Nhận hồ sơ ${th.hienThi(r.ngayNhan)}; ${r.tong.soNgay} ${f.dv.value}${r.tong.tangThem ? " + " + r.tong.tangThem + " ngày làm việc (xã khu vực III)" : ""}${r.tong.tamDung ? " + " + r.tong.tamDung + " ngày không tính" : ""}.`; navigator.clipboard && navigator.clipboard.writeText(s).then(() => { chep.textContent = "Đã chép"; }, () => { }); });
+          if (chep) chep.addEventListener("click", () => { const s = `Ngày hẹn trả (tham khảo): ${th.hienThi(r.ngayHen)}. Nhận hồ sơ ${th.hienThi(r.ngayNhan)}; ${r.tong.soNgay} ${f.dv.value}${moTaThem.map(x => " + " + x).join("")}${r.tong.tamDung ? " + " + r.tong.tamDung + " ngày không tính" : ""}.`; navigator.clipboard && navigator.clipboard.writeText(s).then(() => { chep.textContent = "Đã chép"; }, () => { }); });
           const p = new URLSearchParams(); if (f.ma.value) p.set("ma", f.ma.value); p.set("nhan", f.nhan.value); p.set("so", f.so.value); p.set("dv", f.dv.value); if (f.kv3.checked) { p.set("kv3", "1"); p.set("them", f.them.value); } if (+f.dung.value) p.set("dung", f.dung.value);
+          if (thDangChon) p.set("th", f.querySelector('[name="th"]:checked').value); if (themNV) p.set("nv", "1");
           if (capNhatDiaChi) history.replaceState(null, "", "#/tinh-han?" + p.toString());
         }
         f.addEventListener("submit", ev => { ev.preventDefault(); tinh(true); });
-        f.addEventListener("input", ev => { if (ev.target !== f.ma && ev.target.id !== "nghi-moi") tinh(true); });
+        f.addEventListener("input", ev => { if (ev.target !== f.ma && ev.target.id !== "nghi-moi" && ev.target.name !== "th") tinh(true); });
+        // Đổi trường hợp: điền số ngày, đơn vị; bật/tắt ô nghĩa vụ tài chính
+        f.addEventListener("change", ev => {
+          if (ev.target.name !== "th") return;
+          const c = cfg.ds[+ev.target.value]; f.so.value = c.ngay; f.dv.value = c.dv === "ngay" ? "ngày" : "ngày làm việc";
+          if (f.nv) { const ok = coNV(c); f.nv.disabled = !ok; if (!ok) f.nv.checked = false; f.querySelector("[data-nv-ghi]").textContent = ok ? "(mục 3)" : "(không áp dụng cho trường hợp này)"; }
+          tinh(true);
+        });
         if (f.so.value) tinh();
       } };
   };

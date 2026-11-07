@@ -1,6 +1,6 @@
 # Đối chiếu Bảng giá đất Nghị quyết 152/2025 giữa hai phần mềm
 
-Sinh tự động bởi `cong-cu/nhap-bang-gia-dat.js` ngày 2026-10-29. Phần mềm tra cứu TTHC dùng dữ liệu **phần mềm GPMB** (trích từ bản Word) làm nguồn chính cho Nghị quyết 152; phần bổ sung theo Nghị quyết 28/2026 lấy từ phần mềm Tính tiền đất đai và môi trường (396 tuyến, 1626 ô giá).
+Sinh tự động bởi `cong-cu/nhap-bang-gia-dat.js` ngày 2026-11-07. Phần mềm tra cứu TTHC dùng dữ liệu **phần mềm GPMB** (trích từ bản Word) làm nguồn chính cho Nghị quyết 152; phần bổ sung theo Nghị quyết 28/2026 lấy từ phần mềm Tính tiền đất đai và môi trường (396 tuyến, 1626 ô giá).
 
 - Ô giá cùng xã, cùng tuyến, cùng vị trí nhưng **khác giá**: **179**.
 - Trong đó **119** ô có giá trùng với giá của một vị trí khác trên cùng tuyến (dấu hiệu lệch cột khi nhập, ví dụ giá vị trí 2 ghi vào vị trí 4) — đánh dấu “lệch cột” trong bảng.

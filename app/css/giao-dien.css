@@ -732,3 +732,24 @@ button.cg-gia[aria-pressed="true"] { background: var(--chinh); border-color: var
 .gd-quy-tac { margin: 0; display: grid; gap: 6px; } .gd-quy-tac dt { font-weight: 600; color: var(--chu); } .gd-quy-tac dd { margin: 0 0 4px; }
 .tra-gia { margin-top: 8px; grid-column: 1 / -1; }
 [hidden] { display: none !important; }
+.truong-hop-han { border: 1px solid var(--vien); border-radius: 10px; padding: 8px 12px 10px; margin: 0; display: grid; gap: 6px; }
+.truong-hop-han legend { font-size: 12.5px; font-weight: 600; color: var(--chu-phu); padding: 0 4px; }
+/* Chọn đúng thủ tục */
+.pd-nhom > summary { list-style: none; cursor: pointer; padding: 14px 16px; display: grid; gap: 2px; }
+.pd-nhom > summary::-webkit-details-marker { display: none; }
+.pd-ten { font-weight: 600; font-size: 15px; color: var(--chu); }
+.pd-hoi { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 10px; }
+.pd-ds { display: grid; gap: 8px; }
+.pd-lc { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .9fr) minmax(0, 1.4fr); gap: 6px 12px; align-items: start; padding: 10px 12px; border: 1px solid var(--vien); border-radius: 10px; background: var(--be-mat-2); }
+.pd-dk { font-size: 13.5px; } .pd-kq { display: flex; gap: 6px; align-items: center; font-size: 12.5px; }
+.pd-tts { display: grid; gap: 4px; } .pd-tt { font-size: 13px; text-decoration: none; } .pd-tt b { margin-right: 4px; }
+.pd-hop { margin: 8px 0; }
+@media (max-width: 760px) { .pd-lc { grid-template-columns: minmax(0, 1fr); } }
+/* Văn bản pháp luật */
+.lk-pl { color: var(--chinh); text-decoration: underline dotted; text-underline-offset: 3px; }
+:root[data-theme="dark"] .lk-pl { color: var(--tieu-diem); }
+.pl-dieu .pl-to { background: var(--vang-nen); border-left: 3px solid var(--vang-to); padding-left: 8px; margin-left: -11px; }
+.pl-muc-luc { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pl-muc-luc li a { text-decoration: none; } .pl-muc-luc .pl-chuong { margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--chu-phu); text-transform: uppercase; letter-spacing: .02em; }
+.pl-muc-luc .pl-chuong:first-child { margin-top: 0; }
+.cg-tuyen.cg-bai-bo { opacity: .6; }

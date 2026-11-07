@@ -29,7 +29,7 @@ const ghi = (ma, nhom, noiDung, mongDoi, thucTe, dat, ghiChu) => { kq.push({ ma,
     {
       const ctx = await b.newContext({ viewport: { width: 375, height: 812 }, serviceWorkers: "block", hasTouch: true, isMobile: true });
       const p = await ctx.newPage(); const loi = []; p.on("pageerror", e => loi.push(e.message));
-      const tuyen = ["#/tong-quan", "#/thu-tuc", "#/thu-tuc/III.3", "#/thu-tuc/I.1/ho-so", "#/quy-trinh/QT15", "#/thu-hoi", "#/mau-bieu", "#/mau-bieu/19", "#/co-quan", "#/can-cu", "#/tra-cuu?q=s%E1%BB%95%20%C4%91%E1%BB%8F", "#/tinh-han?ma=III.3", "#/phieu/III.3", "#/gioi-thieu", "#/doi-soat", "#/nghia-vu?phi=III.3", "#/phi-le-phi", "#/dien-mau", "#/dien-mau/22", "#/bao-cao", "#/so-theo-doi", "#/hoi-dap", "#/doi-soat?tab=ma-tthc", "#/gia-dat"];
+      const tuyen = ["#/tong-quan", "#/thu-tuc", "#/thu-tuc/III.3", "#/thu-tuc/I.1/ho-so", "#/quy-trinh/QT15", "#/thu-hoi", "#/mau-bieu", "#/mau-bieu/19", "#/co-quan", "#/can-cu", "#/tra-cuu?q=s%E1%BB%95%20%C4%91%E1%BB%8F", "#/tinh-han?ma=III.3", "#/phieu/III.3", "#/gioi-thieu", "#/doi-soat", "#/nghia-vu?phi=III.3", "#/phi-le-phi", "#/dien-mau", "#/dien-mau/22", "#/bao-cao", "#/so-theo-doi", "#/hoi-dap", "#/doi-soat?tab=ma-tthc", "#/gia-dat", "#/chon-thu-tuc", "#/phap-luat", "#/phap-luat/LDD/141", "#/tinh-han?ma=I.8"];
       const tran = [];
       await p.goto(GOC + "#/tong-quan"); await p.waitForSelector(".ben-muc");
       for (const h of tuyen) {
@@ -124,6 +124,19 @@ const ghi = (ma, nhom, noiDung, mongDoi, thucTe, dat, ghiChu) => { kq.push({ ma,
       await p.click(".khoan-nv .cg-truoc button.cg-gia"); await p.fill('.khoan-nv [data-lop="0"] [data-k="dienTich"]', "200");
       const tienCMD = await p.$eval(".khoan-nv .kq-nv .v", x => x.textContent);
       ghi("GD-13", "Công cụ", "Tiền chuyển mục đích tra Bảng giá đất: Đoàn Kết, QL 43 VT2 (420.000) ← đất trồng cây lâu năm (68.000), 200 m²", "70.400.000 đồng", tienCMD, tienCMD === "70.400.000 đồng");
+      // Tính hạn theo trường hợp: I.10 cấp lại sau thu hồi + NVTC + khu vực III, nhận 02/11/2026 → 17/12/2026
+      await p.goto(GOC + "#/tinh-han?ma=I.10&nhan=2026-11-02"); await p.waitForSelector('[name="th"]');
+      await p.check('[name="th"][value="1"]'); await p.check('[name="nv"]'); await p.check('[name="kv3"]'); await p.waitForTimeout(200);
+      const hanI10 = await p.$eval(".ket-qua-han .ngay-hen", x => x.textContent);
+      await p.check('[name="th"][value="0"]'); const nvTat = await p.$eval('[name="nv"]', x => x.disabled);
+      ghi("GD-14", "Công cụ", "Tính hạn I.10: cấp lại (20) + NVTC (3) + khu vực III (10) từ 02/11/2026; trường hợp thu hồi không cộng NVTC", "17/12/2026; ô NVTC tắt", `${hanI10}; ô NVTC tắt: ${nvTat}`, /17\/12\/2026/.test(hanI10) && nvTat);
+      // Nguyên văn pháp luật: bấm viện dẫn trong thủ tục II.6 → ngăn hiện Điều, tô khoản
+      await p.goto(GOC + "#/thu-tuc/II.6"); await p.waitForSelector("a.lk-pl"); const soLk = await p.$$eval("a.lk-pl", a => a.length);
+      await p.click("a.lk-pl >> nth=0"); const coNgan = await p.waitForSelector(".ngan.mo .pl-to", { timeout: 8000 }).then(() => true, () => false); await p.keyboard.press("Escape");
+      ghi("GD-15", "Tra cứu", "Viện dẫn “khoản… Điều… Luật Đất đai” trong nguyên văn mở được nguyên văn Điều, tô khoản", "≥ 10 liên kết; ngăn mở", `${soLk} liên kết; ngăn: ${coNgan}`, soLk >= 10 && coNgan);
+      // Chọn đúng thủ tục + khung Dễ nhầm với
+      await p.goto(GOC + "#/thu-tuc/II.9"); const deNham = await p.$eval(".pd-hop", x => x.innerText).catch(() => "");
+      ghi("GD-16", "Tra cứu", "Trang thủ tục II.9 hiện khung “Dễ nhầm với” I.9, III.17", "có I.9 và III.17", deNham.slice(0, 80), /I\.9/.test(deNham) && /III\.17/.test(deNham));
       ghi("GD-10a", "Công cụ", "Hỏi đáp qua Worker Workers AI dùng chung (giao thức messages): lời nhắc có chỉ dẫn + đoạn trích, trả lời dẫn nguồn", "system + user; có liên kết [1]", `trả lời: ${coTraLoi1}; system: ${!!(thanMessages && thanMessages.messages[0].role === "system")}`, coTraLoi1 && !!thanMessages && thanMessages.messages.length === 2 && /ĐOẠN TRÍCH/.test(thanMessages.messages[1].content));
       await p.route("https://tro-ly.vi-du.workers.dev/hoi", r => r.fulfill({ status: 200, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ traLoi: "- Thời hạn: 12 ngày làm việc [1]\nThông tin tham khảo.", nhaCungCap: "Giả lập", moHinh: "kiem-thu" }) }));
       await p.evaluate(() => localStorage.setItem("tthc-tro-ly-dia-chi", "https://tro-ly.vi-du.workers.dev"));

@@ -33,10 +33,11 @@ TT.chonGia = (function () {
       if (xa === "" && q.length < 2) { ds.innerHTML = `<p class="mo chu-nho">Chọn xã, phường hoặc gõ ít nhất 2 ký tự tên tuyến đường để tìm trên toàn tỉnh.</p>`; return; }
       const kq = gd.timTuyen({ loai: tt.loai, xa: xa === "" ? null : xa, q, ngay, toiDa: cfg.toiDa || 60 });
       const tong = gd.timTuyen({ loai: tt.loai, xa: xa === "" ? null : xa, q, ngay, toiDa: 100000 }).length;
-      ds.innerHTML = kq.length ? kq.map(t => `<div class="cg-tuyen${t.chuaHieuLuc ? " cg-chua" : ""}" role="listitem">
+      ds.innerHTML = kq.length ? kq.map(t => `<div class="cg-tuyen${t.chuaHieuLuc ? " cg-chua" : ""}${t.daBaiBo ? " cg-bai-bo" : ""}" role="listitem">
           <div class="cg-ten"><b>${e(t.ten)}</b><span>${xa === "" ? e(D.xa[t.xa]) + " · " : ""}${t.nhom ? e(t.nhom.replace(/^\d+\.\s*/, "")) + " · " : ""}${t.stt ? "STT " + e(t.stt) + " · " : ""}Bảng ${e(t.bang)} · ${t.vb === 1 ? "Nghị quyết 28/2026" : "Nghị quyết 152/2025"}${t.chuaHieuLuc ? ` · <b class="cg-nhan-vang">hiệu lực từ ${e(ngayVN(gd.vanBan(t.vb).hieuLucTu))}</b>` : ""}</span>
-            ${t.canhBao.length ? `<span class="cg-canh-bao">⚠ ${e(t.canhBao.join("; "))} (đúng như văn bản)</span>` : ""}</div>
-          <div class="cg-vt">${t.vt.map((g, j) => g == null ? `<span class="cg-gia cg-trong"><small>VT${j + 1}</small>—</span>` : `<button type="button" class="cg-gia" data-tuyen="${t.i}" data-vt="${j + 1}" aria-pressed="${tt.tuyen === t.i && tt.viTri === j + 1}" title="Chọn vị trí ${j + 1}: ${vnd(g * D.donVi)} đồng/m²"><small>VT${j + 1}</small>${vnd(g * D.donVi)}</button>`).join("")}</div></div>`).join("")
+            ${t.canhBao.length ? `<span class="cg-canh-bao">⚠ ${e(t.canhBao.join("; "))} (đúng như văn bản)</span>` : ""}
+          ${t.tenCu ? `<span class="chu-nho mo">Tên cũ: ${e(t.tenCu)} (${e(t.thayDoi.doiTen.can)})</span>` : ""}${t.daBaiBo ? `<span class="cg-canh-bao">⛔ Tuyến đã bị bãi bỏ từ ${e(ngayVN(t.daBaiBo.tu))} (${e(t.daBaiBo.can)})</span>` : ""}</div>
+          <div class="cg-vt">${t.daBaiBo ? `<span class="cg-gia cg-trong"><small>Bãi bỏ</small>—</span>` : t.vt.map((g, j) => g == null ? `<span class="cg-gia cg-trong"><small>VT${j + 1}</small>—</span>` : `<button type="button" class="cg-gia" data-tuyen="${t.i}" data-vt="${j + 1}" aria-pressed="${tt.tuyen === t.i && tt.viTri === j + 1}" title="Chọn vị trí ${j + 1}: ${vnd(g * D.donVi)} đồng/m²"><small>VT${j + 1}</small>${vnd(g * D.donVi)}</button>`).join("")}</div></div>`).join("")
           + (tong > kq.length ? `<p class="mo chu-nho">Đang hiện ${kq.length}/${tong} tuyến — gõ thêm từ khóa để thu hẹp.</p>` : "")
         : `<p class="mo chu-nho">Không có tuyến phù hợp${q ? ` với “${e(q)}”` : ""}. Thử từ khóa khác (gõ không dấu cũng được).</p>`;
     }

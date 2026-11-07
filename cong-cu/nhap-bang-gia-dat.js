@@ -6,10 +6,11 @@
  *      — chỉ lấy phần bổ sung theo Nghị quyết số 28/2026/NQ-HĐND (Phụ lục I–III), là các dòng nhập sau dòng cuối của Nghị quyết 152.
  * Đồng thời ghi tai-lieu/doi-chieu-bang-gia-dat.md: các ô giá Nghị quyết 152 hai phần mềm ghi khác nhau, để tác giả rà soát.
  *
- * Cách dùng: node cong-cu/nhap-bang-gia-dat.js <đường dẫn phanmemGPMB> <đường dẫn tinhtiendatdai>
+ * Tùy chọn tham số thứ 3: tệp JSON Phụ lục IV (đổi tên tuyến), Phụ lục V (bãi bỏ tuyến) Nghị quyết 28/2026 — mẫu: tai-lieu/mau-nq28-phu-luc-iv-v.json.
+ * Cách dùng: node cong-cu/nhap-bang-gia-dat.js <đường dẫn phanmemGPMB> <đường dẫn tinhtiendatdai> [nq28-phu-luc-iv-v.json]
  */
 const fs = require("fs"), path = require("path");
-const [gpmbDir, ttddDir] = process.argv.slice(2);
+const [gpmbDir, ttddDir, plIVV] = process.argv.slice(2);
 if (!gpmbDir || !ttddDir) { console.error("Cách dùng: node cong-cu/nhap-bang-gia-dat.js <phanmemGPMB> <tinhtiendatdai>"); process.exit(1); }
 const GOC = path.join(__dirname, "..");
 
@@ -69,13 +70,24 @@ const nn = G.dat_nong_nghiep.filter(r => r.xa !== "Toàn tỉnh").map(r => [xaId
 const nnToanTinh = G.dat_nong_nghiep.filter(r => r.xa === "Toàn tỉnh").map(r => [r.loai_dat, r.gia, r.bang]);
 const kcn = G.dat_kcn_ccn.map(r => [r.ten, xaIdx.has(r.xa) ? xaIdx.get(r.xa) : -1, r.gia, r.bang]);
 
+// Phụ lục IV (đổi tên tuyến), Phụ lục V (bãi bỏ tuyến) Nghị quyết 28/2026: gắn vào phần tử thứ 10 của dòng tuyến { doiTen: {ten, tu}, baiBo: {tu} }
+const thayDoi = { doiTen: 0, baiBo: 0, khongThay: [] };
+if (plIVV) {
+  const pl = JSON.parse(fs.readFileSync(plIVV, "utf8")), tu = pl.hieuLucTu || "2026-11-01";
+  const LOAI_MA = { "o": 0, "tmdv": 1, "skc": 2 };
+  const timDong = r => tuyen.filter(t => t[1] === xaIdx.get(r.xa) && t[2] === 0 && t[6] === r.tuyen && (r.loai == null || t[0] === LOAI_MA[r.loai]) && (!r.stt || t[4] === String(r.stt)));
+  for (const r of pl.doiTen || []) { const ds = timDong(r); if (!ds.length) thayDoi.khongThay.push("đổi tên: " + r.xa + " — " + r.tuyen); for (const t of ds) { while (t.length < 9) t.push([]); t[9] = { ...(t[9] || {}), doiTen: { ten: r.tenMoi, tu, can: r.canCu || "Phụ lục IV Nghị quyết 28/2026" } }; thayDoi.doiTen++; } }
+  for (const r of pl.baiBo || []) { const ds = timDong(r); if (!ds.length) thayDoi.khongThay.push("bãi bỏ: " + r.xa + " — " + r.tuyen); for (const t of ds) { while (t.length < 9) t.push([]); t[9] = { ...(t[9] || {}), baiBo: { tu, can: r.canCu || "Phụ lục V Nghị quyết 28/2026" } }; thayDoi.baiBo++; } }
+  if (thayDoi.khongThay.length) console.warn("Không khớp tuyến nào trong bảng giá Nghị quyết 152:\n  " + thayDoi.khongThay.join("\n  "));
+}
 const du = {
   phienBan: new Date().toISOString().slice(0, 10),
   donVi: 1000, // giá trong tệp: nghìn đồng/m²
   vanBan: [
     { id: "nq152", ten: "Nghị quyết số 152/2025/NQ-HĐND ngày 29/12/2025 của HĐND tỉnh Sơn La ban hành Bảng giá đất", hieuLucTu: G.hieu_luc_tu, nguon: "Phần mềm GPMB Sơn La — policy/nguon/nq152-2025-bang-gia-dat.json (trích từ bản Word)" },
     { id: "nq28", ten: "Nghị quyết số 28/2026/NQ-HĐND ngày 19/10/2026 của HĐND tỉnh Sơn La (sửa đổi, bổ sung Bảng giá đất)", hieuLucTu: nk28.effect, nguon: "Phần mềm Tính tiền đất đai và môi trường — dữ liệu giá bổ sung (Phụ lục I–III)",
-      chuaXuLy: "Chưa áp dụng Phụ lục IV (đổi tên tuyến), Phụ lục V (bãi bỏ tuyến) và khoản 8 Điều 7 (đất thương mại, dịch vụ có nguồn gốc đất ở = 90% giá đất ở) — đối chiếu văn bản khi tra tuyến có liên quan." }
+      chuaXuLy: plIVV ? `Đã áp dụng Phụ lục IV (${thayDoi.doiTen} dòng đổi tên tuyến), Phụ lục V (${thayDoi.baiBo} dòng bãi bỏ tuyến). Khoản 8 Điều 7 (đất thương mại, dịch vụ có nguồn gốc đất ở = 90% giá đất ở): chọn ở công cụ tính tiền.` : "Chưa có danh sách Phụ lục IV (đổi tên tuyến), Phụ lục V (bãi bỏ tuyến) — tuyến có thể đã đổi tên hoặc bị bãi bỏ từ 01/11/2026, đối chiếu văn bản. Khoản 8 Điều 7 (đất thương mại, dịch vụ có nguồn gốc đất ở = 90% giá đất ở): chọn ở công cụ tính tiền.",
+      phuLucIVV: !!plIVV }
   ],
   loai: LOAI.map(([, t]) => t), bangLoai: BANG_LOAI, xa, nhom, tuyen, tenNN: TEN_NN, nn, nnToanTinh, kcn
 };

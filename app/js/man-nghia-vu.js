@@ -139,6 +139,7 @@ TT.man = TT.man || {};
           <div data-khoi-truoc${bang0 ? " hidden" : ""}>
             <div class="tang" style="margin-bottom:8px"><button type="button" class="nut nut-nho" data-cung>${bt("luong", 13)} Cùng tuyến, cùng vị trí với giá sau</button><span class="chu-nho mo">— khi đất trước là đất phi nông nghiệp cùng tuyến (ví dụ đất thương mại, dịch vụ → đất ở).</span></div>
             <div class="cg-truoc"></div>
+            <label class="o-chon" data-tmdv-dat-o${c.truoc.loai === "tmdv" ? "" : " hidden"}><input type="checkbox" data-dc="tmdvDatO"${c.dc.tmdvDatO ? " checked" : ""}> <span>Đất thương mại, dịch vụ có nguồn gốc là đất ở — bằng 90% giá đất ở cùng tuyến, cùng vị trí (khoản 8 Điều 7, Nghị quyết 28/2026, từ 01/11/2026) <span class="nhan nhan-vang">cần đối chiếu nguyên văn</span></span></label>
             <label class="o-chon" data-xen-kep${/^nn:/.test(c.truoc.loai) ? "" : " hidden"}><input type="checkbox" data-dc="xenKep"${c.dc.xenKep ? " checked" : ""}> <span>Đất nông nghiệp trong cùng thửa có đất ở hoặc xen kẹt với đất ở — tăng 50% (khoản 1 Điều 6)</span></label>
             <div class="cmd-gia"><label class="truong"><span>Giá đất trước (đồng/m²) — chọn ở trên hoặc nhập</span><input name="giaTruoc" inputmode="decimal" value="${e(kh.gt.giaTruoc || "")}" autocomplete="off"></label><div class="cmd-nguon" data-nguon="truoc"></div></div></div></div></div>
         <div class="cmd-buoc"><div class="cmd-so">4</div><div class="cmd-noi"><h4>Diện tích chuyển mục đích</h4>
@@ -153,7 +154,8 @@ TT.man = TT.man || {};
       const t = c[phia], dc = c.dc;
       if (/^nn:/.test(t.loai)) return t.nn && c.xa !== "" || t.nn === "RSX" ? gd.giaNNDieuChinh(c.xa === "" ? -1 : c.xa, t.nn, dc.xenKep) : null;
       if (t.tuyen == null || !t.viTri) return null;
-      const r = gd.giaViTri(t.tuyen, t.viTri, dc); if (!r) return null;
+      const datO = phia === "truoc" && t.loai === "tmdv" && dc.tmdvDatO && gd.coHieuLuc(1, c.ngay);
+      const r = datO ? gd.giaTMDVNguonGocDatO(t.tuyen, t.viTri, dc) : gd.giaViTri(t.tuyen, t.viTri, dc); if (!r) return null;
       const tu = gd.tuyen(t.tuyen); r.vb = tu.vb; r.chuaHieuLuc = !gd.coHieuLuc(tu.vb, c.ngay); r.xaKhac = c.xa !== "" && tu.xa !== +c.xa;
       return r;
     }
@@ -178,7 +180,7 @@ TT.man = TT.man || {};
         onChon: () => { apGia(sec, kh, "sau"); luu(); tinhTatCa(); }, onDoi: luu, onDoiLoai: () => { c.nguonsau = false; luu(); } });
       const truoc = TT.chonGia.tao(sec.querySelector(".cg-truoc"), { loaiCho: ["nn", "tmdv", "skc", "o"], trangThai: c.truoc, layXa: () => c.xa, layNgay: () => c.ngay,
         onChon: () => { apGia(sec, kh, "truoc"); luu(); tinhTatCa(); }, onDoi: luu,
-        onDoiLoai: tt => { c.nguontruoc = false; sec.querySelector("[data-xen-kep]").hidden = !/^nn:/.test(tt.loai); luu(); } });
+        onDoiLoai: tt => { c.nguontruoc = false; sec.querySelector("[data-xen-kep]").hidden = !/^nn:/.test(tt.loai); sec.querySelector("[data-tmdv-dat-o]").hidden = tt.loai !== "tmdv"; luu(); } });
       boChon.set(kh.id, { sau, truoc, cu });
       veNguon(sec, kh, "sau"); veNguon(sec, kh, "truoc"); veLop(sec, kh);
     }
@@ -222,6 +224,7 @@ TT.man = TT.man || {};
         if (kh.loai === "chuyen-muc-dich") { ts = tsCMD(kh, ts); veLop(sec, kh); }
         for (const el of sec.querySelectorAll("[data-chu]")) { const v = nv.so(ts[el.getAttribute("data-chu")]); el.textContent = isFinite(v) && v > 0 ? nv.tien(v) : ""; }
         const r = nv.tinh(ts, ch), kq = sec.querySelector(".kq-khoan");
+        kh._kq = r.loi ? null : { r, ts };
         if (r.loi) { kq.innerHTML = `<p class="mo chu-nho">${e(r.loi)}</p>`; du = false; return; }
         tong += r.soTien;
         const bangLop = r.chiTiet && r.chiTiet.length > 1 ? `<table class="bang bang-gon" style="margin-top:6px"><thead><tr><th>Lớp</th><th class="so">Diện tích</th><th class="so">Tiền đất sau</th><th class="so">Tiền đất trước</th></tr></thead><tbody>${r.chiTiet.map(x => `<tr><td>${e(x.ten)}</td><td class="so">${nv.soVN(x.dienTich)} m²</td><td class="so">${e(nv.tien(x.tienSau))}</td><td class="so">${e(nv.tien(x.tienTruoc))}</td></tr>`).join("")}<tr><td><b>Cộng</b></td><td></td><td class="so"><b>${e(nv.tien(r.tienSau))}</b></td><td class="so"><b>${e(nv.tien(r.tienTruoc))}</b></td></tr></tbody></table>` : "";
@@ -230,7 +233,8 @@ TT.man = TT.man || {};
           ${r.truongHop ? `<div class="chu-nho"><b>Trường hợp:</b> ${e(r.truongHop)} (${e(r.canCuTruongHop)})</div>` : ""}
           ${kh.loai === "chuyen-muc-dich" ? nguonCMD(kh) : ""}
           <div class="chu-nho mo"><b>Căn cứ:</b> ${e(r.canCu)}</div>
-          ${r.canhBao.map(c => `<div class="chu-nho" style="color:var(--vang)">• ${e(c)}</div>`).join("")}</div>`;
+          ${r.canhBao.map(c => `<div class="chu-nho" style="color:var(--vang)">• ${e(c)}</div>`).join("")}
+          ${kh.loai === "chuyen-muc-dich" ? `<div class="tang khong-in" style="margin-top:10px"><button type="button" class="nut nut-nho" data-word-cmd>${bt("taiXuong", 14)} Tải phiếu tính tiền (Word)</button></div>` : ""}</div>`;
       });
       tongEl.innerHTML = `<div class="the-than"><div class="k">Tổng dự trù ${ds.some(x => x.loai === "thue-hang-nam") ? "(tiền thuê hằng năm tính cho 1 năm)" : ""}</div><div class="ngay-hen">${e(nv.tien(tong))}</div><div class="chu-nho"><i>${e(nv.docSo(tong))}</i>${du ? "" : " · còn khoản thiếu số liệu"}</div><div class="chu-nho mo" style="margin-top:6px">Lập ngày ${ti.ngayHienTai()} bằng phần mềm tra cứu — không phải Thông báo nộp tiền.</div></div>`;
     }
@@ -278,6 +282,7 @@ TT.man = TT.man || {};
       const nutTN = ev.target.closest("[data-tra-gia-tu-nhap]"); if (nutTN) { moTraGia(nutTN, sec.querySelector(`[name="${nutTN.getAttribute("data-tra-gia-tu-nhap")}"]`)); return; }
       if (kh.loai !== "chuyen-muc-dich") return;
       const c = cmd(kh);
+      if (ev.target.closest("[data-word-cmd]")) { xuatPhieuCMD(kh); return; }
       if (ev.target.closest("[data-them-lop]")) { c.lop.push({ ten: "", dienTich: "", pSau: "100", pTruoc: "100" }); luu(); ve(); return; }
       const xl = ev.target.closest("[data-xoa-lop]"); if (xl) { c.lop.splice(+xl.getAttribute("data-xoa-lop"), 1); luu(); ve(); return; }
       if (ev.target.closest("[data-phan-lop]")) {
@@ -295,6 +300,51 @@ TT.man = TT.man || {};
       }
     });
     root.querySelector("#them-khoan").addEventListener("click", () => { ds.push({ id: Date.now(), loai: root.querySelector("#loai-moi").value, gt: {} }); luu(); ve(); });
+
+    // Phiếu dự trù tiền sử dụng đất khi chuyển mục đích (Word, A4) — giá, nguồn giá, bảng lớp, công thức, căn cứ
+    function xuatPhieuCMD(kh) {
+      if (!kh._kq) return;
+      const { r, ts } = kh._kq, c = cmd(kh), W = TT.word, D = gd.D, th = thHienTai(c);
+      const vnd = v => isFinite(v) ? Math.round(v).toLocaleString("vi-VN") : "—", ngayVN = d => String(d || "").split("-").reverse().join("/");
+      const nguon = p => c["nguon" + p] ? giaTuChon(c, p) : null, ns = nguon("sau"), nt = nguon("truoc");
+      const mo = p => p ? [p.moTa, ...(p.buoc || []).map(x => "Điều chỉnh: " + x), ...(p.canhBao || []).map(x => "Lưu ý: " + x + " (đúng như văn bản)")] : ["Nhập trực tiếp"];
+      const bang0 = th.cachTinh === "bang-0", tl = nv.so(ts.tyLeThu), hs = nv.so(ts.heSo), tru = nv.so(ts.duocTru), mg = nv.so(ts.mienGiamPhanTram);
+      const k = [
+        { text: "PHIẾU DỰ TRÙ TIỀN SỬ DỤNG ĐẤT", can: "giua", dam: true, co: 14, sau: 0 },
+        { text: "KHI CHUYỂN MỤC ĐÍCH SỬ DỤNG ĐẤT", can: "giua", dam: true, co: 14, sau: 2 },
+        { text: "(Dự trù tham khảo — không thay thế Thông báo nộp tiền của cơ quan thuế)", can: "giua", nghieng: true, sau: 10 },
+        { text: "I. THỬA ĐẤT VÀ TRƯỜNG HỢP CHUYỂN MỤC ĐÍCH", dam: true, truoc: 4 },
+        { text: `Xã, phường nơi có thửa đất: ${c.xa !== "" && D.xa[c.xa] ? D.xa[c.xa] : "……………………"}; thời điểm tính giá: ${ngayVN(c.ngay)}.`, can: "deu" },
+        { text: `Trường hợp đất trước khi chuyển mục đích: ${th.nhan || "—"} (${th.canCu || ""}).`, can: "deu" },
+        ...(th.cachTinh === "theo-thoi-han" ? [{ text: `Thời hạn giao, thuê đất: ${c.thoiHanGoc || "…"} năm; thời gian đã sử dụng: ${c.daSuDung || "…"} năm.`, can: "deu" }] : []),
+        { text: "II. GIÁ ĐẤT ÁP DỤNG", dam: true, truoc: 6 },
+        { bang: { cot: [2300, 1700, 5100], dau: 1, dong: [["Nội dung", "Giá (đồng/m²)", "Nguồn, điều chỉnh"],
+          ["Giá đất sau khi chuyển mục đích", { text: vnd(nv.so(ts.giaSau)), can: "phai" }, mo(ns).map(x => ({ text: x, can: "deu" }))],
+          ["Giá đất trước khi chuyển mục đích", { text: bang0 ? "0" : vnd(nv.so(ts.giaTruoc)), can: "phai" }, bang0 ? [{ text: "Tiền đất trước bằng 0 theo trường hợp đã chọn" }] : mo(nt).map(x => ({ text: x, can: "deu" }))],
+          ...(isFinite(hs) && hs !== 1 ? [["Hệ số điều chỉnh giá đất", { text: String(hs).replace(".", ","), can: "phai" }, ""]] : []),
+          ...(isFinite(tl) && tl !== 100 ? [["Tỷ lệ thu trên chênh lệch", { text: String(tl).replace(".", ",") + "%", can: "phai" }, "Cần đối chiếu Nghị quyết số 254/2025/QH15, Nghị định số 50/2026/NĐ-CP"]] : [])] } },
+        { text: "III. DIỆN TÍCH VÀ TIỀN ĐẤT THEO LỚP, VỊ TRÍ", dam: true, truoc: 6 },
+        { bang: { cot: [1900, 1150, 1450, 1450, 1600, 1550], dau: 1, co: 11, dong: [["Lớp, vị trí", "Diện tích (m²)", "Giá sau (đ/m²)", "Giá trước (đ/m²)", "Tiền đất sau (đồng)", "Tiền đất trước (đồng)"],
+          ...(r.chiTiet || []).map(x => [x.ten || "Toàn bộ diện tích", { text: nv.soVN(x.dienTich), can: "phai" }, { text: vnd(x.giaSau), can: "phai" }, { text: vnd(x.giaTruoc), can: "phai" }, { text: vnd(x.tienSau), can: "phai" }, { text: vnd(x.tienTruoc), can: "phai" }]),
+          [{ text: "Cộng", dam: true }, { text: nv.soVN((r.chiTiet || []).reduce((a, x) => a + x.dienTich, 0)), can: "phai", dam: true }, "", "", { text: vnd(r.tienSau), can: "phai", dam: true }, { text: vnd(r.tienTruoc), can: "phai", dam: true }]] } },
+        { text: "IV. SỐ TIỀN SỬ DỤNG ĐẤT DỰ TRÙ", dam: true, truoc: 6 },
+        { text: `Công thức: ${r.congThuc}.`, can: "deu" },
+        ...(isFinite(mg) && mg > 0 ? [{ text: `Miễn, giảm: ${String(mg).replace(".", ",")}%.`, can: "deu" }] : []),
+        ...(isFinite(tru) && tru > 0 ? [{ text: `Khoản được trừ: ${vnd(tru)} đồng.`, can: "deu" }] : []),
+        { text: `Số tiền dự trù: ${vnd(r.soTien)} đồng.`, dam: true, co: 14 },
+        { text: `(Bằng chữ: ${r.bangChu}.)`, nghieng: true },
+        { text: "V. CĂN CỨ VÀ LƯU Ý", dam: true, truoc: 6 },
+        { text: `- Căn cứ: ${r.canCu}.`, can: "deu" },
+        ...(th.canCu ? [{ text: `- Trường hợp đất trước: ${th.canCu}.`, can: "deu" }] : []),
+        { text: `- Bảng giá đất: ${D.vanBan.map(v => v.ten + " (hiệu lực từ " + ngayVN(v.hieuLucTu) + ")").join("; ")}.`, can: "deu" },
+        ...r.canhBao.map(x => ({ text: "- " + x, can: "deu" })),
+        { text: "- Giá trong bảng giá đất là giá theo vị trí; các điều chỉnh khác theo Điều 4 Quy định kèm theo Nghị quyết số 152/2025/NQ-HĐND (mặt tiếp giáp…) và giá đất cụ thể (nếu có) chưa được tính. Số tiền phải nộp do cơ quan thuế xác định.", can: "deu" },
+        { text: `Lập ngày ${ti.ngayHienTai()}`, can: "phai", nghieng: true, truoc: 12 },
+        { text: "NGƯỜI LẬP PHIẾU", can: "phai", dam: true, sau: 40 },
+        { text: "Phiếu lập bằng phần mềm tra cứu thủ tục hành chính đất đai tỉnh Sơn La — số liệu để tham khảo, đối chiếu hồ sơ trước khi sử dụng.", nghieng: true, co: 10, truoc: 20 }
+      ];
+      W.taiVe(W.taoDocx(k, { tieuDe: "Phiếu dự trù tiền sử dụng đất khi chuyển mục đích", tacGia: TT.THONG_TIN_PM.tacGia }), `Phieu-du-tru-tien-chuyen-muc-dich-${c.ngay}.docx`);
+    }
 
     // Tra Bảng giá đất tỉnh cho ô giá của các khoản khác (giao đất, thuê đất, lệ phí trước bạ)
     function moTraGiaTinh(nut, oNhap) {

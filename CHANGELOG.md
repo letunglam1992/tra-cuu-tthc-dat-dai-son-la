@@ -1,5 +1,28 @@
 # Nhật ký thay đổi
 
+## 2.3.0 — 07/11/2026
+
+### Thời hạn giải quyết
+- **Tính thời hạn theo trường hợp**: 26 thủ tục có nhiều trường hợp ở mục (3) (ví dụ I.10: thu hồi 25 / cấp lại 20 / cả hai 45 ngày làm việc) — chọn trường hợp, phần mềm điền số ngày, đơn vị. Ô **“Phát sinh nghĩa vụ tài chính — cộng thêm 03 ngày làm việc”** cho 11 thủ tục có quy định (tự tắt ở trường hợp không áp dụng); cộng cùng phần tăng thêm xã khu vực III.
+- Cảnh báo các điểm chưa thống nhất của chính Quyết định 75: I.8 điểm b (ghi 15 ngày, cộng thành phần 18), II.5 điểm b, đơn vị “ngày” ở I.5, II.2, II.4, II.11.
+
+### Chọn đúng thủ tục
+- Trang **Chọn đúng thủ tục** (`#/chon-thu-tuc`): 7 nhóm dễ nhầm (giao đất, chuyển mục đích, đăng ký lần đầu, đính chính, thu hồi Giấy chứng nhận, chấp thuận nhận quyền sử dụng đất, cấp đổi/cấp lại) — câu hỏi, lựa chọn, cơ quan có thẩm quyền, tiêu chí theo mục (4), (5) Quyết định 75.
+- Khung **“Dễ nhầm với”** trên trang thủ tục; ghi chú chỗ Quyết định 75 chưa phân định (I.4/II.4, I.6/II.13).
+
+### Văn bản pháp luật
+- **Nguyên văn 11 văn bản** (444 Điều): Luật Đất đai (VBHN 44/VBHN-VPQH), Nghị quyết 254/2025/QH15, Nghị định 49/2026, 50/2026, 71/2024, 226/2025, 291/2025, Thông tư 10/2024, 23/2025, Quyết định 27/2026 và Phụ lục I Quyết định 106/2025 của UBND tỉnh — từ bộ “phap-ly-dat-dai”; dựng lại bằng `cong-cu/nhap-phap-luat.js`.
+- Viện dẫn trong nguyên văn (“khoản 6 Điều 141 của Luật Đất đai”, “Nghị quyết số 254/2025/QH15”…) tự gắn liên kết: bấm mở ngăn nguyên văn Điều, tô khoản/điểm; 122 viện dẫn trong 31 thủ tục.
+- Trang **Văn bản pháp luật** (`#/phap-luat`): danh mục, hiệu lực, mục lục, tìm trong văn bản (không dấu), xem từng Điều; ghi chú **“Điều này đã được sửa đổi tại …”** cho 24 Điều của Nghị định 71/2024, Thông tư 10/2024.
+
+### Bảng giá đất, tiền chuyển mục đích
+- Cơ chế **Phụ lục IV (đổi tên tuyến), Phụ lục V (bãi bỏ tuyến) Nghị quyết 28/2026** theo ngày hiệu lực: tuyến đổi tên hiện tên mới (tìm được theo cả tên cũ), tuyến bãi bỏ làm mờ, không chọn được giá. Chờ danh sách — mẫu nhập `tai-lieu/mau-nq28-phu-luc-iv-v.json`.
+- Tùy chọn **khoản 8 Điều 7**: đất thương mại, dịch vụ có nguồn gốc đất ở = 90% giá đất ở cùng tuyến, cùng vị trí (gắn nhãn cần đối chiếu nguyên văn).
+- **Phiếu dự trù tiền chuyển mục đích (Word, A4)**: thửa đất, trường hợp, giá và nguồn giá, bảng lớp, công thức, số tiền bằng chữ, căn cứ.
+
+### Trợ lý AI
+- Hạn mức **30 lượt hỏi/ngày/trình duyệt** (`troLyAI.gioiHanNgay`), hiện số lượt còn lại; khi Worker báo hết hạn mức (429) thì ngừng gọi đến hết ngày. Hướng dẫn đặt `ALLOWED_ORIGIN` cho Worker dùng chung: `tro-ly-ai/README.md`.
+
 ## 2.2.0 — 30/10/2026
 
 ### Bảng giá đất tỉnh Sơn La

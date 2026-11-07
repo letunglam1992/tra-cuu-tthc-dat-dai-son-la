@@ -10,7 +10,8 @@ TT.giaDat = (function () {
 
   function gan(du) {
     D = du; const ch = TT.ti.chuanHoa;
-    chiMuc = D.tuyen.map((t, i) => ({ i, loai: LOAI_PNN[t[0]], xa: t[1], vb: t[2], bang: t[3], stt: t[4], nhom: D.nhom[t[5]], ten: t[6], vt: t[7], canhBao: t[8] || [], tim: ch(D.nhom[t[5]] + " " + t[6]) }));
+    chiMuc = D.tuyen.map((t, i) => ({ i, loai: LOAI_PNN[t[0]], xa: t[1], vb: t[2], bang: t[3], stt: t[4], nhom: D.nhom[t[5]], ten: t[6], vt: t[7], canhBao: t[8] || [], thayDoi: t[9] || null,
+      tim: ch(D.nhom[t[5]] + " " + t[6] + (t[9] && t[9].doiTen ? " " + t[9].doiTen.ten : "")) }));
     return D;
   }
   // Nạp dữ liệu (trình duyệt): chèn thẻ script một lần
@@ -43,7 +44,10 @@ TT.giaDat = (function () {
     }
     // Văn bản có hiệu lực lên trước; trong cùng xã giữ thứ tự bảng giá
     ra.sort((a, b) => (coHieuLuc(b.vb, ngay) - coHieuLuc(a.vb, ngay)) || (a.xa - b.xa) || (a.i - b.i));
-    return ra.slice(0, toiDa || 300).map(t => ({ ...t, chuaHieuLuc: !coHieuLuc(t.vb, ngay) }));
+    // Phụ lục IV, V Nghị quyết 28/2026: tại ngày tính, tuyến đổi tên hiện tên mới; tuyến bãi bỏ xếp cuối, không cho chọn giá
+    const trangThai = t => { const td = t.thayDoi || {}, sau = x => x && (!ngay || ngay >= x.tu);
+      return { ...t, chuaHieuLuc: !coHieuLuc(t.vb, ngay), daBaiBo: sau(td.baiBo) ? td.baiBo : null, tenCu: sau(td.doiTen) ? t.ten : null, ten: sau(td.doiTen) ? td.doiTen.ten : t.ten }; };
+    return ra.map(trangThai).sort((a, b) => !!a.daBaiBo - !!b.daBaiBo).slice(0, toiDa || 300);
   }
   const tuyen = i => chiMuc[i];
   // Giá đất nông nghiệp theo xã (Bảng 01–03), rừng sản xuất toàn tỉnh (Bảng 04)
@@ -73,6 +77,15 @@ TT.giaDat = (function () {
     return { gia, goc: r.gia, buoc: xenKep ? ["đất nông nghiệp trong thửa có đất ở / xen kẹt đất ở: +50% (khoản 1 Điều 6)"] : [],
       moTa: `${r.ten} — ${r.xa} (Bảng ${r.bang}, ${tenVB(0)})`, canhBao: [] };
   }
+  /* Khoản 8 Điều 7 (theo Nghị quyết 28/2026, hiệu lực 01/11/2026 — nội dung theo ghi chú phần mềm Tính tiền đất đai, cần đối chiếu nguyên văn):
+   * đất thương mại, dịch vụ có nguồn gốc là đất ở = 90% giá đất ở cùng tuyến, cùng vị trí. i: chỉ số tuyến TM-DV. */
+  function giaTMDVNguonGocDatO(i, viTri, dc) {
+    const t = chiMuc[i]; if (!t || t.loai !== "tmdv") return null;
+    const o = chiMuc.find(x => x.loai === "o" && x.xa === t.xa && x.vb === t.vb && x.ten === t.ten && x.stt === t.stt);
+    if (!o) return null;
+    const r = giaViTri(o.i, viTri, dc); if (!r) return null;
+    return { ...r, gia: Math.round(r.gia * 0.9), goc: r.goc, buoc: [`đất thương mại, dịch vụ có nguồn gốc đất ở: 90% giá đất ở cùng vị trí (khoản 8 Điều 7 — Nghị quyết 28/2026, cần đối chiếu nguyên văn)`, ...r.buoc], moTa: "Đất thương mại, dịch vụ có nguồn gốc đất ở — 90% giá " + moTa(o, viTri), tuyenDatO: o.i };
+  }
   const tenVB = vb => vb === 1 ? "Nghị quyết 28/2026/NQ-HĐND" : "Nghị quyết 152/2025/NQ-HĐND";
   function moTa(t, viTri) {
     return `${TEN_LOAI[t.loai]} — ${D.xa[t.xa]}${t.stt ? `, STT ${t.stt}` : ""}: ${t.nhom ? t.nhom.replace(/^\d+\.\s*/, "") + " — " : ""}${t.ten}${viTri ? `, vị trí ${viTri}` : ""} (Bảng ${t.bang}, ${tenVB(t.vb)})`;
@@ -84,5 +97,5 @@ TT.giaDat = (function () {
   };
   const tyLeLop = (loai, lop) => { const c = PHAN_LOP[loai === "o" ? "o" : "pnn"]; return Math.round(Math.pow(c.tyLe, Math.min(lop, c.moc.length) - 1) * 10000) / 100; };
 
-  return { nap, gan, daNap, vanBan, timTuyen, tuyen, giaNN, maNN, giaViTri, giaNNDieuChinh, moTa, coHieuLuc, PHAN_LOP, tyLeLop, TEN_LOAI, get D() { return D; } };
+  return { nap, gan, daNap, vanBan, timTuyen, tuyen, giaNN, maNN, giaViTri, giaNNDieuChinh, giaTMDVNguonGocDatO, moTa, coHieuLuc, PHAN_LOP, tyLeLop, TEN_LOAI, get D() { return D; } };
 })();

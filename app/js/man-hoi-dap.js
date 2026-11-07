@@ -11,8 +11,8 @@ TT.man = TT.man || {};
   const cauHinh = mh => {
     const g = mh.B.troLyAI || {}; let dc = "", gt = "";
     try { dc = localStorage.getItem(KHOA_DC) || ""; gt = localStorage.getItem(KHOA_GT) || ""; } catch (_) { }
-    return dc ? { diaChi: dc.replace(/\/+$/, ""), giaoThuc: gt || "tthc", moHinh: gt === "messages" ? g.moHinh || "" : "" }
-      : { diaChi: (g.diaChi || "").replace(/\/+$/, ""), giaoThuc: g.giaoThuc || "tthc", moHinh: g.moHinh || "" };
+    return dc ? { diaChi: dc.replace(/\/+$/, ""), giaoThuc: gt || "tthc", moHinh: gt === "messages" ? g.moHinh || "" : "", gioiHanNgay: g.gioiHanNgay }
+      : { diaChi: (g.diaChi || "").replace(/\/+$/, ""), giaoThuc: g.giaoThuc || "tthc", moHinh: g.moHinh || "", gioiHanNgay: g.gioiHanNgay };
   };
   const GOI_Y = ["Tách thửa đất mất bao nhiêu ngày làm việc?", "Cấp lại Giấy chứng nhận bị mất cần những giấy tờ gì?", "Lệ phí cấp Giấy chứng nhận lần đầu cho cá nhân ở xã là bao nhiêu?", "Cơ quan thuế ban hành thông báo nộp tiền trong thời hạn bao lâu?", "Ai có thẩm quyền giao đất cho hộ gia đình chuyển mục đích sang đất ở?"];
 
