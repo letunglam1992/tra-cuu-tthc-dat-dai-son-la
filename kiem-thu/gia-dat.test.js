@@ -36,7 +36,10 @@ test("Điều chỉnh: chênh cao −30%, đường đất 70% chỉ vị trí 2
   const t = gd.timTuyen({ loai: "o", xa: xa("Xã Đoàn Kết") })[0];
   assert.equal(gd.giaViTri(t.i, 1, { duongDat: true }).gia, 720000);
   assert.equal(gd.giaViTri(t.i, 2, { duongDat: true }).gia, 294000);
-  assert.equal(gd.giaViTri(t.i, 2, { duongDat: true, chenhCao: true }).gia, 205800);
+  assert.equal(gd.giaViTri(t.i, 2, { duongDat: true, chenhCao: true, ngay: "2026-10-31" }).gia, 205800);
+  // Điều 2 Nghị quyết 28/2026 bãi bỏ khoản 3 Điều 4 (giảm 30% do chênh cao) từ 01/11/2026
+  const sau = gd.giaViTri(t.i, 2, { duongDat: true, chenhCao: true, ngay: "2026-11-01" });
+  assert.equal(sau.gia, 294000); assert.match(sau.buoc[0], /bãi bỏ tại Điều 2 Nghị quyết 28\/2026/);
   assert.equal(gd.giaNNDieuChinh(xa("Xã Đoàn Kết"), "HNK", true).gia, 102000);
   assert.deepEqual([1, 2, 3, 4, 5, 6].map(l => gd.tyLeLop("o", l)), [100, 60, 36, 21.6, 12.96, 12.96]);
   assert.deepEqual([1, 2, 3, 4].map(l => gd.tyLeLop("tmdv", l)), [100, 50, 25, 12.5]);
@@ -59,4 +62,25 @@ test("Chuyển mục đích nhiều lớp: 100 m² lớp 1 + 50 m² lớp 2 (60%
   const r = nv.tinh({ loai: "chuyen-muc-dich", truongHop: "nn-giao-khong-thu", lop: [{ ten: "Lớp 1", dienTich: 100, giaSau: gs, giaTruoc: gt }, { ten: "Lớp 2", dienTich: 50, giaSau: gs * 0.6, giaTruoc: gt }] }, ch);
   assert.equal(r.tienSau, 100 * 720000 + 50 * 432000); assert.equal(r.tienTruoc, 150 * 68000);
   assert.equal(r.soTien, 72000000 + 21600000 - 10200000); assert.equal(r.chiTiet.length, 2);
+});
+
+test("Nghị quyết 28/2026 (phụ biểu Excel): Phụ lục V bãi bỏ, Phụ lục IV đổi tên tuyến và tên nhóm theo ngày hiệu lực", () => {
+  const xa = ten => D.xa.indexOf(ten);
+  // Phụ lục V: Đoàn Kết 1.4 bị bãi bỏ ở cả ba bảng
+  for (const loai of ["o", "tmdv", "skc"]) {
+    const t = gd.timTuyen({ loai, xa: xa("Xã Đoàn Kết"), ngay: "2026-11-01", toiDa: 1000 }).find(x => x.vb === 0 && x.stt === "1.4");
+    assert.ok(t && t.daBaiBo, loai + " 1.4 phải bị bãi bỏ"); assert.match(t.daBaiBo.can, /Phụ lục V/);
+  }
+  assert.ok(!gd.timTuyen({ loai: "o", xa: xa("Xã Đoàn Kết"), ngay: "2026-10-31", toiDa: 1000 }).find(x => x.vb === 0 && x.stt === "1.4").daBaiBo);
+  // Phụ lục V: cả nhóm không có dòng con (Mường É, STT 1 “Khu dân cư Bản Ái Khôm”)
+  assert.ok(gd.timTuyen({ loai: "o", xa: xa("Xã Mường É"), ngay: "2026-11-02", toiDa: 1000 }).find(x => x.vb === 0 && x.stt === "1").daBaiBo);
+  // Phụ lục IV: Xuân Nha 1.5 đổi tên; tìm được theo tên mới
+  const xn = gd.timTuyen({ loai: "o", xa: xa("Xã Xuân Nha"), ngay: "2026-11-02", toiDa: 1000 }).find(x => x.vb === 0 && x.stt === "1.5");
+  assert.equal(xn.ten, "Cầu khu Bướt đến nhà văn hóa khu Ngà bản Tân Xuân"); assert.equal(xn.tenCu, "Cầu bản Bướt đến nhà văn hóa bản Ngà");
+  assert.ok(gd.timTuyen({ loai: "o", xa: xa("Xã Xuân Nha"), q: "khu nga ban tan xuan" }).length >= 1);
+  // Phụ lục IV đổi tên nhóm: Chiềng Hặc nhóm 2 → “Tuyến đường liên xã Chiềng Hặc - Mường Lựm - Tân Lập”
+  const ch = gd.timTuyen({ loai: "o", xa: xa("Xã Chiềng Hặc"), ngay: "2026-11-02", toiDa: 1000 }).find(x => x.vb === 0 && /^2\./.test(x.nhomCu || ""));
+  assert.match(ch.nhom, /Tuyến đường liên xã Chiềng Hặc - Mường Lựm - Tân Lập/);
+  // STT lệch trong Phụ lục IV (Chiềng La 3.1 ↔ tên ở 3.3) được ghi nhận
+  assert.ok(D.vanBan[1].lechStt.some(x => /Chiềng La/.test(x)));
 });

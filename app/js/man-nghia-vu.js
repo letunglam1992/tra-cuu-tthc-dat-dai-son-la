@@ -131,7 +131,7 @@ TT.man = TT.man || {};
           </div><p class="chu-nho mo cmd-can-cu">${e(th.canCu || "")}</p></div></div>
         <div class="cmd-buoc"><div class="cmd-so">2</div><div class="cmd-noi"><h4>Giá đất sau khi chuyển mục đích</h4>
           <div class="cg-sau"></div>
-          <div class="cmd-dc"><label class="o-chon"><input type="checkbox" data-dc="chenhCao"${c.dc.chenhCao ? " checked" : ""}> <span>Chênh cao bình quân so với mặt đường ≥ 1,5 m — giảm 30% (khoản 3 Điều 4)</span></label>
+          <div class="cmd-dc"><label class="o-chon"><input type="checkbox" data-dc="chenhCao"${c.dc.chenhCao ? " checked" : ""}> <span>Chênh cao bình quân so với mặt đường ≥ 1,5 m — giảm 30% (khoản 3 Điều 4) <span class="nhan nhan-vang" data-ghi-chenh-cao${gd.boChenhCao(c.ngay) ? "" : " hidden"}>đã bãi bỏ từ 01/11/2026 (Điều 2 Nghị quyết 28/2026) — không áp dụng</span></span></label>
             <label class="o-chon"><input type="checkbox" data-dc="duongDat"${c.dc.duongDat ? " checked" : ""}> <span>Vị trí 2–5, mặt đường là đường đất — 70% (khoản 4 Điều 4)</span></label></div>
           <div class="cmd-gia"><label class="truong"><span>Giá đất sau (đồng/m²) — chọn ở trên hoặc nhập</span><input name="giaSau" inputmode="decimal" value="${e(kh.gt.giaSau || "")}" autocomplete="off"></label><div class="cmd-nguon" data-nguon="sau"></div></div></div></div>
         <div class="cmd-buoc"><div class="cmd-so">3</div><div class="cmd-noi"><h4>Giá đất trước khi chuyển mục đích</h4>
@@ -139,7 +139,7 @@ TT.man = TT.man || {};
           <div data-khoi-truoc${bang0 ? " hidden" : ""}>
             <div class="tang" style="margin-bottom:8px"><button type="button" class="nut nut-nho" data-cung>${bt("luong", 13)} Cùng tuyến, cùng vị trí với giá sau</button><span class="chu-nho mo">— khi đất trước là đất phi nông nghiệp cùng tuyến (ví dụ đất thương mại, dịch vụ → đất ở).</span></div>
             <div class="cg-truoc"></div>
-            <label class="o-chon" data-tmdv-dat-o${c.truoc.loai === "tmdv" ? "" : " hidden"}><input type="checkbox" data-dc="tmdvDatO"${c.dc.tmdvDatO ? " checked" : ""}> <span>Đất thương mại, dịch vụ có nguồn gốc là đất ở — bằng 90% giá đất ở cùng tuyến, cùng vị trí (khoản 8 Điều 7, Nghị quyết 28/2026, từ 01/11/2026) <span class="nhan nhan-vang">cần đối chiếu nguyên văn</span></span></label>
+            <label class="o-chon" data-tmdv-dat-o${c.truoc.loai === "tmdv" ? "" : " hidden"}><input type="checkbox" data-dc="tmdvDatO"${c.dc.tmdvDatO ? " checked" : ""}> <span>Đất thương mại, dịch vụ của hộ gia đình, cá nhân đang sử dụng ổn định lâu dài, có nguồn gốc từ đất ở (được công nhận, giao đất ban đầu là đất ở hoặc được phép chuyển mục đích từ đất ở) — bằng 90% đơn giá đất ở cùng vị trí, cùng tuyến đường (khoản 8 Điều 7, bổ sung tại khoản 6 Điều 1 Nghị quyết 28/2026, từ 01/11/2026)</span></label>
             <label class="o-chon" data-xen-kep${/^nn:/.test(c.truoc.loai) ? "" : " hidden"}><input type="checkbox" data-dc="xenKep"${c.dc.xenKep ? " checked" : ""}> <span>Đất nông nghiệp trong cùng thửa có đất ở hoặc xen kẹt với đất ở — tăng 50% (khoản 1 Điều 6)</span></label>
             <div class="cmd-gia"><label class="truong"><span>Giá đất trước (đồng/m²) — chọn ở trên hoặc nhập</span><input name="giaTruoc" inputmode="decimal" value="${e(kh.gt.giaTruoc || "")}" autocomplete="off"></label><div class="cmd-nguon" data-nguon="truoc"></div></div></div></div></div>
         <div class="cmd-buoc"><div class="cmd-so">4</div><div class="cmd-noi"><h4>Diện tích chuyển mục đích</h4>
@@ -154,8 +154,8 @@ TT.man = TT.man || {};
       const t = c[phia], dc = c.dc;
       if (/^nn:/.test(t.loai)) return t.nn && c.xa !== "" || t.nn === "RSX" ? gd.giaNNDieuChinh(c.xa === "" ? -1 : c.xa, t.nn, dc.xenKep) : null;
       if (t.tuyen == null || !t.viTri) return null;
-      const datO = phia === "truoc" && t.loai === "tmdv" && dc.tmdvDatO && gd.coHieuLuc(1, c.ngay);
-      const r = datO ? gd.giaTMDVNguonGocDatO(t.tuyen, t.viTri, dc) : gd.giaViTri(t.tuyen, t.viTri, dc); if (!r) return null;
+      const datO = phia === "truoc" && t.loai === "tmdv" && dc.tmdvDatO && gd.coHieuLuc(1, c.ngay), dcN = { ...dc, ngay: c.ngay };
+      const r = datO ? gd.giaTMDVNguonGocDatO(t.tuyen, t.viTri, dcN) : gd.giaViTri(t.tuyen, t.viTri, dcN); if (!r) return null;
       const tu = gd.tuyen(t.tuyen); r.vb = tu.vb; r.chuaHieuLuc = !gd.coHieuLuc(tu.vb, c.ngay); r.xaKhac = c.xa !== "" && tu.xa !== +c.xa;
       return r;
     }
@@ -243,7 +243,7 @@ TT.man = TT.man || {};
       const c = cmd(kh), t = ev.target;
       if (t.hasAttribute("data-cmd")) {
         const k = t.getAttribute("data-cmd"); c[k] = t.value;
-        if (k === "xa" || k === "ngay") { const b = boChon.get(kh.id); b.sau.ve(); b.truoc.ve(); veNguon(sec, kh, "sau"); veNguon(sec, kh, "truoc"); }
+        if (k === "xa" || k === "ngay") { const b = boChon.get(kh.id); b.sau.ve(); b.truoc.ve(); sec.querySelector("[data-ghi-chenh-cao]").hidden = !gd.boChenhCao(c.ngay); apGia(sec, kh, "sau", !c.nguonsau); apGia(sec, kh, "truoc", !c.nguontruoc); }
         if (k === "truongHop") {
           const th = thHienTai(c); sec.querySelectorAll("[data-th]").forEach(x => { x.hidden = th.cachTinh !== "theo-thoi-han"; });
           sec.querySelector("[data-bang0]").hidden = th.cachTinh !== "bang-0"; sec.querySelector("[data-khoi-truoc]").hidden = th.cachTinh === "bang-0";
@@ -355,7 +355,7 @@ TT.man = TT.man || {};
       hop.innerHTML = `<div class="the-than"><div class="tang" style="justify-content:space-between"><label class="truong" style="flex:1;min-width:200px"><span>Xã, phường</span><select data-xa><option value="">— Toàn tỉnh —</option>${gd.D.xa.map((x, j) => `<option value="${j}">${e(x)}</option>`).join("")}</select></label><button type="button" class="nut nut-nho nut-chu" data-dong-tra aria-label="Đóng">${bt("dong", 14)}</button></div><div class="cg-o"></div></div>`;
       nut.closest(".truong").after(hop);
       const w = TT.chonGia.tao(hop.querySelector(".cg-o"), { loaiCho: ["o", "tmdv", "skc", "nn"], trangThai: {}, layXa: () => tt.xa, layNgay: homNay,
-        onChon: s => { const r = /^nn:/.test(s.loai) ? gd.giaNNDieuChinh(tt.xa === "" ? -1 : tt.xa, s.nn, false) : gd.giaViTri(s.tuyen, s.viTri); if (!r) return; oNhap.value = nv.soVN(r.gia, 0); oNhap.dispatchEvent(new Event("input", { bubbles: true })); hop.remove(); } });
+        onChon: s => { const r = /^nn:/.test(s.loai) ? gd.giaNNDieuChinh(tt.xa === "" ? -1 : tt.xa, s.nn, false) : gd.giaViTri(s.tuyen, s.viTri, { ngay: homNay() }); if (!r) return; oNhap.value = nv.soVN(r.gia, 0); oNhap.dispatchEvent(new Event("input", { bubbles: true })); hop.remove(); } });
       hop.querySelector("[data-xa]").addEventListener("change", ev => { tt.xa = ev.target.value; w.ve(); });
       hop.querySelector("[data-dong-tra]").addEventListener("click", () => hop.remove());
     }

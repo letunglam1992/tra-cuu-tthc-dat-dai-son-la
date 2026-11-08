@@ -22,14 +22,18 @@ const CHON = {
   TT10: { ten: "Thông tư số 10/2024/TT-BTNMT", mau: "Thông tư(?: số)? 10\\/2024\\/TT-BTNMT" },
   TT23: { ten: "Thông tư số 23/2025/TT-BNNMT", mau: "Thông tư(?: số)? 23\\/2025\\/TT-BNNMT" },
   QD27: { ten: "Quyết định số 27/2026/QĐ-UBND", mau: "Quyết định(?: số)? 27\\/2026\\/QĐ-UBND" },
-  QD106PL1: { ten: "Quyết định số 106/2025/QĐ-UBND (Phụ lục I)", mau: "Quyết định(?: số)? 106\\/2025\\/QĐ-UBND" }
+  QD106PL1: { ten: "Quyết định số 106/2025/QĐ-UBND (Phụ lục I)", mau: "Quyết định(?: số)? 106\\/2025\\/QĐ-UBND" },
+  // Văn bản bổ sung ngoài bộ: tệp ở cong-cu/du-lieu/<MÃ>.md, danh mục ghi tại đây
+  NQ28: { ten: "Nghị quyết số 28/2026/NQ-HĐND", mau: "Nghị quyết(?: số)? 28\\/2026\\/NQ-HĐND", tep: path.join(__dirname, "du-lieu", "NQ28.md"),
+    dm: { loai: "Nghị quyết", so_hieu: "28/2026/NQ-HĐND", ngay: "19/10/2026", ten: "Sửa đổi, bổ sung một số điều của Quy định bảng giá các loại đất trên địa bàn tỉnh áp dụng từ ngày 01/01/2026 ban hành kèm theo Nghị quyết số 152/2025/NQ-HĐND (HĐND tỉnh Sơn La)",
+      hieu_luc: "Từ 01/11/2026 (Điều 4)", sua_doi: "", ghi_chu: "Nguyên văn phần quyết nghị gõ lại từ bản sao y; Phụ lục I–V áp dụng tại trang Bảng giá đất. Điều 2 bãi bỏ khoản 3 Điều 4 Quy định kèm Nghị quyết 152/2025 (giảm 30% do chênh cao)." } }
 };
 // Văn bản sửa đổi → văn bản gốc (Điều của văn bản sửa đổi), theo references/quan-he-sua-doi.md
 const SUA = [{ vb: "ND226", dieu: "1", goc: "ND71" }, { vb: "ND49", dieu: "10", goc: "ND71" }, { vb: "TT23", dieu: "5", goc: "TT10" }];
 
 const dm = JSON.parse(fs.readFileSync(path.join(nguon, "danh-muc.json"), "utf8"));
 const docVB = ma => {
-  const s = fs.readFileSync(path.join(nguon, "van-ban", ma + ".md"), "utf8").split(/\r?\n/);
+  const s = fs.readFileSync(CHON[ma] && CHON[ma].tep ? CHON[ma].tep : path.join(nguon, "van-ban", ma + ".md"), "utf8").split(/\r?\n/);
   const dieu = []; let chuong = "", cur = null, mo = [];
   for (const l of s) {
     let m;
@@ -45,7 +49,7 @@ const docVB = ma => {
 
 const danhMuc = {}, suaDoi = {};
 for (const [ma, c] of Object.entries(CHON)) {
-  const d = dm.find(x => x.id === ma); if (!d) throw new Error("Danh mục không có " + ma);
+  const d = c.dm || dm.find(x => x.id === ma); if (!d) throw new Error("Danh mục không có " + ma);
   const vb = docVB(ma);
   fs.writeFileSync(path.join(RA, ma + ".js"), `/* ${c.ten} — nguyên văn từ bộ phap-ly-dat-dai; TỆP SINH TỰ ĐỘNG bởi cong-cu/nhap-phap-luat.js. dieu: [số, tiêu đề, nội dung, chương] */\nTT.phapLuat && TT.phapLuat.nhan(${JSON.stringify(ma)}, ${JSON.stringify(vb)});\n`);
   danhMuc[ma] = { ten: c.ten, mau: c.mau, loai: d.loai, soHieu: d.so_hieu, ngay: d.ngay, trichYeu: d.ten, hieuLuc: d.hieu_luc, suaDoi: d.sua_doi || "", ghiChu: d.ghi_chu || "", soDieu: vb.dieu.length };

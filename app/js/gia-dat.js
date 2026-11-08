@@ -11,7 +11,7 @@ TT.giaDat = (function () {
   function gan(du) {
     D = du; const ch = TT.ti.chuanHoa;
     chiMuc = D.tuyen.map((t, i) => ({ i, loai: LOAI_PNN[t[0]], xa: t[1], vb: t[2], bang: t[3], stt: t[4], nhom: D.nhom[t[5]], ten: t[6], vt: t[7], canhBao: t[8] || [], thayDoi: t[9] || null,
-      tim: ch(D.nhom[t[5]] + " " + t[6] + (t[9] && t[9].doiTen ? " " + t[9].doiTen.ten : "")) }));
+      tim: ch(D.nhom[t[5]] + " " + t[6] + (t[9] && t[9].doiTen ? " " + t[9].doiTen.ten : "") + (t[9] && t[9].doiNhom ? " " + t[9].doiNhom.ten : "")) }));
     return D;
   }
   // Nạp dữ liệu (trình duyệt): chèn thẻ script một lần
@@ -30,6 +30,13 @@ TT.giaDat = (function () {
   const vanBan = i => D.vanBan[i];
   // Văn bản có hiệu lực tại ngày tính (chuỗi yyyy-mm-dd)
   const coHieuLuc = (vb, ngay) => !ngay || D.vanBan[vb].hieuLucTu <= ngay;
+  // Tên tuyến, tên nhóm tại ngày tính (Phụ lục IV Nghị quyết 28/2026); ngày bỏ trống = tên hiện hành (theo hôm nay)
+  const homNay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const sauNgay = (x, ngay) => x && (ngay || homNay()) >= x.tu;
+  const tenTai = (t, ngay) => sauNgay(t.thayDoi && t.thayDoi.doiTen, ngay) ? t.thayDoi.doiTen.ten : t.ten;
+  const nhomTai = (t, ngay) => sauNgay(t.thayDoi && t.thayDoi.doiNhom, ngay) ? t.thayDoi.doiNhom.ten : t.nhom;
+  // Điều 2 Nghị quyết 28/2026: bãi bỏ khoản 3 Điều 4 (giảm 30% khi chênh cao ≥ 1,5 m) từ ngày Nghị quyết có hiệu lực
+  const boChenhCao = ngay => D.vanBan[1] && (ngay || homNay()) >= D.vanBan[1].hieuLucTu;
 
   /* Tìm tuyến: loai "o" | "tmdv" | "skc"; xa: chỉ số xã (bỏ trống = toàn tỉnh); q: từ khóa (không dấu cũng được); ngay: ngày tính giá.
    * Trả về danh sách tuyến, kèm `chuaHieuLuc` nếu thuộc văn bản chưa có hiệu lực tại ngày tính. */
@@ -46,7 +53,8 @@ TT.giaDat = (function () {
     ra.sort((a, b) => (coHieuLuc(b.vb, ngay) - coHieuLuc(a.vb, ngay)) || (a.xa - b.xa) || (a.i - b.i));
     // Phụ lục IV, V Nghị quyết 28/2026: tại ngày tính, tuyến đổi tên hiện tên mới; tuyến bãi bỏ xếp cuối, không cho chọn giá
     const trangThai = t => { const td = t.thayDoi || {}, sau = x => x && (!ngay || ngay >= x.tu);
-      return { ...t, chuaHieuLuc: !coHieuLuc(t.vb, ngay), daBaiBo: sau(td.baiBo) ? td.baiBo : null, tenCu: sau(td.doiTen) ? t.ten : null, ten: sau(td.doiTen) ? td.doiTen.ten : t.ten }; };
+      return { ...t, chuaHieuLuc: !coHieuLuc(t.vb, ngay), daBaiBo: sau(td.baiBo) ? td.baiBo : null, tenCu: sau(td.doiTen) ? t.ten : null, ten: sau(td.doiTen) ? td.doiTen.ten : t.ten,
+        nhomCu: sau(td.doiNhom) ? t.nhom : null, nhom: sau(td.doiNhom) ? td.doiNhom.ten : t.nhom }; };
     return ra.map(trangThai).sort((a, b) => !!a.daBaiBo - !!b.daBaiBo).slice(0, toiDa || 300);
   }
   const tuyen = i => chiMuc[i];
@@ -59,16 +67,20 @@ TT.giaDat = (function () {
   }
   const maNN = () => Object.keys(D.tenNN);
 
-  /* Giá một vị trí của tuyến, áp điều chỉnh (thứ tự: vị trí → chênh cao / đường đất):
-   *  chenhCao: chênh cao bình quân ≥ 1,5 m → giảm 30% (khoản 3 Điều 4); duongDat: vị trí 2–5 mặt đường đất → 70% (khoản 4 Điều 4). */
+  /* Giá một vị trí của tuyến, áp điều chỉnh (thứ tự: vị trí → chênh cao / đường đất); dc.ngay: ngày tính giá.
+   *  chenhCao: chênh cao bình quân ≥ 1,5 m → giảm 30% (khoản 3 Điều 4 — bị bãi bỏ tại Điều 2 Nghị quyết 28/2026 từ 01/11/2026);
+   *  duongDat: vị trí 2–5 mặt đường đất → 70% (khoản 4 Điều 4). */
   function giaViTri(i, viTri, dc) {
-    const t = chiMuc[i], g = t.vt[viTri - 1];
+    const t = chiMuc[i], g = t.vt[viTri - 1], ngay = dc && dc.ngay;
     if (g == null) return null;
     const goc = g * D.donVi, buoc = [];
     let gia = goc;
-    if (dc && dc.chenhCao) { gia *= 0.7; buoc.push("chênh cao ≥ 1,5 m: giảm 30% (khoản 3 Điều 4)"); }
+    if (dc && dc.chenhCao) {
+      if (boChenhCao(ngay)) buoc.push("không giảm do chênh cao — khoản 3 Điều 4 đã bị bãi bỏ tại Điều 2 Nghị quyết 28/2026 từ 01/11/2026");
+      else { gia *= 0.7; buoc.push("chênh cao ≥ 1,5 m: giảm 30% (khoản 3 Điều 4)"); }
+    }
     if (dc && dc.duongDat && viTri >= 2) { gia *= 0.7; buoc.push(`vị trí ${viTri} mặt đường đất: 70% (khoản 4 Điều 4)`); }
-    return { gia: Math.round(gia), goc, buoc, moTa: moTa(t, viTri), canhBao: t.canhBao };
+    return { gia: Math.round(gia), goc, buoc, moTa: moTa(t, viTri, ngay), canhBao: t.canhBao };
   }
   // Đất nông nghiệp trong cùng thửa có đất ở hoặc xen kẹt đất ở: tăng 50% (khoản 1 Điều 6)
   function giaNNDieuChinh(xa, ma, xenKep) {
@@ -77,18 +89,21 @@ TT.giaDat = (function () {
     return { gia, goc: r.gia, buoc: xenKep ? ["đất nông nghiệp trong thửa có đất ở / xen kẹt đất ở: +50% (khoản 1 Điều 6)"] : [],
       moTa: `${r.ten} — ${r.xa} (Bảng ${r.bang}, ${tenVB(0)})`, canhBao: [] };
   }
-  /* Khoản 8 Điều 7 (theo Nghị quyết 28/2026, hiệu lực 01/11/2026 — nội dung theo ghi chú phần mềm Tính tiền đất đai, cần đối chiếu nguyên văn):
-   * đất thương mại, dịch vụ có nguồn gốc là đất ở = 90% giá đất ở cùng tuyến, cùng vị trí. i: chỉ số tuyến TM-DV. */
+  /* Khoản 8 Điều 7 Quy định kèm theo Nghị quyết 152/2025 (bổ sung tại khoản 6 Điều 1 Nghị quyết 28/2026, hiệu lực 01/11/2026):
+   * “Đối với diện tích đất thương mại, dịch vụ của hộ gia đình, cá nhân đang sử dụng ổn định lâu dài có nguồn gốc từ đất ở (được công nhận,
+   * giao đất ban đầu là đất ở hoặc được phép chuyển mục đích sử dụng đất từ đất ở) thì giá đất được xác định bằng 90% đơn giá đất ở cùng vị trí,
+   * cùng tuyến đường quy định tại Bảng số 05”. i: chỉ số tuyến TM-DV. */
   function giaTMDVNguonGocDatO(i, viTri, dc) {
     const t = chiMuc[i]; if (!t || t.loai !== "tmdv") return null;
     const o = chiMuc.find(x => x.loai === "o" && x.xa === t.xa && x.vb === t.vb && x.ten === t.ten && x.stt === t.stt);
     if (!o) return null;
     const r = giaViTri(o.i, viTri, dc); if (!r) return null;
-    return { ...r, gia: Math.round(r.gia * 0.9), goc: r.goc, buoc: [`đất thương mại, dịch vụ có nguồn gốc đất ở: 90% giá đất ở cùng vị trí (khoản 8 Điều 7 — Nghị quyết 28/2026, cần đối chiếu nguyên văn)`, ...r.buoc], moTa: "Đất thương mại, dịch vụ có nguồn gốc đất ở — 90% giá " + moTa(o, viTri), tuyenDatO: o.i };
+    return { ...r, gia: Math.round(r.gia * 0.9), goc: r.goc, buoc: [`đất thương mại, dịch vụ của hộ gia đình, cá nhân có nguồn gốc từ đất ở: 90% đơn giá đất ở cùng vị trí, cùng tuyến (khoản 8 Điều 7, bổ sung tại khoản 6 Điều 1 Nghị quyết 28/2026)`, ...r.buoc], moTa: "Đất thương mại, dịch vụ có nguồn gốc từ đất ở — 90% giá " + moTa(o, viTri, dc && dc.ngay), tuyenDatO: o.i };
   }
   const tenVB = vb => vb === 1 ? "Nghị quyết 28/2026/NQ-HĐND" : "Nghị quyết 152/2025/NQ-HĐND";
-  function moTa(t, viTri) {
-    return `${TEN_LOAI[t.loai]} — ${D.xa[t.xa]}${t.stt ? `, STT ${t.stt}` : ""}: ${t.nhom ? t.nhom.replace(/^\d+\.\s*/, "") + " — " : ""}${t.ten}${viTri ? `, vị trí ${viTri}` : ""} (Bảng ${t.bang}, ${tenVB(t.vb)})`;
+  function moTa(t, viTri, ngay) {
+    const nh = nhomTai(t, ngay), ten = tenTai(t, ngay), doi = ten !== t.ten || nh !== t.nhom;
+    return `${TEN_LOAI[t.loai]} — ${D.xa[t.xa]}${t.stt ? `, STT ${t.stt}` : ""}: ${nh ? nh.replace(/^\d+\.\s*/, "") + " — " : ""}${ten}${viTri ? `, vị trí ${viTri}` : ""} (Bảng ${t.bang}, ${tenVB(t.vb)}${doi ? "; tên điều chỉnh tại Phụ lục IV Nghị quyết 28/2026" : ""})`;
   }
   // Tỷ lệ phân lớp theo chiều sâu so với lớp 1 (khoản 6 Điều 4): đất ở 60% lớp trước (≤ 20, 40, 60, 80 m); đất PNN khác 50% (≤ 40, 80, 120 m)
   const PHAN_LOP = {
@@ -97,5 +112,5 @@ TT.giaDat = (function () {
   };
   const tyLeLop = (loai, lop) => { const c = PHAN_LOP[loai === "o" ? "o" : "pnn"]; return Math.round(Math.pow(c.tyLe, Math.min(lop, c.moc.length) - 1) * 10000) / 100; };
 
-  return { nap, gan, daNap, vanBan, timTuyen, tuyen, giaNN, maNN, giaViTri, giaNNDieuChinh, giaTMDVNguonGocDatO, moTa, coHieuLuc, PHAN_LOP, tyLeLop, TEN_LOAI, get D() { return D; } };
+  return { nap, gan, daNap, vanBan, timTuyen, tuyen, tenTai, nhomTai, boChenhCao, giaNN, maNN, giaViTri, giaNNDieuChinh, giaTMDVNguonGocDatO, moTa, coHieuLuc, PHAN_LOP, tyLeLop, TEN_LOAI, get D() { return D; } };
 })();

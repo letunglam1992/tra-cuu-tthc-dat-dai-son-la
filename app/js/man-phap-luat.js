@@ -4,13 +4,13 @@ window.TT = window.TT || {};
 TT.man = TT.man || {};
 (function () {
   const ti = TT.ti, tp = TT.tp, e = ti.e, bt = tp.bt, pl = TT.phapLuat;
-  const NHOM = [["Luật", "Luật, nghị quyết của Quốc hội"], ["Nghị quyết", null], ["Nghị định", "Nghị định của Chính phủ"], ["Thông tư", "Thông tư của Bộ"], ["Quyết định", "Quyết định của UBND tỉnh Sơn La"]];
+  const NHOM = [["Luật", "Luật, nghị quyết của Quốc hội"], ["Nghị định", "Nghị định của Chính phủ"], ["Thông tư", "Thông tư của Bộ"], ["Tinh", "Văn bản của tỉnh Sơn La (HĐND, UBND tỉnh)"]];
   const dauTrang = (nhan, h1, moTa, phai) => `<div class="dong-tieu-de"><div><div class="nhan-trang">${nhan}</div><h1>${h1}</h1>${moTa ? `<div class="mo-ta">${moTa}</div>` : ""}</div>${phai ? `<div class="phai khong-in">${phai}</div>` : ""}</div>`;
 
   TT.man["phap-luat"] = function (ctx) {
     const { thamSo, q } = ctx, [ma, so] = thamSo, dm = pl.danhMuc;
     if (!ma) {
-      const nhomCua = v => v.loai === "Nghị quyết" && /QH/.test(v.soHieu) ? "Luật" : v.loai;
+      const nhomCua = v => /HĐND|UBND/.test(v.soHieu) ? "Tinh" : v.loai === "Nghị quyết" && /QH/.test(v.soHieu) ? "Luật" : v.loai;
       const html = `<div class="trang">${dauTrang("Tra cứu", "Văn bản pháp luật đất đai", "Nguyên văn các văn bản được Quyết định 75 viện dẫn hoặc dùng khi giải quyết thủ tục, tính tiền sử dụng đất. Trong nguyên văn thủ tục, các cụm như “khoản 6 Điều 141 của Luật Đất đai” đã được gắn liên kết — bấm để xem ngay.")}
         <div class="thong-bao thong-bao-vang">${bt("canhBao")}<div>Văn bản dùng để tra cứu, soạn thảo nội bộ. Trừ Luật Đất đai (văn bản hợp nhất), các nghị định, thông tư là <b>bản gốc chưa hợp nhất</b> — phần mềm ghi chú các Điều đã được sửa đổi. Khi cần giá trị pháp lý, đối chiếu văn bản gốc trên cổng thông tin chính thức.</div></div>
         ${NHOM.filter(n => n[1]).map(([loai, ten]) => { const ds = Object.entries(dm).filter(([, v]) => nhomCua(v) === loai); return ds.length ? `<div class="dong-muc"><h2>${e(ten)}</h2></div><div class="luoi luoi-2">${ds.map(([m, v]) => `<a class="the the-muc" href="#/phap-luat/${m}"><div class="tang"><span class="nhan nhan-xanh">${e(v.loai)}</span><span class="nhan nhan-xam">${v.soDieu} Điều</span>${v.suaDoi ? `<span class="nhan nhan-vang" title="${e(v.suaDoi)}">Đã được sửa đổi</span>` : ""}</div><div class="tieu">${e(v.ten)}</div><div class="chu-nho mo">${e(v.trichYeu)}</div><div class="chu-nho"><b>Hiệu lực:</b> ${e(v.hieuLuc)}</div></a>`).join("")}</div>` : ""; }).join("")}

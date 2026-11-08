@@ -14,11 +14,12 @@ TT.man = TT.man || {};
     ["Vị trí 5", "Các thửa đất còn lại.", "điểm a khoản 1 Điều 4"],
     ["Chiều rộng ngõ", "Gồm lòng đường, vỉa hè, rãnh thoát nước (không có thì tính đến mép); không đều thì lấy mặt cắt nhỏ nhất từ đầu ngõ đến thửa đất.", "điểm b, c khoản 1 Điều 4"],
     ["Nhiều cách xác định", "Lấy vị trí có giá cao nhất.", "khoản 2 Điều 4"],
-    ["Chênh cao", "Chênh cao bình quân so với mặt đường từ 1,5 m trở lên: giảm 30%.", "khoản 3 Điều 4"],
+    ["Chênh cao", "Chênh cao bình quân so với mặt đường từ 1,5 m trở lên: giảm 30%. Đã bị bãi bỏ tại Điều 2 Nghị quyết số 28/2026/NQ-HĐND, không áp dụng từ ngày 01/11/2026.", "khoản 3 Điều 4"],
     ["Đường đất", "Vị trí 2–5 có mặt đường là đường đất: bằng 70% giá cùng vị trí.", "khoản 4 Điều 4"],
     ["Nhiều mặt tiếp giáp", "Tăng theo số mặt tiếp giáp (đường, ngõ, ngách, hẻm), tối đa 20%.", "khoản 5 Điều 4"],
     ["Phân lớp chiều sâu", "Đất ở (trừ lô đấu giá, đấu thầu): lớp 1 đến 20 m 100%, mỗi lớp 20 m tiếp theo bằng 60% lớp trước (đến lớp 5). Đất phi nông nghiệp khác (trừ KCN, CCN): đến 40 m 100%, mỗi lớp 40 m tiếp theo bằng 50% lớp trước. Giá bình quân sau phân lớp không thấp hơn giá vị trí thấp nhất của tuyến.", "khoản 6 Điều 4"],
     ["Khu quy hoạch 1/500", "Khu đô thị, khu dân cư, khu tái định cư có quy hoạch chi tiết 1/500: toàn khu là vị trí 1.", "khoản 7 Điều 4"],
+    ["Đất TM-DV có nguồn gốc đất ở", "Đất thương mại, dịch vụ của hộ gia đình, cá nhân đang sử dụng ổn định lâu dài có nguồn gốc từ đất ở (được công nhận, giao đất ban đầu là đất ở hoặc được phép chuyển mục đích từ đất ở): bằng 90% đơn giá đất ở cùng vị trí, cùng tuyến đường tại Bảng số 05 (từ 01/11/2026).", "khoản 8 Điều 7, bổ sung tại khoản 6 Điều 1 Nghị quyết 28/2026"],
     ["Đất nông nghiệp", "Một vị trí theo xã, phường. Đất nông nghiệp trong cùng thửa có đất ở hoặc xen kẹt với đất ở: tăng 50%.", "Điều 5; khoản 1 Điều 6"],
     ["Đất chưa sử dụng", "Bằng 20% giá đất nông nghiệp liền kề cao nhất.", "Điều 8"]
   ];
@@ -39,7 +40,7 @@ TT.man = TT.man || {};
       <aside style="display:grid;gap:16px;align-content:start">
         <div class="the gd-da-chon" id="gd-kq" aria-live="polite"><div class="the-than chu-nho mo">Bấm một ô giá (VT1–VT5) để chọn.</div></div>
         <details class="the" open><summary style="padding:12px 16px;cursor:pointer;font-weight:600">Cách xác định vị trí, điều chỉnh giá</summary><div class="the-than chu-nho">
-          <p class="mo" style="margin-top:0">Quy định kèm theo Nghị quyết số 152/2025/NQ-HĐND.</p>
+          <p class="mo" style="margin-top:0">Quy định kèm theo Nghị quyết số 152/2025/NQ-HĐND, sửa đổi, bổ sung tại Nghị quyết số 28/2026/NQ-HĐND.</p>
           <dl class="gd-quy-tac">${QUY_TAC.map(([a, b, c]) => `<dt>${e(a)}</dt><dd>${e(b)} <span class="mo">(${e(c)})</span></dd>`).join("")}</dl></div></details>
       </aside></div></div>`;
     return { tieuDe: "Bảng giá đất", html, sau(root) {
@@ -49,11 +50,12 @@ TT.man = TT.man || {};
         oXa.insertAdjacentHTML("beforeend", D.xa.map((x, j) => `<option value="${j}">${e(x)}</option>`).join(""));
         if (q.xa != null) oXa.value = q.xa;
         root.querySelector("#gd-vb").innerHTML = `<div class="thong-bao thong-bao-xanh">${bt("kiem")}<div>${D.vanBan.map(v => `<b>${e(v.ten)}</b> — hiệu lực từ ${e(v.hieuLucTu.split("-").reverse().join("/"))}.`).join("<br>")}
-          <div class="chu-nho" style="margin-top:4px">${e(D.vanBan[1].chuaXuLy || "")} Giá trong bảng là giá đất có thời hạn tương ứng 70 năm (khoản 1 Điều 9), đơn vị đồng/m².</div></div></div>`;
+          <div class="chu-nho" style="margin-top:4px">${e(D.vanBan[1].chuaXuLy || "")} Giá trong bảng là giá đất có thời hạn tương ứng 70 năm (khoản 1 Điều 9), đơn vị đồng/m². <a href="#/phap-luat/NQ28">Nguyên văn Nghị quyết 28/2026</a></div>
+          ${(D.vanBan[1].lechStt || []).map(x => `<div class="chu-nho" style="margin-top:4px;color:var(--vang)">⚠ ${e(x)}.</div>`).join("")}</div></div>`;
         const w = TT.chonGia.tao(root.querySelector("#gd-chon"), { loaiCho: ["o", "tmdv", "skc", "nn"], trangThai: { loai: q.loai || "o", q: q.q || "" }, layXa: () => oXa.value, layNgay: () => oNgay.value, toiDa: 120,
           onChon: s => {
             const nn = /^nn:/.test(s.loai);
-            const r = nn ? gd.giaNNDieuChinh(oXa.value === "" ? -1 : oXa.value, s.nn, false) : gd.giaViTri(s.tuyen, s.viTri);
+            const r = nn ? gd.giaNNDieuChinh(oXa.value === "" ? -1 : oXa.value, s.nn, false) : gd.giaViTri(s.tuyen, s.viTri, { ngay: oNgay.value });
             if (!r) return;
             const t = nn ? null : gd.tuyen(s.tuyen), chuaHL = t && !gd.coHieuLuc(t.vb, oNgay.value);
             kq.innerHTML = `<div class="the-dau"><h3>Giá đã chọn</h3></div><div class="the-than">

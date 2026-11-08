@@ -1,5 +1,16 @@
 # Nhật ký thay đổi
 
+## 2.3.1 — 08/11/2026
+
+### Nghị quyết số 28/2026/NQ-HĐND (sửa đổi Bảng giá đất), hiệu lực 01/11/2026
+- **Nguồn dữ liệu**: phụ biểu Excel kèm Nghị quyết → `cong-cu/du-lieu/nq28-2026.json` (`cong-cu/nq28-excel-sang-json.py`); đối chiếu bản ký (sao y ngày 22/10/2026). Phụ lục I–III: 396 tuyến, trùng 1.608/1.608 ô giá đã nhập trước đây. Không dùng sheet “PL.4_Bổ sung NTD” (giá đất nghĩa trang) và các cột giá đề nghị của Phụ lục IV vì không có trong bản ký.
+- **Phụ lục IV**: điều chỉnh tên tuyến (364 dòng) và tên nhóm tuyến (118 dòng) ở Bảng 05, 06, 07 — từ 01/11/2026 hiện tên mới, kèm “Tên cũ”; tìm được theo cả hai tên; tên mới dùng trong nguồn giá của phiếu tính tiền.
+- **Phụ lục V**: bãi bỏ tên và giá 80 dòng tuyến (gồm cả nhóm không liệt kê dòng con, như Mường É “Khu dân cư Bản Ái Khôm”) — làm mờ, không chọn được giá từ 01/11/2026.
+- **Điều 2**: bãi bỏ khoản 3 Điều 4 (giảm 30% khi chênh cao ≥ 1,5 m) — công cụ tính tiền không áp từ 01/11/2026, ghi rõ lý do; bảng “Cách xác định vị trí” cập nhật.
+- **Khoản 8 Điều 7** (bổ sung tại khoản 6 Điều 1): thay nhãn “cần đối chiếu” bằng nguyên văn — đất thương mại, dịch vụ của hộ gia đình, cá nhân có nguồn gốc từ đất ở = 90% đơn giá đất ở cùng vị trí, cùng tuyến (Bảng số 05).
+- Phát hiện **STT lệch**: Phụ lục IV ghi xã Chiềng La STT 3.1 “Từ đất nhà Lò Văn Xôm đến đất nhà ông Quàng Văn Ngấn” nhưng tên này ở STT 3.3 của Nghị quyết 152 (STT 3.1 là tuyến “Đồng Văn Hiệu”) — áp dụng theo tên, ghi cảnh báo trên trang Bảng giá đất.
+- Nguyên văn Điều 1–5 Nghị quyết 28/2026 trong trang **Văn bản pháp luật** (nhóm “Văn bản của tỉnh Sơn La”).
+
 ## 2.3.0 — 07/11/2026
 
 ### Thời hạn giải quyết

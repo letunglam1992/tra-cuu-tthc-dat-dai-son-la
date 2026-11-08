@@ -2,15 +2,16 @@
 /* Dựng app/du-lieu/bang-gia-dat.js từ dữ liệu bảng giá đất của hai phần mềm cùng tác giả:
  *   1) Phần mềm GPMB (letunglam1992/phanmemGPMB): policy/nguon/nq152-2025-bang-gia-dat.json
  *      — Bảng giá đất ban hành kèm Nghị quyết số 152/2025/NQ-HĐND (trích từ bản Word, có cảnh báo dòng bất thường). Dùng làm NGUỒN CHÍNH.
- *   2) Phần mềm Tính tiền đất đai và môi trường (letunglam1992/tinhtiendatdai): index.html, khối seed-data
- *      — chỉ lấy phần bổ sung theo Nghị quyết số 28/2026/NQ-HĐND (Phụ lục I–III), là các dòng nhập sau dòng cuối của Nghị quyết 152.
+ *   2) Nghị quyết số 28/2026/NQ-HĐND: cong-cu/du-lieu/nq28-2026.json (dựng từ phụ biểu Excel bằng cong-cu/nq28-excel-sang-json.py) —
+ *      Phụ lục I–III bổ sung giá, Phụ lục IV điều chỉnh tên tuyến, Phụ lục V bãi bỏ tuyến.
+ *   3) Phần mềm Tính tiền đất đai và môi trường (letunglam1992/tinhtiendatdai): chỉ để đối chiếu chéo giá.
  * Đồng thời ghi tai-lieu/doi-chieu-bang-gia-dat.md: các ô giá Nghị quyết 152 hai phần mềm ghi khác nhau, để tác giả rà soát.
  *
- * Tùy chọn tham số thứ 3: tệp JSON Phụ lục IV (đổi tên tuyến), Phụ lục V (bãi bỏ tuyến) Nghị quyết 28/2026 — mẫu: tai-lieu/mau-nq28-phu-luc-iv-v.json.
- * Cách dùng: node cong-cu/nhap-bang-gia-dat.js <đường dẫn phanmemGPMB> <đường dẫn tinhtiendatdai> [nq28-phu-luc-iv-v.json]
+ * Cách dùng: node cong-cu/nhap-bang-gia-dat.js <đường dẫn phanmemGPMB> <đường dẫn tinhtiendatdai> [nq28-2026.json]
  */
 const fs = require("fs"), path = require("path");
-const [gpmbDir, ttddDir, plIVV] = process.argv.slice(2);
+const [gpmbDir, ttddDir, nq28Arg] = process.argv.slice(2);
+const nq28Json = nq28Arg || path.join(__dirname, "du-lieu", "nq28-2026.json");
 if (!gpmbDir || !ttddDir) { console.error("Cách dùng: node cong-cu/nhap-bang-gia-dat.js <phanmemGPMB> <tinhtiendatdai>"); process.exit(1); }
 const GOC = path.join(__dirname, "..");
 
@@ -41,28 +42,26 @@ LOAI.forEach(([k], li) => {
   }
 });
 const BANG_LOAI = ["05", "06", "07"];
-// 2) Nghị quyết 28/2026 (tinhtiendatdai: các dòng cuối)
-const bs = L.slice(-soDong28), gom = new Map();
-for (const r of bs) {
-  const li = LOAI.findIndex(([, t]) => t === r.type);
-  const mm = r.zone.match(/^((?:Xã|Phường) [^,]+), (.*), Vị trí (\d)$/);
-  if (li < 0 || !mm || !xaIdx.has(mm[1])) throw new Error("Dòng Nghị quyết 28 không đọc được: " + JSON.stringify(r));
-  const khoa = li + "|" + mm[1] + "|" + mm[2];
-  if (!gom.has(khoa)) gom.set(khoa, { li, xa: mm[1], ten: mm[2], vt: [null, null, null, null, null] });
-  gom.get(khoa).vt[+mm[3] - 1] = r.price / 1000;
-}
+// 2) Nghị quyết 28/2026 — Phụ lục I–III (bổ sung giá) từ phụ biểu Excel (cong-cu/du-lieu/nq28-2026.json, dựng bằng cong-cu/nq28-excel-sang-json.py)
+const N28 = JSON.parse(fs.readFileSync(nq28Json, "utf8"));
 let stt28 = 0;
-for (const t of gom.values()) {
-  // "Nhóm: tuyến" — tách phần trước dấu hai chấm làm tên nhóm (khu vực/trục chính)
-  const i = t.ten.indexOf(": ");
-  const nh = i > 0 ? t.ten.slice(0, i) : "", ten = i > 0 ? t.ten.slice(i + 2) : t.ten;
-  let n = 5; while (n > 0 && t.vt[n - 1] == null) n--;
-  const dong = [t.li, xaIdx.get(t.xa), 1, BANG_LOAI[t.li], "", layNhom(nh), ten, t.vt.slice(0, n)];
-  const cb = []; for (let j = 1; j < n; j++) if (t.vt[j] != null && t.vt[j - 1] != null && t.vt[j] > t.vt[j - 1]) { cb.push("Giá vị trí sau cao hơn vị trí trước"); break; }
-  if (t.vt.slice(0, n).some(v => v == null)) cb.push("Có vị trí trống");
-  if (cb.length) dong.push(cb);
-  tuyen.push(dong); stt28++;
-}
+[N28.plI, N28.plII, N28.plIII].forEach((ds, li) => {
+  for (const r of ds) {
+    if (!xaIdx.has(r.xa)) throw new Error("Nghị quyết 28: xã ngoài danh mục: " + r.xa);
+    const vt = r.vt.map(v => v == null ? null : v), n = vt.length;
+    const dong = [li, xaIdx.get(r.xa), 1, BANG_LOAI[li], "", layNhom(r.nhom || ""), r.ten, vt];
+    const cb = []; for (let j = 1; j < n; j++) if (vt[j] != null && vt[j - 1] != null && vt[j] > vt[j - 1]) { cb.push("Giá vị trí sau cao hơn vị trí trước"); break; }
+    if (vt.some(v => v == null)) cb.push("Có vị trí trống");
+    if (cb.length) dong.push(cb);
+    tuyen.push(dong); stt28++;
+  }
+});
+// Đối chiếu với phần bổ sung đã nhập ở phần mềm Tính tiền đất đai (kiểm tra chéo giá)
+const bs = L.slice(-soDong28), giaTTDD = new Map();
+for (const r of bs) { const mm = r.zone.match(/^((?:Xã|Phường) [^,]+), (.*), Vị trí (\d)$/); if (mm) giaTTDD.set(`${r.type}|${mm[1]}|${mm[2]}|${mm[3]}`, r.price / 1000); }
+let khopTTDD = 0, khacTTDD = 0;
+tuyen.filter(t => t[2] === 1).forEach(t => t[7].forEach((v, j) => { const k = [LOAI[t[0]][1], xa[t[1]], (nhom[t[5]] ? nhom[t[5]] + ": " : "") + t[6], j + 1].join("|"), k2 = [LOAI[t[0]][1], xa[t[1]], t[6], j + 1].join("|"); const g = giaTTDD.has(k) ? giaTTDD.get(k) : giaTTDD.get(k2); if (g == null || v == null) return; g === v ? khopTTDD++ : khacTTDD++; }));
+console.log(`Nghị quyết 28 Phụ lục I–III: ${stt28} tuyến; đối chiếu phần mềm Tính tiền: ${khopTTDD} ô khớp, ${khacTTDD} ô khác`);
 
 // Đất nông nghiệp, khu/cụm công nghiệp (Nghị quyết 152)
 const TEN_NN = { LUC: "Đất chuyên trồng lúa (lúa hai vụ)", LUK: "Đất trồng lúa còn lại (lúa một vụ, lúa nương)", HNK: "Đất trồng cây hàng năm khác", CLN: "Đất trồng cây lâu năm", NTS: "Đất nuôi trồng thủy sản", RSX: "Đất rừng sản xuất" };
@@ -70,30 +69,84 @@ const nn = G.dat_nong_nghiep.filter(r => r.xa !== "Toàn tỉnh").map(r => [xaId
 const nnToanTinh = G.dat_nong_nghiep.filter(r => r.xa === "Toàn tỉnh").map(r => [r.loai_dat, r.gia, r.bang]);
 const kcn = G.dat_kcn_ccn.map(r => [r.ten, xaIdx.has(r.xa) ? xaIdx.get(r.xa) : -1, r.gia, r.bang]);
 
-// Phụ lục IV (đổi tên tuyến), Phụ lục V (bãi bỏ tuyến) Nghị quyết 28/2026: gắn vào phần tử thứ 10 của dòng tuyến { doiTen: {ten, tu}, baiBo: {tu} }
-const thayDoi = { doiTen: 0, baiBo: 0, khongThay: [] };
-if (plIVV) {
-  const pl = JSON.parse(fs.readFileSync(plIVV, "utf8")), tu = pl.hieuLucTu || "2026-11-01";
-  const LOAI_MA = { "o": 0, "tmdv": 1, "skc": 2 };
-  const timDong = r => tuyen.filter(t => t[1] === xaIdx.get(r.xa) && t[2] === 0 && t[6] === r.tuyen && (r.loai == null || t[0] === LOAI_MA[r.loai]) && (!r.stt || t[4] === String(r.stt)));
-  for (const r of pl.doiTen || []) { const ds = timDong(r); if (!ds.length) thayDoi.khongThay.push("đổi tên: " + r.xa + " — " + r.tuyen); for (const t of ds) { while (t.length < 9) t.push([]); t[9] = { ...(t[9] || {}), doiTen: { ten: r.tenMoi, tu, can: r.canCu || "Phụ lục IV Nghị quyết 28/2026" } }; thayDoi.doiTen++; } }
-  for (const r of pl.baiBo || []) { const ds = timDong(r); if (!ds.length) thayDoi.khongThay.push("bãi bỏ: " + r.xa + " — " + r.tuyen); for (const t of ds) { while (t.length < 9) t.push([]); t[9] = { ...(t[9] || {}), baiBo: { tu, can: r.canCu || "Phụ lục V Nghị quyết 28/2026" } }; thayDoi.baiBo++; } }
-  if (thayDoi.khongThay.length) console.warn("Không khớp tuyến nào trong bảng giá Nghị quyết 152:\n  " + thayDoi.khongThay.join("\n  "));
+// Phụ lục IV (điều chỉnh tên tuyến), Phụ lục V (bãi bỏ tuyến) Nghị quyết 28/2026 → phần tử thứ 10 của dòng tuyến NQ 152:
+//   { doiTen: {ten, tu, can}, doiNhom: {ten, tu, can}, baiBo: {tu, can} }. Áp cho cả Bảng 05, 06, 07 (cùng tên tuyến).
+// Khớp theo xã + STT của Nghị quyết 152; dòng “-” khớp theo tên trong nhóm; dòng số nguyên không có dòng con = cả nhóm (hoặc tuyến đứng riêng).
+const tu28 = N28.hieuLucTu, nghiepVu = { doiTen: 0, doiNhom: 0, baiBo: 0, boQua: [], khongKhop: [], nghiNgo: [], lechStt: [] };
+const chuan = s => String(s || "").normalize("NFC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+function giong(a, b) { // hệ số Dice trên cặp ký tự
+  a = chuan(a); b = chuan(b); if (a === b) return 1; if (a.length < 2 || b.length < 2) return 0;
+  const m = new Map(); for (let i = 0; i < a.length - 1; i++) { const k = a.slice(i, i + 2); m.set(k, (m.get(k) || 0) + 1); }
+  let c = 0; for (let i = 0; i < b.length - 1; i++) { const k = b.slice(i, i + 2), v = m.get(k); if (v) { c++; m.set(k, v - 1); } }
+  return 2 * c / (a.length + b.length - 2);
 }
+const dong152 = xaTen => tuyen.filter(t => t[2] === 0 && t[1] === xaIdx.get(xaTen));
+const soNhom = t => (nhom[t[5]] || "").match(/^(\d+)\./) ? nhom[t[5]].match(/^(\d+)\./)[1] : (/^\d+$/.test(t[4]) ? t[4] : (t[4].match(/^(\d+)\./) || [])[1]);
+function khopPL(ds, coMoi) {
+  const ra = []; let nhomHienTai = null;
+  ds.forEach((r, i) => {
+    if (!xaIdx.has(r.xa)) { nghiepVu.khongKhop.push(`${r.xa} ${r.stt}: xã ngoài danh mục`); return; }
+    const ke = ds[i + 1], laSoNguyen = /^\d+$/.test(r.stt);
+    if (laSoNguyen) nhomHienTai = r.stt;
+    if (coMoi && !r.moi) return;                                   // tiêu đề nhóm/nhóm con, không đổi tên
+    if (coMoi && /^Sửa đổi STT/i.test(r.moi)) { nghiepVu.boQua.push(`${r.xa} ${r.stt}: ${r.moi}`); return; }
+    const coCon = laSoNguyen && ke && ke.xa === r.xa && (ke.stt.startsWith(r.stt + ".") || ke.stt === "-");
+    const cung = dong152(r.xa);
+    let chon = [], kieu;
+    if (laSoNguyen) {
+      chon = cung.filter(t => soNhom(t) === r.stt); kieu = "nhom";
+      if (!coMoi && coCon) return;            // tiêu đề nhóm có dòng con được liệt kê
+    } else if (r.stt === "-") {
+      const ung = cung.filter(t => t[4] === "-" && (!nhomHienTai || soNhom(t) === nhomHienTai));
+      const tot = Math.max(0, ...ung.map(t => giong(t[6], r.cu))); chon = ung.filter(t => giong(t[6], r.cu) === tot && tot >= 0.5); kieu = "tuyen";
+    } else {
+      const ung = cung.filter(t => t[4] === r.stt);
+      // STT trùng (ví dụ hai dòng 5.1): giữ dòng giống tên cũ nhất trong mỗi bảng
+      const tot = l => Math.max(0, ...ung.filter(t => t[0] === l).map(t => giong(t[6], r.cu)));
+      chon = ung.filter(t => giong(t[6], r.cu) === tot(t[0])); kieu = "tuyen";
+    }
+    // STT ghi trong Phụ lục không khớp tên ở Nghị quyết 152 → tìm theo tên trong cùng xã (ghi lại để báo cáo)
+    const simTuyen = ds2 => Math.max(0, ...ds2.map(t => giong(t[6], r.cu)));
+    if (kieu === "tuyen" && simTuyen(chon) < 0.6) {
+      const tot = l => Math.max(0, ...cung.filter(t => t[0] === l).map(t => giong(t[6], r.cu)));
+      const theoTen = cung.filter(t => giong(t[6], r.cu) === tot(t[0]) && tot(t[0]) >= 0.85);
+      if (theoTen.length) { nghiepVu.lechStt.push(`${r.xa}: Phụ lục ghi STT ${r.stt} “${r.cu.slice(0, 70)}” — tên này ở STT ${theoTen[0][4]} của Nghị quyết 152 (STT ${r.stt} là “${(chon[0] ? chon[0][6] : "—").slice(0, 60)}”); áp dụng theo tên`); chon = theoTen; }
+    }
+    if (!chon.length) { nghiepVu.khongKhop.push(`${r.xa} ${r.stt}: ${r.cu.slice(0, 80)}`); return; }
+    const sim = kieu === "nhom" ? Math.max(...chon.map(t => Math.max(giong(nhom[t[5]].replace(/^\d+\.\s*/, ""), r.cu), giong(t[6], r.cu)))) : Math.max(...chon.map(t => giong(t[6], r.cu)));
+    if (sim < 0.75) nghiepVu.nghiNgo.push(`${r.xa} ${r.stt} (${sim.toFixed(2)}): PL “${r.cu.slice(0, 70)}” ↔ NQ152 “${(kieu === "nhom" && nhom[chon[0][5]] ? nhom[chon[0][5]] : chon[0][6]).slice(0, 70)}”`);
+    ra.push({ r, chon, kieu });
+  });
+  return ra;
+}
+const gan = (t, k, v) => { while (t.length < 9) t.push([]); t[9] = { ...(t[9] || {}), [k]: v }; };
+for (const { r, chon, kieu } of khopPL(N28.plIV, true)) {
+  const can = `Phụ lục IV Nghị quyết 28/2026, ${r.xa} STT ${r.stt}`;
+  for (const t of chon) {
+    if (kieu === "nhom" && nhom[t[5]]) { gan(t, "doiNhom", { ten: `${r.stt}. ${r.moi}`, tu: tu28, can }); nghiepVu.doiNhom++; }
+    else { gan(t, "doiTen", { ten: r.moi, tu: tu28, can }); nghiepVu.doiTen++; }
+  }
+}
+for (const { r, chon } of khopPL(N28.plV, false)) for (const t of chon) { gan(t, "baiBo", { tu: tu28, can: `Phụ lục V Nghị quyết 28/2026, ${r.xa} STT ${r.stt}` }); nghiepVu.baiBo++; }
+console.log(`Phụ lục IV: ${nghiepVu.doiTen} dòng đổi tên tuyến, ${nghiepVu.doiNhom} dòng đổi tên nhóm; Phụ lục V: ${nghiepVu.baiBo} dòng bãi bỏ (gồm cả 3 bảng)`);
+if (nghiepVu.khongKhop.length) console.warn("KHÔNG KHỚP:\n  " + nghiepVu.khongKhop.join("\n  "));
+if (nghiepVu.nghiNgo.length) console.warn("TÊN CŨ KHÁC NHIỀU (kiểm tra):\n  " + nghiepVu.nghiNgo.join("\n  "));
+if (nghiepVu.lechStt.length) console.warn("STT TRONG PHỤ LỤC LỆCH VỚI NGHỊ QUYẾT 152 (áp theo tên):\n  " + nghiepVu.lechStt.join("\n  "));
+if (nghiepVu.boQua.length) console.log("Bỏ qua (chỉ đổi STT):\n  " + nghiepVu.boQua.join("\n  "));
 const du = {
   phienBan: new Date().toISOString().slice(0, 10),
   donVi: 1000, // giá trong tệp: nghìn đồng/m²
   vanBan: [
     { id: "nq152", ten: "Nghị quyết số 152/2025/NQ-HĐND ngày 29/12/2025 của HĐND tỉnh Sơn La ban hành Bảng giá đất", hieuLucTu: G.hieu_luc_tu, nguon: "Phần mềm GPMB Sơn La — policy/nguon/nq152-2025-bang-gia-dat.json (trích từ bản Word)" },
-    { id: "nq28", ten: "Nghị quyết số 28/2026/NQ-HĐND ngày 19/10/2026 của HĐND tỉnh Sơn La (sửa đổi, bổ sung Bảng giá đất)", hieuLucTu: nk28.effect, nguon: "Phần mềm Tính tiền đất đai và môi trường — dữ liệu giá bổ sung (Phụ lục I–III)",
-      chuaXuLy: plIVV ? `Đã áp dụng Phụ lục IV (${thayDoi.doiTen} dòng đổi tên tuyến), Phụ lục V (${thayDoi.baiBo} dòng bãi bỏ tuyến). Khoản 8 Điều 7 (đất thương mại, dịch vụ có nguồn gốc đất ở = 90% giá đất ở): chọn ở công cụ tính tiền.` : "Chưa có danh sách Phụ lục IV (đổi tên tuyến), Phụ lục V (bãi bỏ tuyến) — tuyến có thể đã đổi tên hoặc bị bãi bỏ từ 01/11/2026, đối chiếu văn bản. Khoản 8 Điều 7 (đất thương mại, dịch vụ có nguồn gốc đất ở = 90% giá đất ở): chọn ở công cụ tính tiền.",
-      phuLucIVV: !!plIVV }
+    { id: "nq28", ten: "Nghị quyết số 28/2026/NQ-HĐND ngày 19/10/2026 của HĐND tỉnh Sơn La (sửa đổi, bổ sung Bảng giá đất)", hieuLucTu: N28.hieuLucTu, nguon: "Phụ biểu Excel kèm Nghị quyết (" + N28.nguon + "), đối chiếu bản ký",
+      chuaXuLy: `Đã áp dụng Phụ lục I–III (${stt28} tuyến bổ sung), Phụ lục IV (đổi tên ${nghiepVu.doiTen + nghiepVu.doiNhom} dòng), Phụ lục V (bãi bỏ ${nghiepVu.baiBo} dòng) và Điều 2 (bãi bỏ khoản 3 Điều 4 — giảm 30% do chênh cao) từ ${N28.hieuLucTu.split("-").reverse().join("/")}. Khoản 8 Điều 7 (đất thương mại, dịch vụ có nguồn gốc đất ở = 90% giá đất ở): chọn ở công cụ tính tiền.`,
+      lechStt: nghiepVu.lechStt }
   ],
   loai: LOAI.map(([, t]) => t), bangLoai: BANG_LOAI, xa, nhom, tuyen, tenNN: TEN_NN, nn, nnToanTinh, kcn
 };
 const dauTep = `/* Bảng giá đất tỉnh Sơn La — TỆP SINH TỰ ĐỘNG bởi cong-cu/nhap-bang-gia-dat.js, không sửa tay.
- * Nguồn: Nghị quyết số 152/2025/NQ-HĐND (phần mềm GPMB) và phần bổ sung theo Nghị quyết số 28/2026/NQ-HĐND (phần mềm Tính tiền đất đai và môi trường).
- * tuyen: [loại (0 đất ở | 1 TM-DV | 2 SXKD PNN), chỉ số xã, văn bản (0 NQ152 | 1 NQ28), bảng, STT, chỉ số nhóm, tên tuyến, [giá VT1..VT5 nghìn đồng/m²], cảnh báo?]
+ * Nguồn: Nghị quyết số 152/2025/NQ-HĐND (phần mềm GPMB); Nghị quyết số 28/2026/NQ-HĐND (phụ biểu Excel kèm Nghị quyết, cong-cu/du-lieu/nq28-2026.json).
+ * tuyen: [loại (0 đất ở | 1 TM-DV | 2 SXKD PNN), chỉ số xã, văn bản (0 NQ152 | 1 NQ28), bảng, STT, chỉ số nhóm, tên tuyến, [giá VT1..VT5 nghìn đồng/m²], cảnh báo?, thay đổi theo NQ 28?]
  * nn: [chỉ số xã, mã loại đất, giá nghìn đồng/m², bảng] */
 `;
 fs.writeFileSync(path.join(GOC, "app/du-lieu/bang-gia-dat.js"), dauTep + "window.QD75_BANG_GIA = " + JSON.stringify(du) + ";\n");

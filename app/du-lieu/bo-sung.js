@@ -6,8 +6,9 @@
  *   tăng "phienBanDuLieu" và ghi "lichSu".
  */
 window.QD75_BO_SUNG = {
-  phienBanDuLieu: "2.3.0",
+  phienBanDuLieu: "2.3.1",
   lichSu: [
+    { phienBan: "2.3.1", ngay: "2026-11-08", noiDung: "Nghị quyết 28/2026/NQ-HĐND theo phụ biểu Excel kèm Nghị quyết, đối chiếu bản ký: Phụ lục IV đổi tên tuyến, nhóm tuyến; Phụ lục V bãi bỏ tuyến; Điều 2 bãi bỏ giảm 30% do chênh cao từ 01/11/2026; nguyên văn khoản 8 Điều 7; nguyên văn Nghị quyết 28 trong Văn bản pháp luật." },
     { phienBan: "2.3.0", ngay: "2026-11-07", noiDung: "Tính thời hạn theo từng trường hợp của mục (3), cộng thêm khi phát sinh nghĩa vụ tài chính; trang Chọn đúng thủ tục và khung “Dễ nhầm với”; nguyên văn 11 văn bản pháp luật đất đai, gắn liên kết viện dẫn trong Quyết định 75; cơ chế Phụ lục IV, V và khoản 8 Điều 7 Nghị quyết 28/2026; phiếu Word dự trù tiền chuyển mục đích; hạn mức lượt hỏi trợ lý AI." },
     { phienBan: "2.2.0", ngay: "2026-10-29", noiDung: "Bảng giá đất tỉnh Sơn La (Nghị quyết 152/2025/NQ-HĐND từ phần mềm GPMB; bổ sung Nghị quyết 28/2026/NQ-HĐND từ phần mềm Tính tiền đất đai và môi trường) — tra cứu theo xã, tuyến, vị trí; tính tiền chuyển mục đích theo 6 trường hợp Điều 8 Nghị định 103/2024/NĐ-CP (sửa đổi tại Nghị định 50/2026/NĐ-CP), nhiều lớp/vị trí." },
     { phienBan: "2.1.4", ngay: "2026-10-29", noiDung: "Trợ lý AI: nguồn ghi gộp dạng [1, 5] được tách thành từng liên kết." },
